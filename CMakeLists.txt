@@ -16,18 +16,13 @@
 
 # THE MESOS PROJECT.
 ####################
-if (NOT WIN32)
-  cmake_minimum_required(VERSION 3.7.0)
-else ()
-  cmake_minimum_required(VERSION 3.8.0)
-endif ()
+cmake_minimum_required(VERSION 3.18)
+project(Mesos VERSION 1.13.0)
 
-project(Mesos)
-set(MESOS_MAJOR_VERSION 1)
-set(MESOS_MINOR_VERSION 12)
-set(MESOS_PATCH_VERSION 0)
-set(PACKAGE_VERSION
-  ${MESOS_MAJOR_VERSION}.${MESOS_MINOR_VERSION}.${MESOS_PATCH_VERSION})
+set(MESOS_MAJOR_VERSION ${PROJECT_VERSION_MAJOR})
+set(MESOS_MINOR_VERSION ${PROJECT_VERSION_MINOR})
+set(MESOS_PATCH_VERSION ${PROJECT_VERSION_PATCH})
+set(PACKAGE_VERSION ${MESOS_MAJOR_VERSION}.${MESOS_MINOR_VERSION}.${MESOS_PATCH_VERSION})
 
 set(MESOS_PACKAGE_VERSION ${PACKAGE_VERSION})
 set(MESOS_PACKAGE_SOVERSION 0)
@@ -95,15 +90,3 @@ option(CPACK_SOURCE_TZ   "Enable to build TZ source packages"   OFF)
 option(CPACK_SOURCE_ZIP  "Enable to build ZIP source packages"  OFF)
 
 include(CPack)
-
-if (NOT WIN32)
-  # These targets are intended to mirror the same targets of the Autotools
-  # build. Because these are written as Shell scripts, they cannot be
-  # run on Windows.
-  add_custom_target(dist
-    COMMAND ${CMAKE_SOURCE_DIR}/cmake/dist.sh ${MESOS_PACKAGE_VERSION})
-
-  add_custom_target(distcheck
-    COMMAND ${CMAKE_SOURCE_DIR}/cmake/distcheck.sh ${MESOS_PACKAGE_VERSION}
-    DEPENDS dist)
-endif ()

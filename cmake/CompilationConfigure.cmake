@@ -18,9 +18,7 @@ include(CMakePushCheckState)
 
 # GENERAL OPTIONS.
 ##################
-option(VERBOSE
-  "Enable verbose CMake statements and compilation output."
-  TRUE)
+option(VERBOSE "Enable verbose CMake statements and compilation output." TRUE)
 set(CMAKE_VERBOSE_MAKEFILE ${VERBOSE})
 
 if (NOT WIN32)
@@ -29,22 +27,14 @@ else ()
   set(DEFAULT_BUILD_SHARED_LIBS FALSE)
 endif ()
 
-option(BUILD_SHARED_LIBS
-  "Build shared libraries."
-  ${DEFAULT_BUILD_SHARED_LIBS})
+option(BUILD_SHARED_LIBS "Build shared libraries." ${DEFAULT_BUILD_SHARED_LIBS})
 
-option(ENABLE_INSTALL_MODULE_DEPENDENCIES
-  "Install third-party bundled dependencies required for module development"
-  FALSE)
+option(ENABLE_INSTALL_MODULE_DEPENDENCIES "Install third-party bundled dependencies required for module development" FALSE)
 
-option(ENABLE_PRECOMPILED_HEADERS
-  "Enable auto-generated precompiled headers using cotire"
-  ${WIN32})
+option(ENABLE_PRECOMPILED_HEADERS "Enable auto-generated precompiled headers using cotire" ${WIN32})
 
 if (NOT WIN32 AND ENABLE_PRECOMPILED_HEADERS)
-  message(
-    FATAL_ERROR
-    "Precompiled headers are only supported on Windows.  See MESOS-7322.")
+  message(FATAL_ERROR "Precompiled headers are only supported on Windows.  See MESOS-7322.")
 endif ()
 
 if (ENABLE_PRECOMPILED_HEADERS)
@@ -81,124 +71,49 @@ set(
 
 # TODO(asekretenko): Consider making Mesos tests a separate project
 # that would depend on Mesos installation.
-option(MESOS_INSTALL_TESTS
-  "Add test executables and their dependencies to the install step."
-  FALSE)
+option(MESOS_INSTALL_TESTS "Add test executables and their dependencies to the install step." FALSE)
 
 
 # 3RDPARTY OPTIONS.
 ###################
-option(
-  REBUNDLED
-  "Use dependencies from the 3rdparty folder (instead of internet)."
-  TRUE)
+option(REBUNDLED "Use dependencies from the 3rdparty folder (instead of internet)." TRUE)
 
-option(
-  UNBUNDLED_LIBARCHIVE
-  "Build with an installed libarchive version instead of the bundled."
-  FALSE)
+option(UNBUNDLED_LIBARCHIVE "Build with an installed libarchive version instead of the bundled." FALSE)
 
-set(
-  LIBARCHIVE_ROOT_DIR
-  ""
-  CACHE STRING
-  "Specify the path to libarchive, e.g. \"C:\\libarchive-Win64\".")
+set( LIBARCHIVE_ROOT_DIR "" CACHE STRING "Specify the path to libarchive, e.g. \"C:\\libarchive-Win64\".")
 
-option(
-  ENABLE_LIBEVENT
-  "Use libevent instead of libev as the core event loop implementation."
-  FALSE)
+option( ENABLE_LIBEVENT "Use libevent instead of libev as the core event loop implementation." FALSE)
 
 if (ENABLE_LIBEVENT)
-  option(
-    UNBUNDLED_LIBEVENT
-    "Build libprocess with an installed libevent version instead of the bundled."
-    FALSE)
+  option( UNBUNDLED_LIBEVENT "Build libprocess with an installed libevent version instead of the bundled." FALSE)
 
-  set(
-    LIBEVENT_ROOT_DIR
-    ""
-    CACHE STRING
-    "Specify the path to libevent, e.g. \"C:\\libevent-Win64\".")
+  set( LIBEVENT_ROOT_DIR "" CACHE STRING "Specify the path to libevent, e.g. \"C:\\libevent-Win64\".")
 endif()
 
-set(
-  BOOST_ROOT_DIR
-  ""
-  CACHE STRING
-  "Specify the path to boost.")
+set( BOOST_ROOT_DIR "" CACHE STRING "Specify the path to boost.")
 
 if (NOT WIN32)
-  set(
-    CURL_ROOT_DIR
-    ""
-    CACHE STRING
-    "Specify the path to libcurl.")
+  set( CURL_ROOT_DIR "" CACHE STRING "Specify the path to libcurl.")
 endif()
 
-option(
-  UNBUNDLED_LEVELDB
-  "Build with an installed leveldb version instead of the bundled."
-  FALSE)
+option( UNBUNDLED_LEVELDB "Build with an installed leveldb version instead of the bundled." FALSE)
 
-set(
-  LEVELDB_ROOT_DIR
-  ""
-  CACHE STRING
-  "Specify the path to leveldb, e.g. \"C:\\leveldb-Win64\".")
+set( LEVELDB_ROOT_DIR "" CACHE STRING "Specify the path to leveldb, e.g. \"C:\\leveldb-Win64\".")
 
 if (ENABLE_SECCOMP_ISOLATOR)
-  option(
-    UNBUNDLED_LIBSECCOMP
-    "Build with an installed libseccomp version instead of the bundled."
-    FALSE)
+  option( UNBUNDLED_LIBSECCOMP "Build with an installed libseccomp version instead of the bundled." FALSE)
 
-  set(
-    LIBSECCOMP_ROOT_DIR
-    ""
-    CACHE STRING
-    "Specify the path to libseccomp, e.g. \"C:\\libseccomp-Win64\".")
+  set( LIBSECCOMP_ROOT_DIR "" CACHE STRING "Specify the path to libseccomp, e.g. \"C:\\libseccomp-Win64\".")
 endif ()
 
-option(
-  ENABLE_SSL
-  "Build libprocess with SSL support."
-  FALSE)
-
-option(
-  ENABLE_LOCK_FREE_RUN_QUEUE
-  "Build libprocess with lock free run queue."
-  FALSE)
-
-option(
-  ENABLE_LOCK_FREE_EVENT_QUEUE
-  "Build libprocess with lock free event queue."
-  FALSE)
-
-option(
-  ENABLE_LAST_IN_FIRST_OUT_FIXED_SIZE_SEMAPHORE
-  "Build libprocess with LIFO fixed size semaphore."
-  FALSE)
-
-option(
-  ENABLE_NVML
-  "Whether to use the NVML headers."
-  TRUE)
-
-option(
-  PYTHON
-  "Command for the Python interpreter, set to `python` if not given."
-  "python")
-
-option(
-  PYTHON_3
-  "Command for the Python 3 interpreter, set to the option PYTHON if not given."
-  "")
-
-option(
-  ENABLE_NEW_CLI
-  "Build the new CLI instead of the old one."
-  FALSE)
+option(ENABLE_SSL "Build libprocess with SSL support." FALSE)
+option(ENABLE_LOCK_FREE_RUN_QUEUE "Build libprocess with lock free run queue." FALSE)
+option(ENABLE_LOCK_FREE_EVENT_QUEUE "Build libprocess with lock free event queue." FALSE)
+option(ENABLE_LAST_IN_FIRST_OUT_FIXED_SIZE_SEMAPHORE "Build libprocess with LIFO fixed size semaphore." FALSE)
+option(ENABLE_NVML "Whether to use the NVML headers." TRUE)
+option(PYTHON "Command for the Python interpreter, set to `python` if not given." "python")
+option(PYTHON_3 "Command for the Python 3 interpreter, set to the option PYTHON if not given." "")
+option(ENABLE_NEW_CLI "Build the new CLI instead of the old one." FALSE)
 
 if (ENABLE_NEW_CLI)
   # We always want to have PYTHON_3 set as it will be used to build the CLI.
