@@ -563,31 +563,9 @@ endif ()
 # RapidJSON: JSON parser / serializer.
 # https://github.com/Tencent/rapidjson
 #####################################
-EXTERNAL(rapidjson ${RAPIDJSON_VERSION} ${CMAKE_CURRENT_BINARY_DIR})
+find_package(RapidJSON REQUIRED)
 add_library(rapidjson INTERFACE)
-add_dependencies(rapidjson ${RAPIDJSON_TARGET})
-
-target_include_directories(
-    rapidjson INTERFACE
-    ${RAPIDJSON_ROOT}/include)
-
-PATCH_CMD(RAPIDJSON_PATCH_CMD rapidjson-${RAPIDJSON_VERSION}.patch)
-
-ExternalProject_Add(
-  ${RAPIDJSON_TARGET}
-  PREFIX            ${RAPIDJSON_CMAKE_ROOT}
-  PATCH_COMMAND     ${RAPIDJSON_PATCH_CMD}
-  CONFIGURE_COMMAND ${CMAKE_NOOP}
-  BUILD_COMMAND     ${CMAKE_NOOP}
-  INSTALL_COMMAND   ${CMAKE_NOOP}
-  URL               ${RAPIDJSON_URL}
-  URL_HASH          ${RAPIDJSON_HASH})
-
-if (ENABLE_INSTALL_MODULE_DEPENDENCIES)
-  install(
-    DIRECTORY ${RAPIDJSON_CMAKE_ROOT}/src/rapidjson-${RAPIDJSON_VERSION}/include/rapidjson
-    DESTINATION ${MESOS_INSTALL_HEADERS})
-endif ()
+target_include_directories(rapidjson INTERFACE ${RAPIDJSON_INCLUDE_DIRS})
 
 if (ENABLE_NVML)
   # NVML: NVIDIA Management Library.
