@@ -16,11 +16,7 @@
 
 # THE MESOS PROJECT.
 ####################
-if (NOT WIN32)
-  cmake_minimum_required(VERSION 3.7.0)
-else ()
-  cmake_minimum_required(VERSION 3.8.0)
-endif ()
+cmake_minimum_required(VERSION 3.18)
 
 project(Mesos)
 set(MESOS_MAJOR_VERSION 1)
@@ -32,6 +28,9 @@ set(PACKAGE_VERSION
 set(MESOS_PACKAGE_VERSION ${PACKAGE_VERSION})
 set(MESOS_PACKAGE_SOVERSION 0)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # CMAKE MODULE SETUP.
 #####################

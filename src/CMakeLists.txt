@@ -121,8 +121,11 @@ add_library(
   ${INTERNAL_PROTOBUF_SRC})
 
 target_link_libraries(mesos-protobufs PUBLIC
-  protobuf
-  grpc)
+  protobuf::libprotobuf
+  gRPC::grpc   gRPC::grpc_unsecure
+  gRPC::grpc++ gRPC::grpc++_unsecure
+  gRPC::gpr
+  c-ares::cares)
 
 target_include_directories(
   mesos-protobufs

@@ -66,6 +66,13 @@
 # NOTE: The `protoc` binary used here is an imported executable target from
 # `3rdparty/CMakeLists.txt`. However, this is not strictly necessary, and
 # `protoc` could be supplied in `PATH`.
+
+set(Protobuf_USE_STATIC_LIBS OFF)
+find_package(Protobuf 3.20 REQUIRED)
+
+find_package(gRPC 1.51 REQUIRED)
+get_target_property(grpc_cpp_plugin gRPC::grpc_cpp_plugin IMPORTED_LOCATION_NONE)
+
 function(PROTOC_GENERATE)
   set(options OPTIONAL INTERNAL JAVA GRPC)
   set(oneValueArgs LIB TARGET)
@@ -97,13 +104,13 @@ function(PROTOC_GENERATE)
     set(CPP_OUT ${MESOS_BIN_INCLUDE_DIR})
   endif()
 
-  if (PROTOC_JAVA AND HAS_JAVA)
-    set(JAVA_OUT ${MESOS_BIN_SRC_DIR}/java/generated)
-  endif()
+  #if (PROTOC_JAVA AND HAS_JAVA)
+  #  set(JAVA_OUT ${MESOS_BIN_SRC_DIR}/java/generated)
+  #endif()
 
   get_target_property(
     PROTOBUF_INCLUDE_DIR
-    protobuf
+    protobuf::libprotobuf
     INTERFACE_INCLUDE_DIRECTORIES)
 
   set(PROTOC_OPTIONS
@@ -119,13 +126,13 @@ function(PROTOC_GENERATE)
   if (PROTOC_GRPC)
     list(APPEND PROTOC_OPTIONS
       --grpc_out=${CPP_OUT}
-      --plugin=protoc-gen-grpc=$<TARGET_FILE:grpc_cpp_plugin>)
+      --plugin=protoc-gen-grpc=${grpc_cpp_plugin})
   endif ()
 
-  if (JAVA_OUT)
-    list(APPEND PROTOC_OPTIONS
-      --java_out=${JAVA_OUT})
-  endif ()
+  #if (JAVA_OUT)
+  #  list(APPEND PROTOC_OPTIONS
+  #    --java_out=${JAVA_OUT})
+  #endif ()
 
   # Fully qualified paths for the input .proto file and the output .pb.h and
   # .pb.cc files.
@@ -138,10 +145,10 @@ function(PROTOC_GENERATE)
   endif ()
 
   # Fully qualified path for the Java file.
-  if (JAVA_OUT)
-    get_filename_component(PROTOC_JAVA_DIR ${PROTOC_TARGET} DIRECTORY)
-    set(JAVA ${JAVA_OUT}/org/apache/${PROTOC_JAVA_DIR}/Protos.java)
-  endif ()
+  #if (JAVA_OUT)
+  #  get_filename_component(PROTOC_JAVA_DIR ${PROTOC_TARGET} DIRECTORY)
+  #  set(JAVA ${JAVA_OUT}/org/apache/${PROTOC_JAVA_DIR}/Protos.java)
+  #endif ()
 
   # Export variables holding the target filenames.
   if (PROTOC_INTERNAL)
@@ -152,10 +159,10 @@ function(PROTOC_GENERATE)
     set(PUBLIC_PROTOBUF_SRC ${PUBLIC_PROTOBUF_SRC} PARENT_SCOPE)
   endif ()
 
-  if (JAVA)
-    list(APPEND JAVA_PROTOBUF_SRC ${JAVA})
-    set(JAVA_PROTOBUF_SRC ${JAVA_PROTOBUF_SRC} PARENT_SCOPE)
-  endif ()
+  #if (JAVA)
+  #  list(APPEND JAVA_PROTOBUF_SRC ${JAVA})
+  #  set(JAVA_PROTOBUF_SRC ${JAVA_PROTOBUF_SRC} PARENT_SCOPE)
+  #endif ()
 
   # Make the directory that generated files go into.
   if (PROTOC_INTERNAL)
@@ -168,19 +175,19 @@ function(PROTOC_GENERATE)
     list(APPEND PROTOC_DEPENDS ${PROTOC_LIB})
   endif ()
 
-  if (JAVA_OUT)
-    list(APPEND PROTOC_DEPENDS make_bin_java_dir)
-  endif ()
+  #if (JAVA_OUT)
+  #  list(APPEND PROTOC_DEPENDS make_bin_java_dir)
+  #endif ()
 
   # Make sure that the gRPC plugin is built.
   if (PROTOC_GRPC)
-    list(APPEND PROTOC_DEPENDS grpc_cpp_plugin)
+    list(APPEND PROTOC_DEPENDS gRPC::grpc_cpp_plugin)
   endif ()
 
   # Compile the .proto file.
   add_custom_command(
     OUTPUT ${CC} ${H} ${GRPC_CC} ${GRPC_H} ${JAVA}
-    COMMAND protoc ${PROTOC_OPTIONS} ${PROTO}
+    COMMAND protobuf::protoc ${PROTOC_OPTIONS} ${PROTO}
     DEPENDS ${PROTOC_DEPENDS} ${PROTO}
     WORKING_DIRECTORY ${MESOS_BIN})
 endfunction()
