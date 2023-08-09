@@ -34,7 +34,6 @@ set(HTTP_PARSER_URL     ${FETCH_URL}/http-parser-${HTTP_PARSER_VERSION}.tar.gz)
 set(LEVELDB_URL         ${FETCH_URL}/leveldb-${LEVELDB_VERSION}.tar.gz)
 set(LIBARCHIVE_URL      ${FETCH_URL}/libarchive-${LIBARCHIVE_VERSION}.tar.gz)
 set(LIBEV_URL           ${FETCH_URL}/libev-${LIBEV_VERSION}.tar.gz)
-set(LIBSECCOMP_URL      ${FETCH_URL}/libseccomp-${LIBSECCOMP_VERSION}.tar.gz)
 set(NVML_URL            ${FETCH_URL}/nvml-${NVML_VERSION}.tar.gz)
 set(PICOJSON_URL        ${FETCH_URL}/picojson-${PICOJSON_VERSION}.tar.gz)
 set(RAPIDJSON_URL       ${FETCH_URL}/rapidjson-${RAPIDJSON_VERSION}.tar.gz)
@@ -673,43 +672,11 @@ endif ()
 # https://github.com/seccomp/libseccomp
 ##################################################
 if (ENABLE_SECCOMP_ISOLATOR)
-  if (NOT UNBUNDLED_LIBSECCOMP)
-    EXTERNAL(libseccomp ${LIBSECCOMP_VERSION} ${CMAKE_CURRENT_BINARY_DIR})
-    add_library(libseccomp STATIC IMPORTED GLOBAL)
-    add_dependencies(libseccomp ${LIBSECCOMP_TARGET})
-
-    set_target_properties(
-      libseccomp PROPERTIES
-      IMPORTED_LOCATION ${LIBSECCOMP_ROOT}-build/src/.libs/libseccomp.a
-      INTERFACE_INCLUDE_DIRECTORIES "${LIBSECCOMP_ROOT}/include")
-
-    set(
-      LIBSECCOMP_CONFIGURE_COMMAND
-      ${LIBSECCOMP_ROOT}/configure --disable-shared --prefix=${LIBSECCOMP_ROOT}-build)
-
-    MAKE_INCLUDE_DIR(libseccomp)
-    GET_BYPRODUCTS(libseccomp)
-
-    ExternalProject_Add(
-      ${LIBSECCOMP_TARGET}
-      PREFIX            ${LIBSECCOMP_CMAKE_ROOT}
-      BUILD_BYPRODUCTS  ${LIBSECCOMP_BYPRODUCTS}
-      CONFIGURE_COMMAND ${LIBSECCOMP_CONFIGURE_COMMAND}
-      INSTALL_COMMAND   ${CMAKE_NOOP}
-      URL               ${LIBSECCOMP_URL}
-      URL_HASH          ${LIBSECCOMP_HASH})
-
-    install(
-      FILES $<TARGET_FILE:libseccomp>
-      DESTINATION ${3RDPARTY_LIBS_INSTALL_DIR})
-
-  else ()
-    find_package(LIBSECCOMP REQUIRED)
-    add_library(libseccomp SHARED IMPORTED GLOBAL)
-    set_target_properties(libseccomp PROPERTIES
-      IMPORTED_LOCATION ${LIBSECCOMP_LIBS}
-      INTERFACE_INCLUDE_DIRECTORIES ${LIBSECCOMP_INCLUDE_DIR})
-  endif ()
+  pkg_check_modules(seccomp libseccomp >= 2.5 REQUIRED)
+  message(STATUS "libseccomp ${seccomp_VERSION}")
+  add_library(libseccomp STATIC IMPORTED GLOBAL)
+  target_include_directories(libseccomp INTERFACE "${seccomp_INCLUDEDIR}")
+  target_link_libraries(libseccomp INTERFACE "${seccomp_LIBRARIES}")
 endif ()
 
 
@@ -1292,6 +1259,7 @@ get_target_property(grpc_cpp_plugin gRPC::grpc_cpp_plugin IMPORTED_LOCATION_NONE
 # http://jemalloc.net
 ##################################################
 pkg_check_modules(jemalloc_ jemalloc>=5.3.0 REQUIRED)
+message(STATUS "jemalloc ${jemalloc__VERSION}")
 add_library(jemalloc STATIC IMPORTED GLOBAL)
 target_include_directories(jemalloc INTERFACE "${jemalloc__INCLUDEDIR}")
 target_link_libraries(jemalloc INTERFACE "${jemalloc__LIBRARIES}")
