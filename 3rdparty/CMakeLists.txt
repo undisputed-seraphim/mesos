@@ -22,6 +22,8 @@ else ()
   set(FETCH_URL ${3RDPARTY_DEPENDENCIES})
 endif ()
 
+find_package(PkgConfig REQUIRED)
+
 # TODO(andschwa): Move each URL to the dependency itself.
 set(BZIP2_URL           ${FETCH_URL}/bzip2-${BZIP2_VERSION}.tar.gz)
 set(CONCURRENTQUEUE_URL ${FETCH_URL}/concurrentqueue-${CONCURRENTQUEUE_VERSION}.zip)
@@ -38,10 +40,6 @@ set(PICOJSON_URL        ${FETCH_URL}/picojson-${PICOJSON_VERSION}.tar.gz)
 set(RAPIDJSON_URL       ${FETCH_URL}/rapidjson-${RAPIDJSON_VERSION}.tar.gz)
 set(XZ_URL              ${FETCH_URL}/xz-${XZ_VERSION}-modified.tar.gz)
 set(ZOOKEEPER_URL       ${FETCH_URL}/zookeeper-${ZOOKEEPER_VERSION}.tar.gz)
-
-# NOTE: libevent doesn't come rebundled, so this URL is always the same. But,
-# it's only downloaded if `ENABLE_LIBEVENT` is set.
-set(LIBEVENT_URL ${3RDPARTY_DEPENDENCIES}/libevent-release-${LIBEVENT_VERSION}.tar.gz)
 
 if (WIN32)
   # NOTE: These dependencies are only rebundled on Windows because they
@@ -561,109 +559,27 @@ if (ENABLE_LIBEVENT)
   # libevent: An event notification library.
   # http://libevent.org/
   ##########################################
-  if (NOT UNBUNDLED_LIBEVENT)
-    EXTERNAL(libevent ${LIBEVENT_VERSION} ${CMAKE_CURRENT_BINARY_DIR})
-    add_library(libevent ${LIBRARY_LINKAGE} IMPORTED)
-    add_dependencies(libevent ${LIBEVENT_TARGET})
-
-    set_target_properties(
-      libevent PROPERTIES
-      INTERFACE_INCLUDE_DIRECTORIES "${LIBEVENT_ROOT}/include;${LIBEVENT_ROOT}-build/include")
-
-    if (WIN32)
-      if (CMAKE_GENERATOR MATCHES "Visual Studio")
-        set_target_properties(
-          libevent PROPERTIES
-          IMPORTED_LOCATION_DEBUG ${LIBEVENT_ROOT}-build/lib/Debug/event${LIBRARY_SUFFIX}
-          IMPORTED_LOCATION_RELEASE ${LIBEVENT_ROOT}-build/lib/Release/event${LIBRARY_SUFFIX})
-      else ()
-        set_target_properties(
-          libevent PROPERTIES
-          IMPORTED_LOCATION ${LIBEVENT_ROOT}-build/lib/event${LIBRARY_SUFFIX})
-      endif ()
-    else ()
-      set_target_properties(
-        libevent PROPERTIES
-        IMPORTED_LOCATION ${LIBEVENT_ROOT}-build/lib/libevent${LIBRARY_SUFFIX})
-    endif ()
-
-    set(LIBEVENT_CMAKE_FORWARD_ARGS
-      ${CMAKE_C_FORWARD_ARGS}
-      ${CMAKE_SSL_FORWARD_ARGS}
-      # NOTE: Libevent does not respect the BUILD_SHARED_LIBS global flag.
-      -DEVENT__BUILD_SHARED_LIBRARIES=${BUILD_SHARED_LIBS}
-      -DEVENT__DISABLE_OPENSSL=$<NOT:$<BOOL:${ENABLE_SSL}>>
-      -DEVENT__DISABLE_BENCHMARK=ON
-      -DEVENT__DISABLE_REGRESS=ON
-      -DEVENT__DISABLE_SAMPLES=ON
-      -DEVENT__DISABLE_TESTS=ON)
-
-    if (CMAKE_C_COMPILER_ID MATCHES GNU OR CMAKE_C_COMPILER_ID MATCHES Clang)
-      list(APPEND LIBEVENT_CMAKE_FORWARD_ARGS -DCMAKE_C_FLAGS=-fPIC)
-    endif ()
-
-    MAKE_INCLUDE_DIR(libevent)
-    GET_BYPRODUCTS(libevent)
-
-    ExternalProject_Add(
-      ${LIBEVENT_TARGET}
-      PREFIX            ${LIBEVENT_CMAKE_ROOT}
-      BUILD_BYPRODUCTS  ${LIBEVENT_BYPRODUCTS}
-      CMAKE_ARGS        ${LIBEVENT_CMAKE_FORWARD_ARGS}
-      INSTALL_COMMAND   ${CMAKE_NOOP}
-      URL               ${LIBEVENT_URL}
-      URL_HASH          ${LIBEVENT_HASH})
-
-    install(
-      FILES $<TARGET_FILE:libevent>
-      DESTINATION ${3RDPARTY_LIBS_INSTALL_DIR})
-
-  else ()
-    find_package(LIBEVENT REQUIRED)
-    add_library(libevent INTERFACE)
-
-    foreach (lib ${LIBEVENT_LIBS})
-      get_filename_component(LIBEVENT_LIB ${lib} NAME_WE)
-      add_library(${LIBEVENT_LIB} SHARED IMPORTED)
-      set_target_properties(${LIBEVENT_LIB} PROPERTIES
-        IMPORTED_LOCATION ${lib}
-        INTERFACE_INCLUDE_DIRECTORIES ${LIBEVENT_INCLUDE_DIR})
-      target_link_libraries(libevent INTERFACE ${LIBEVENT_LIB})
-    endforeach ()
-  endif ()
-elseif (NOT WIN32) # Windows defaults to `libwinio`, a native implementation.
-  # libev: Full-featured high-performance event loop.
-  # https://github.com/enki/libev
-  ###################################################
-  EXTERNAL(libev ${LIBEV_VERSION} ${CMAKE_CURRENT_BINARY_DIR})
-  add_library(libev SHARED IMPORTED)
-  add_dependencies(libev ${LIBEV_TARGET})
-
-  set_target_properties(
-    libev PROPERTIES
-    IMPORTED_LOCATION ${LIBEV_ROOT}-build/lib/libev${CMAKE_SHARED_LIBRARY_SUFFIX}
-    INTERFACE_INCLUDE_DIRECTORIES ${LIBEV_ROOT}-build/include)
-
-  # Patch libev to keep it from reaping child processes.
-  PATCH_CMD(LIBEV_PATCH_CMD libev-${LIBEV_VERSION}.patch)
-
-  MAKE_INCLUDE_DIR(libev)
-  GET_BYPRODUCTS(libev)
-
-  ExternalProject_Add(
-    ${LIBEV_TARGET}
-    PREFIX            ${LIBEV_CMAKE_ROOT}
-    BUILD_BYPRODUCTS  ${LIBEV_BYPRODUCTS}
-    PATCH_COMMAND     ${LIBEV_PATCH_CMD}
-    CONFIGURE_COMMAND ${LIBEV_ROOT}/configure --prefix=${LIBEV_ROOT}-build
-    BUILD_COMMAND     ${MAKE_PROGRAM}
-    INSTALL_COMMAND   ${MAKE_PROGRAM} install
-    URL               ${LIBEV_URL}
-    URL_HASH          ${LIBEV_HASH})
-
-  install(
-    DIRECTORY ${LIBEV_ROOT}-build/lib/
-    DESTINATION ${3RDPARTY_LIBS_INSTALL_DIR})
+  set(libevent_ALL_VERSION "2.1")
+  pkg_check_modules(libevent_ libevent>=${libevent_ALL_VERSION} REQUIRED)
+  pkg_check_modules(libevent_core_ libevent_core>=${libevent_ALL_VERSION} REQUIRED)
+  pkg_check_modules(libevent_extra_ libevent_extra>=${libevent_ALL_VERSION} REQUIRED)
+  pkg_check_modules(libevent_openssl_ libevent_openssl>=${libevent_ALL_VERSION} REQUIRED)
+  pkg_check_modules(libevent_pthreads_ libevent_pthreads>=${libevent_ALL_VERSION} REQUIRED)
+  add_library(libevent STATIC IMPORTED GLOBAL)
+  target_include_directories(libevent INTERFACE
+    "${libevent__INCLUDEDIR}"
+    "${libevent_core__INCLUDEDIR}"
+    "${libevent_extra__INCLUDEDIR}"
+    "${libevent_openssl__INCLUDEDIR}"
+    "${libevent_pthreads__INCLUDEDIR}"
+  )
+  target_link_libraries(libevent INTERFACE
+    "${libevent__LIBRARIES}"
+    "${libevent_core__LIBRARIES}"
+    "${libevent_extra__LIBRARIES}"
+    "${libevent_openssl__LIBRARIES}"
+    "${libevent_pthreads__LIBRARIES}"
+  )
 endif ()
 
 
