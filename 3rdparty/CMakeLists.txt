@@ -31,7 +31,6 @@ set(ELFIO_URL           ${FETCH_URL}/elfio-${ELFIO_VERSION}.tar.gz)
 set(GLOG_URL            ${FETCH_URL}/glog-${GLOG_VERSION}.tar.gz)
 set(GOOGLETEST_URL      ${FETCH_URL}/googletest-release-${GOOGLETEST_VERSION}.tar.gz)
 set(HTTP_PARSER_URL     ${FETCH_URL}/http-parser-${HTTP_PARSER_VERSION}.tar.gz)
-set(JEMALLOC_URL        ${FETCH_URL}/jemalloc-${JEMALLOC_VERSION}.tar.gz)
 set(LEVELDB_URL         ${FETCH_URL}/leveldb-${LEVELDB_VERSION}.tar.gz)
 set(LIBARCHIVE_URL      ${FETCH_URL}/libarchive-${LIBARCHIVE_VERSION}.tar.gz)
 set(LIBEV_URL           ${FETCH_URL}/libev-${LIBEV_VERSION}.tar.gz)
@@ -1292,31 +1291,10 @@ get_target_property(grpc_cpp_plugin gRPC::grpc_cpp_plugin IMPORTED_LOCATION_NONE
 # Jemalloc: General-purpose malloc implementation.
 # http://jemalloc.net
 ##################################################
-if (ENABLE_JEMALLOC_ALLOCATOR)
-  EXTERNAL(jemalloc ${JEMALLOC_VERSION} ${CMAKE_CURRENT_BINARY_DIR})
-  add_library(jemalloc STATIC IMPORTED GLOBAL)
-  add_dependencies(jemalloc ${JEMALLOC_TARGET})
-
-  set_target_properties(
-    jemalloc PROPERTIES
-    IMPORTED_LOCATION ${JEMALLOC_ROOT}-build/lib/libjemalloc_pic${CMAKE_STATIC_LIBRARY_SUFFIX})
-
-  set(
-    JEMALLOC_CONFIGURE_COMMAND
-    ${JEMALLOC_ROOT}/configure --enable-stats --enable-prof --with-malloc-conf=prof:true,prof_active:false)
-
-  GET_BYPRODUCTS(jemalloc)
-
-  ExternalProject_Add(
-    ${JEMALLOC_TARGET}
-    PREFIX            ${JEMALLOC_CMAKE_ROOT}
-    BUILD_BYPRODUCTS  ${JEMALLOC_BYPRODUCTS}
-    CONFIGURE_COMMAND ${JEMALLOC_CONFIGURE_COMMAND}
-    INSTALL_COMMAND   ${CMAKE_NOOP}
-    URL               ${JEMALLOC_URL}
-    URL_HASH          ${JEMALLOC_HASH})
-endif ()
-
+pkg_check_modules(jemalloc_ jemalloc>=5.3.0 REQUIRED)
+add_library(jemalloc STATIC IMPORTED GLOBAL)
+target_include_directories(jemalloc INTERFACE "${jemalloc__INCLUDEDIR}")
+target_link_libraries(jemalloc INTERFACE "${jemalloc__LIBRARIES}")
 
 # Apache ZooKeeper: C Client Library to ZooKeeper.
 # https://zookeeper.apache.org/
