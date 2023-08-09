@@ -31,7 +31,6 @@ set(ELFIO_URL           ${FETCH_URL}/elfio-${ELFIO_VERSION}.tar.gz)
 set(GLOG_URL            ${FETCH_URL}/glog-${GLOG_VERSION}.tar.gz)
 set(GOOGLETEST_URL      ${FETCH_URL}/googletest-release-${GOOGLETEST_VERSION}.tar.gz)
 set(HTTP_PARSER_URL     ${FETCH_URL}/http-parser-${HTTP_PARSER_VERSION}.tar.gz)
-set(LEVELDB_URL         ${FETCH_URL}/leveldb-${LEVELDB_VERSION}.tar.gz)
 set(LIBARCHIVE_URL      ${FETCH_URL}/libarchive-${LIBARCHIVE_VERSION}.tar.gz)
 set(LIBEV_URL           ${FETCH_URL}/libev-${LIBEV_VERSION}.tar.gz)
 set(NVML_URL            ${FETCH_URL}/nvml-${NVML_VERSION}.tar.gz)
@@ -1352,43 +1351,8 @@ endif ()
 # https://github.com/google/leveldb
 ############################################
 if (NOT WIN32)
-  if (NOT UNBUNDLED_LEVELDB)
-    # TODO(andschwa): Move leveldb so these don't have to be GLOBAL.
-    EXTERNAL(leveldb ${LEVELDB_VERSION} ${CMAKE_CURRENT_BINARY_DIR})
-    add_library(leveldb STATIC IMPORTED GLOBAL)
-    add_dependencies(leveldb ${LEVELDB_TARGET})
-
-    set_target_properties(
-      leveldb PROPERTIES
-      IMPORTED_LOCATION ${LEVELDB_ROOT}/out-static/libleveldb${CMAKE_STATIC_LIBRARY_SUFFIX}
-      INTERFACE_INCLUDE_DIRECTORIES ${LEVELDB_ROOT}/include)
-
-    PATCH_CMD(LEVELDB_PATCH_CMD leveldb-${LEVELDB_VERSION}.patch)
-
-    MAKE_INCLUDE_DIR(leveldb)
-    GET_BYPRODUCTS(leveldb)
-
-    ExternalProject_Add(
-      ${LEVELDB_TARGET}
-      PREFIX            ${LEVELDB_CMAKE_ROOT}
-      BUILD_BYPRODUCTS  ${LEVELDB_BYPRODUCTS}
-      PATCH_COMMAND     ${LEVELDB_PATCH_CMD}
-      CONFIGURE_COMMAND ${CMAKE_NOOP}
-      BUILD_IN_SOURCE   1
-      BUILD_COMMAND     ${MAKE_PROGRAM} OPT=-O2\ -DNDEBUG\ -fPIC all
-      INSTALL_COMMAND   ${CMAKE_NOOP}
-      URL               ${LEVELDB_URL}
-      URL_HASH          ${LEVELDB_HASH})
-  else ()
-    find_package(LEVELDB REQUIRED)
-    # NOTE: We are linking leveldb dynamically to prevent us having to
-    # satisfy its default dependencies against gperftools' tcmalloc and
-    # snappy.
-    add_library(leveldb SHARED IMPORTED GLOBAL)
-    set_target_properties(leveldb PROPERTIES
-      IMPORTED_LOCATION ${LEVELDB_LIBS}
-      INTERFACE_INCLUDE_DIRECTORIES ${LEVELDB_INCLUDE_DIR})
-  endif ()
+  find_package(leveldb REQUIRED)
+  message(STATUS "leveldb ${leveldb_VERSION}")
 endif ()
 
 
