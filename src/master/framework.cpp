@@ -118,7 +118,7 @@ Framework::Framework(
 
   setState(state);
 
-  foreach (const std::string& role, roles) {
+  for (const std::string& role : roles) {
     // NOTE: It's possible that we're already being tracked under the role
     // because a framework can unsubscribe from a role while it still has
     // resources allocated to the role.
@@ -153,7 +153,7 @@ void Framework::addTask(Task* task)
 
   // Verify that Resource.AllocationInfo is set,
   // this should be guaranteed by the master.
-  foreach (const Resource& resource, task->resources()) {
+  for (const Resource& resource : task->resources()) {
     CHECK(resource.has_allocation_info());
   }
 
@@ -341,7 +341,7 @@ void Framework::addExecutor(
 
   // Verify that Resource.AllocationInfo is set,
   // this should be guaranteed by the master.
-  foreach (const Resource& resource, executorInfo.resources()) {
+  for (const Resource& resource : executorInfo.resources()) {
     CHECK(resource.has_allocation_info());
   }
 
@@ -564,13 +564,13 @@ void Framework::update(
 
   const std::set<std::string> removedRoles = [&]() {
     std::set<std::string> result = oldRoles;
-    foreach (const std::string& role, newRoles) {
+    for (const std::string& role : newRoles) {
       result.erase(role);
     }
     return result;
   }();
 
-  foreach (const std::string& role, removedRoles) {
+  for (const std::string& role : removedRoles) {
     auto allocatedToRole = [&role](const Resource& resource) {
       return resource.allocation_info().role() == role;
     };
@@ -585,13 +585,13 @@ void Framework::update(
 
   const std::set<std::string> addedRoles = [&]() {
     std::set<std::string> result = newRoles;
-    foreach (const std::string& role, oldRoles) {
+    for (const std::string& role : oldRoles) {
       result.erase(role);
     }
     return result;
   }();
 
-  foreach (const std::string& role, addedRoles) {
+  for (const std::string& role : addedRoles) {
     // NOTE: It's possible that we're already tracking this framework
     // under the role because a framework can unsubscribe from a role
     // while it still has resources allocated to the role.

@@ -183,7 +183,7 @@ Future<hashset<string>> MetadataManagerProcess::prune(
   hashmap<string, Image> retainedImages;
   hashset<string> retainedLayers;
 
-  foreach (const spec::ImageReference& reference, excludedImages) {
+  for (const spec::ImageReference& reference : excludedImages) {
     const string imageName = stringify(reference);
     Option<Image> image = storedImages.get(imageName);
 
@@ -198,7 +198,7 @@ Future<hashset<string>> MetadataManagerProcess::prune(
 
     retainedImages[imageName] = image.get();
 
-    foreach (const string& layerId, image->layer_ids()) {
+    for (const string& layerId : image->layer_ids()) {
       retainedLayers.insert(layerId);
     }
 
@@ -260,7 +260,7 @@ Future<Nothing> MetadataManagerProcess::recover()
     return Nothing();
   }
 
-  foreach (const Image& image, images->images()) {
+  for (const Image& image : images->images()) {
     const string imageReference = stringify(image.reference());
 
     if (storedImages.contains(imageReference)) {

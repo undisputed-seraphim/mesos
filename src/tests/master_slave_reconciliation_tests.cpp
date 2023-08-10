@@ -489,7 +489,7 @@ TEST_F(
       // would deadlock with below `Invoke` invocation.
       ASSERT_TRUE(resourceProviderId.isReady());
 
-      foreach (const v1::UUID& operationUuid, reconcile.operation_uuids()) {
+      for (const v1::UUID& operationUuid : reconcile.operation_uuids()) {
         v1::resource_provider::Call call;
 
         call.set_type(v1::resource_provider::Call::UPDATE_OPERATION_STATUS);
@@ -1035,7 +1035,7 @@ TEST_F(MasterSlaveReconciliationTest, SlaveReregisterTaskExecutorIds)
     // This variable doesn't have to be used explicitly.
     testing::InSequence inSequence;
 
-    foreach (Future<TaskStatus>& taskStatus, taskStatuses) {
+    for (Future<TaskStatus>& taskStatus : taskStatuses) {
       EXPECT_CALL(sched, statusUpdate(&driver, _))
         .WillOnce(FutureArg<1>(&taskStatus));
     }
@@ -1056,7 +1056,7 @@ TEST_F(MasterSlaveReconciliationTest, SlaveReregisterTaskExecutorIds)
   taskStates[commandExecutorTask.task_id()] = TASK_STAGING;
   taskStates[defaultExecutorTask.task_id()] = TASK_STAGING;
 
-  foreach (const Future<TaskStatus>& taskStatus, taskStatuses) {
+  for (const Future<TaskStatus>& taskStatus : taskStatuses) {
     AWAIT_READY(taskStatus);
 
     Option<TaskState> taskState = taskStates.get(taskStatus->task_id());
@@ -1101,7 +1101,7 @@ TEST_F(MasterSlaveReconciliationTest, SlaveReregisterTaskExecutorIds)
   // Both tasks should be present; the command executor task shouldn't have an
   // executor ID, but the default executor task should have one.
   EXPECT_EQ(2, reregisterSlaveMessage->tasks().size());
-  foreach (const Task& task, reregisterSlaveMessage->tasks()) {
+  for (const Task& task : reregisterSlaveMessage->tasks()) {
     if (task.task_id() == commandExecutorTask.task_id()) {
       EXPECT_FALSE(task.has_executor_id())
         << "The command executor ID is present, but it"

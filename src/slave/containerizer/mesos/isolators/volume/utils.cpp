@@ -40,7 +40,7 @@ PathValidator PathValidator::parse(const string& whitelist)
 
 Try<Nothing> PathValidator::validate(const string& path) const
 {
-  foreach (const string& allowedPath, whitelist) {
+  for (const string& allowedPath : whitelist) {
     const string allowedDirectory = path::join(
         allowedPath, stringify(os::PATH_SEPARATOR));
     if (path == allowedPath || strings::startsWith(path, allowedDirectory)) {

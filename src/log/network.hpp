@@ -33,7 +33,6 @@
 #include <process/protobuf.hpp>
 
 #include <stout/duration.hpp>
-#include <stout/foreach.hpp>
 #include <stout/lambda.hpp>
 #include <stout/nothing.hpp>
 #include <stout/set.hpp>
@@ -195,7 +194,7 @@ public:
   void set(const std::set<process::UPID>& _pids)
   {
     pids.clear();
-    foreach (const process::UPID& pid, _pids) {
+    for (const process::UPID& pid : _pids) {
       add(pid); // Also does a link.
     }
 
@@ -258,7 +257,7 @@ public:
 protected:
   void finalize() override
   {
-    foreach (Watch* watch, watches) {
+    for (Watch* watch : watches) {
       watch->promise.fail("Network is being terminated");
       delete watch;
     }
@@ -439,7 +438,7 @@ inline void ZooKeeperNetwork::watched(
   // Get data for each membership in order to convert them to PIDs.
   std::vector<process::Future<Option<std::string>>> futures;
 
-  foreach (const zookeeper::Group::Membership& membership, memberships.get()) {
+  for (const zookeeper::Group::Membership& membership : memberships.get()) {
     futures.push_back(group.data(membership));
   }
 
@@ -472,7 +471,7 @@ inline void ZooKeeperNetwork::collected(
 
   std::set<process::UPID> pids;
 
-  foreach (const Option<std::string>& data, datas.get()) {
+  for (const Option<std::string>& data : datas.get()) {
     // Data could be None if the membership is gone before its
     // content can be read.
     if (data.isSome()) {

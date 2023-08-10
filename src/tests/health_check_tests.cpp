@@ -1814,7 +1814,7 @@ TEST_F_TEMP_DISABLED_ON_WINDOWS(
   driver.join();
 
   // Cleanup all mesos launched containers.
-  foreach (const ContainerID& containerId, containerIds.get()) {
+  for (const ContainerID& containerId : containerIds.get()) {
     AWAIT_READY(containerizer->wait(containerId));
   }
 }
@@ -1965,7 +1965,7 @@ TEST_F_TEMP_DISABLED_ON_WINDOWS(
   driver.join();
 
   // Cleanup all mesos launched containers.
-  foreach (const ContainerID& containerId, containerIds.get()) {
+  for (const ContainerID& containerId : containerIds.get()) {
     AWAIT_READY(containerizer->wait(containerId));
   }
 }
@@ -2107,7 +2107,7 @@ TEST_F_TEMP_DISABLED_ON_WINDOWS(
   driver.join();
 
   // Cleanup all mesos launched containers.
-  foreach (const ContainerID& containerId, containerIds.get()) {
+  for (const ContainerID& containerId : containerIds.get()) {
     AWAIT_READY(containerizer->wait(containerId));
   }
 }
@@ -2160,7 +2160,7 @@ protected:
     AWAIT_READY(containers);
 
     // Cleanup all mesos launched containers.
-    foreach (const Docker::Container& container, containers.get()) {
+    for (const Docker::Container& container : containers.get()) {
       AWAIT_READY_FOR(docker.get()->rm(container.id, true), Seconds(30));
     }
 
@@ -2673,7 +2673,7 @@ TEST_F(DockerContainerizerHealthCheckTest, ROOT_DOCKER_DockerHealthyTask)
   AWAIT_READY(containers);
 
   // Cleanup all mesos launched containers.
-  foreach (const Docker::Container& container, containers.get()) {
+  for (const Docker::Container& container : containers.get()) {
     AWAIT_READY_FOR(docker->rm(container.id, true), Seconds(30));
   }
 }
@@ -2846,7 +2846,7 @@ TEST_F(DockerContainerizerHealthCheckTest, ROOT_DOCKER_DockerHealthStatusChange)
   AWAIT_READY(containers);
 
   // Cleanup all mesos launched containers.
-  foreach (const Docker::Container& container, containers.get()) {
+  for (const Docker::Container& container : containers.get()) {
     AWAIT_READY_FOR(docker->rm(container.id, true), Seconds(30));
   }
 }
@@ -2969,7 +2969,7 @@ TEST_F(
   AWAIT_READY(containers);
 
   // Cleanup all mesos launched containers.
-  foreach (const Docker::Container& container, containers.get()) {
+  for (const Docker::Container& container : containers.get()) {
     AWAIT_READY_FOR(docker->rm(container.id, true), Seconds(30));
   }
 }

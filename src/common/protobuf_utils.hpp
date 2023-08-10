@@ -336,7 +336,7 @@ struct Capabilities
   template <typename Iterable>
   explicit Capabilities(const Iterable& capabilities)
   {
-    foreach (const SlaveInfo::Capability& capability, capabilities) {
+    for (const SlaveInfo::Capability& capability : capabilities) {
       switch (capability.type()) {
         case SlaveInfo::Capability::UNKNOWN:
           break;
@@ -552,7 +552,7 @@ struct Capabilities
   template <typename Iterable>
   explicit Capabilities(const Iterable& capabilities)
   {
-    foreach (const MasterInfo::Capability& capability, capabilities) {
+    for (const MasterInfo::Capability& capability : capabilities) {
       switch (capability.type()) {
         case MasterInfo::Capability::UNKNOWN:
           break;
@@ -635,7 +635,7 @@ struct Capabilities
   template <typename Iterable>
   explicit Capabilities(const Iterable& capabilities)
   {
-    foreach (const FrameworkInfo::Capability& capability, capabilities) {
+    for (const FrameworkInfo::Capability& capability : capabilities) {
       switch (capability.type()) {
         case FrameworkInfo::Capability::UNKNOWN:
           break;

@@ -93,7 +93,7 @@ Future<Option<ContainerLaunchInfo>> EnvironmentSecretIsolatorProcess::prepare(
   Environment environment;
 
   vector<Future<Environment::Variable>> futures;
-  foreach (const Environment::Variable& variable,
+  for (const Environment::Variable& variable :
            containerConfig.command_info().environment().variables()) {
     if (variable.type() != Environment::Variable::SECRET) {
       continue;
@@ -131,7 +131,7 @@ Future<Option<ContainerLaunchInfo>> EnvironmentSecretIsolatorProcess::prepare(
         -> Future<Option<ContainerLaunchInfo>> {
       ContainerLaunchInfo launchInfo;
       Environment* environment = launchInfo.mutable_environment();
-      foreach (const Environment::Variable& variable, variables) {
+      for (const Environment::Variable& variable : variables) {
         environment->add_variables()->CopyFrom(variable);
       }
       launchInfo.mutable_task_environment()->CopyFrom(*environment);

@@ -361,7 +361,7 @@ TYPED_TEST(LogStorageTest, Overflow)
     UINT64_MAX - 1,
   };
 
-  foreach(uint64_t i, positions) {
+  for (uint64_t i : positions) {
     Action action;
     action.set_position(i);
     action.set_promised(1);
@@ -373,7 +373,7 @@ TYPED_TEST(LogStorageTest, Overflow)
     ASSERT_SOME(storage.persist(action));
   }
 
-  foreach(uint64_t i, positions) {
+  for (uint64_t i : positions) {
     Try<Action> action = storage.read(i);
     ASSERT_SOME(action);
 
@@ -416,7 +416,7 @@ TYPED_TEST(LogStorageTest, OverflowTruncate)
     10000000042,
   };
 
-  foreach(uint64_t i, positions) {
+  for (uint64_t i : positions) {
     Action action;
     action.set_position(i);
     action.set_promised(1);
@@ -439,7 +439,7 @@ TYPED_TEST(LogStorageTest, OverflowTruncate)
 
   ASSERT_SOME(storage.persist(truncate));
 
-  foreach(uint64_t i, positions) {
+  for (uint64_t i : positions) {
     Try<Action> action = storage.read(i);
 
     if (i < 9999999999ull) {
@@ -1344,7 +1344,7 @@ TEST_F(CoordinatorTest, MultipleAppends)
     Future<list<Action>> actions = replica1->read(1, 10);
     AWAIT_READY(actions);
     EXPECT_EQ(10u, actions->size());
-    foreach (const Action& action, actions.get()) {
+    for (const Action& action : actions.get()) {
       ASSERT_TRUE(action.has_type());
       ASSERT_EQ(Action::APPEND, action.type());
       EXPECT_EQ(stringify(action.position()), action.append().bytes());
@@ -1421,7 +1421,7 @@ TEST_F(CoordinatorTest, MultipleAppendsNotLearnedFill)
     Future<list<Action>> actions = replica3->read(1, 10);
     AWAIT_READY(actions);
     EXPECT_EQ(10u, actions->size());
-    foreach (const Action& action, actions.get()) {
+    for (const Action& action : actions.get()) {
       ASSERT_TRUE(action.has_type());
       ASSERT_EQ(Action::APPEND, action.type());
       EXPECT_EQ(stringify(action.position()), action.append().bytes());
@@ -1479,7 +1479,7 @@ TEST_F(CoordinatorTest, Truncate)
     Future<list<Action>> actions = replica1->read(7, 10);
     AWAIT_READY(actions);
     EXPECT_EQ(4u, actions->size());
-    foreach (const Action& action, actions.get()) {
+    for (const Action& action : actions.get()) {
       ASSERT_TRUE(action.has_type());
       ASSERT_EQ(Action::APPEND, action.type());
       EXPECT_EQ(stringify(action.position()), action.append().bytes());
@@ -1568,7 +1568,7 @@ TEST_F(CoordinatorTest, TruncateNotLearnedFill)
     Future<list<Action>> actions = replica3->read(7, 10);
     AWAIT_READY(actions);
     EXPECT_EQ(4u, actions->size());
-    foreach (const Action& action, actions.get()) {
+    for (const Action& action : actions.get()) {
       ASSERT_TRUE(action.has_type());
       ASSERT_EQ(Action::APPEND, action.type());
       EXPECT_EQ(stringify(action.position()), action.append().bytes());
@@ -1653,7 +1653,7 @@ TEST_F(CoordinatorTest, TruncateLearnedFill)
     Future<list<Action>> actions = replica3->read(7, 10);
     AWAIT_READY(actions);
     EXPECT_EQ(4u, actions->size());
-    foreach (const Action& action, actions.get()) {
+    for (const Action& action : actions.get()) {
       ASSERT_TRUE(action.has_type());
       ASSERT_EQ(Action::APPEND, action.type());
       EXPECT_EQ(stringify(action.position()), action.append().bytes());
@@ -1886,7 +1886,7 @@ TEST_F(RecoverTest, RacingCatchup)
     Future<list<Action>> actions = shared4->read(1, 10);
     AWAIT_READY(actions);
     EXPECT_EQ(10u, actions->size());
-    foreach (const Action& action, actions.get()) {
+    for (const Action& action : actions.get()) {
       ASSERT_TRUE(action.has_type());
       ASSERT_EQ(Action::APPEND, action.type());
       EXPECT_EQ(stringify(action.position()), action.append().bytes());
@@ -2312,7 +2312,7 @@ TEST_F(RecoverTest, CatchupVoting)
   Future<list<Action>> actions = replica3->read(begin.get(), end.get());
   AWAIT_READY(actions);
   EXPECT_EQ(end.get() - begin.get() + 1, actions->size());
-  foreach (const Action& action, actions.get()) {
+  for (const Action& action : actions.get()) {
     ASSERT_TRUE(action.has_type());
     ASSERT_EQ(Action::APPEND, action.type());
     EXPECT_EQ(stringify(action.position()), action.append().bytes());
@@ -2382,7 +2382,7 @@ TEST_F(RecoverTest, CatchupVotingWithGap)
   Future<list<Action>> actions = replica3->read(begin.get(), end.get());
   AWAIT_READY(actions);
   EXPECT_EQ(end.get() - begin.get() + 1, actions->size());
-  foreach (const Action& action, actions.get()) {
+  for (const Action& action : actions.get()) {
     ASSERT_TRUE(action.has_type());
     ASSERT_EQ(Action::APPEND, action.type());
     EXPECT_EQ(stringify(action.position()), action.append().bytes());
@@ -2585,7 +2585,7 @@ TEST_F(LogTest, ReaderCatchup)
   ASSERT_EQ(9u, entries->size());
 
   uint64_t position = 1;
-  foreach (const Log::Entry& entry, entries.get()) {
+  for (const Log::Entry& entry : entries.get()) {
     EXPECT_EQ(stringify(position), entry.data);
     ++position;
   }

@@ -181,7 +181,7 @@ int main(int argc, char** argv)
   logging::initialize(argv[0], true, flags); // Catch signals.
 
   // Log any flag warnings (after logging is initialized).
-  foreach (const flags::Warning& warning, load->warnings) {
+  for (const flags::Warning& warning : load->warnings) {
     LOG(WARNING) << warning.message;
   }
 
@@ -274,7 +274,7 @@ int main(int argc, char** argv)
     if (firewall.has_disabled_endpoints()) {
       hashset<string> paths;
 
-      foreach (const string& path, firewall.disabled_endpoints().paths()) {
+      for (const string& path : firewall.disabled_endpoints().paths()) {
         paths.insert(path);
       }
 
@@ -305,7 +305,7 @@ int main(int argc, char** argv)
   }
 
   // Create anonymous modules.
-  foreach (const string& name, ModuleManager::find<Anonymous>()) {
+  for (const string& name : ModuleManager::find<Anonymous>()) {
     Try<Anonymous*> create = ModuleManager::create<Anonymous>(name);
     if (create.isError()) {
       EXIT(EXIT_FAILURE)

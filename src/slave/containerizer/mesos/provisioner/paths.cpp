@@ -145,7 +145,7 @@ Try<hashset<ContainerID>> listContainers(
 
     hashset<ContainerID> results;
 
-    foreach (const string& entry, containerIds.get()) {
+    for (const string& entry : containerIds.get()) {
       const string containerPath = path::join(containersDir, entry);
 
       if (!os::stat::isdir(containerPath)) {
@@ -209,7 +209,7 @@ Try<hashmap<string, hashset<string>>> listContainerRootfses(
     return Error("Unable to list the container directory: " + backends.error());
   }
 
-  foreach (const string& backend, backends.get()) {
+  for (const string& backend : backends.get()) {
     string backendDir = getBackendDir(backendsDir, backend);
     if (!os::stat::isdir(backendDir)) {
       LOG(WARNING) << "Ignoring unexpected backend entry at: " << backendDir;
@@ -229,7 +229,7 @@ Try<hashmap<string, hashset<string>>> listContainerRootfses(
 
     hashset<string> backendResults;
 
-    foreach (const string& rootfsId, rootfses.get()) {
+    for (const string& rootfsId : rootfses.get()) {
       string rootfs = getRootfsDir(getRootfsesDir(backendDir), rootfsId);
 
       if (!os::stat::isdir(rootfs)) {

@@ -339,7 +339,7 @@ TEST_P(MasterFailover_BENCHMARK_Test, AgentReregistrationDelay)
   Stopwatch watch;
   watch.start();
 
-  foreach (TestSlave& slave, slaves) {
+  for (TestSlave& slave : slaves) {
     reregistered.push_back(slave.reregister());
   }
 
@@ -422,7 +422,7 @@ TEST_P(MasterStateQuery_BENCHMARK_Test, GetState)
 
   vector<Future<Nothing>> reregistered;
 
-  foreach (const Owned<TestSlave>& slave, slaves) {
+  for (const Owned<TestSlave>& slave : slaves) {
     reregistered.push_back(slave->reregister());
   }
 
@@ -576,7 +576,7 @@ TEST_P(MasterActorResponsiveness_BENCHMARK_Test, WithV0StateLoad)
 
   vector<Future<Nothing>> reregistered;
 
-  foreach (const Owned<TestSlave>& slave, slaves) {
+  for (const Owned<TestSlave>& slave : slaves) {
     reregistered.push_back(slave->reregister());
   }
 
@@ -700,7 +700,7 @@ TEST_P(MasterActorResponsiveness_BENCHMARK_Test, WithV0StateLoad)
 
   // Aggregate response times for all `/state` clients.
   vector<Duration> aggregatedState;
-  foreach (const vector<Duration>& v, collected.get()) {
+  for (const vector<Duration>& v : collected.get()) {
     aggregatedState.insert(aggregatedState.end(), v.cbegin(), v.cend());
   }
 
@@ -779,7 +779,7 @@ TEST_P(MasterMetricsQuery_BENCHMARK_Test, GetMetrics)
 
   vector<Future<Nothing>> reregistered;
 
-  foreach (const Owned<TestSlave>& slave, slaves) {
+  for (const Owned<TestSlave>& slave : slaves) {
     reregistered.push_back(slave->reregister());
   }
 

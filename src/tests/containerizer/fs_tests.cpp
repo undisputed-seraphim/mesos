@@ -83,7 +83,7 @@ TEST_F(FsTest, MountTableRead)
 
   Option<MountTable::Entry> root = None();
   Option<MountTable::Entry> proc = None();
-  foreach (const MountTable::Entry& entry, table->entries) {
+  for (const MountTable::Entry& entry : table->entries) {
     if (entry.dir == "/") {
       root = entry;
     } else if (entry.dir == "/proc") {
@@ -104,7 +104,7 @@ TEST_F(FsTest, MountTableHasOption)
   ASSERT_SOME(table);
 
   Option<MountTable::Entry> proc = None();
-  foreach (const MountTable::Entry& entry, table->entries) {
+  for (const MountTable::Entry& entry : table->entries) {
     if (entry.dir == "/proc") {
       proc = entry;
     }
@@ -162,7 +162,7 @@ TEST_F(FsTest, DISABLED_MountInfoTableRead)
 
   // Every system should have at least a rootfs mounted.
   Option<MountInfoTable::Entry> root = None();
-  foreach (const MountInfoTable::Entry& entry, table->entries) {
+  for (const MountInfoTable::Entry& entry : table->entries) {
     if (entry.target == "/") {
       root = entry;
     }
@@ -176,7 +176,7 @@ TEST_F(FsTest, DISABLED_MountInfoTableRead)
 
   // Every system should have at least a rootfs mounted.
   root = None();
-  foreach (const MountInfoTable::Entry& entry, table->entries) {
+  for (const MountInfoTable::Entry& entry : table->entries) {
     if (entry.target == "/") {
       root = entry;
     }
@@ -195,7 +195,7 @@ TEST_F(FsTest, MountInfoTableReadSorted)
   hashset<int> ids;
 
   // Verify that all parent entries appear *before* their children.
-  foreach (const MountInfoTable::Entry& entry, table->entries) {
+  for (const MountInfoTable::Entry& entry : table->entries) {
     if (entry.target != "/") {
       ASSERT_TRUE(ids.contains(entry.parent));
     }
@@ -229,7 +229,7 @@ TEST_F(FsTest, MountInfoTableReadSortedParentOfSelf)
   hashset<int> ids;
 
   // Verify that all parent entries appear *before* their children.
-  foreach (const MountInfoTable::Entry& entry, table->entries) {
+  for (const MountInfoTable::Entry& entry : table->entries) {
     if (entry.target != "/") {
       ASSERT_TRUE(ids.contains(entry.parent));
     }
@@ -277,7 +277,7 @@ TEST_F(FsTest, ROOT_SharedMount)
   ASSERT_SOME(table);
 
   Option<MountInfoTable::Entry> entry;
-  foreach (const MountInfoTable::Entry& _entry, table->entries) {
+  for (const MountInfoTable::Entry& _entry : table->entries) {
     if (_entry.target == directory) {
       entry = _entry;
     }
@@ -321,7 +321,7 @@ TEST_F(FsTest, ROOT_SlaveMount)
 
   Option<MountInfoTable::Entry> parent;
   Option<MountInfoTable::Entry> child;
-  foreach (const MountInfoTable::Entry& entry, table->entries) {
+  for (const MountInfoTable::Entry& entry : table->entries) {
     if (entry.target == directory) {
       ASSERT_NONE(parent);
       parent = entry;

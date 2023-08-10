@@ -41,7 +41,7 @@ Try<ResourceQuantities> ResourceQuantities::fromString(const string& text)
 {
   ResourceQuantities result;
 
-  foreach (const string& token, strings::tokenize(text, ";")) {
+  for (const string& token : strings::tokenize(text, ";")) {
     vector<string> pair = strings::tokenize(token, ":");
     if (pair.size() != 2) {
       return Error("Failed to parse '" + token + "': missing or extra ':'");
@@ -78,7 +78,7 @@ ResourceQuantities ResourceQuantities::fromScalarResources(
 {
   ResourceQuantities result;
 
-  foreach (const Resource& resource, resources) {
+  for (const Resource& resource : resources) {
     CHECK_EQ(Value::SCALAR, resource.type()) << " Resources: " << resources;
 
     result.add(resource.name(), resource.scalar());
@@ -105,7 +105,7 @@ ResourceQuantities ResourceQuantities::fromResources(const Resources& resources)
 {
   ResourceQuantities result;
 
-  foreach (const Resource& resource, resources) {
+  for (const Resource& resource : resources) {
     switch (resource.type()) {
       case Value::SCALAR: {
         result.add(resource.name(), resource.scalar());
@@ -116,7 +116,7 @@ ResourceQuantities ResourceQuantities::fromResources(const Resources& resources)
         break;
       }
       case Value::RANGES: {
-        foreach (const Value::Range& range, resource.ranges().range()) {
+        for (const Value::Range& range : resource.ranges().range()) {
           result.add(resource.name(), range.end() - range.begin() + 1);
         }
         break;
@@ -139,7 +139,7 @@ ResourceQuantities::ResourceQuantities(
 {
   // Use `auto` in place of `protobuf::MapPair<string, Value::Scalar>`
   // below since `foreach` is a macro and cannot contain angle brackets.
-  foreach (auto&& quantity, map) {
+  for (auto&& quantity : map) {
     add(quantity.first, quantity.second);
   }
 }
@@ -163,7 +163,7 @@ Value::Scalar ResourceQuantities::get(const string& name) const
 {
   // Don't bother binary searching since
   // we don't expect a large number of elements.
-  foreach (auto& quantity, quantities) {
+  for (auto& quantity : quantities) {
     if (quantity.first == name) {
       return quantity.second;
     } else if (quantity.first > name) {
@@ -362,7 +362,7 @@ Try<ResourceLimits> ResourceLimits::fromString(const string& text)
 {
   ResourceLimits result;
 
-  foreach (const string& token, strings::tokenize(text, ";")) {
+  for (const string& token : strings::tokenize(text, ";")) {
     vector<string> pair = strings::tokenize(token, ":");
     if (pair.size() != 2) {
       return Error("Failed to parse '" + token + "': missing or extra ':'");
@@ -408,7 +408,7 @@ ResourceLimits::ResourceLimits(
 {
   // Use `auto` in place of `protobuf::MapPair<string, Value::Scalar>`
   // below since `foreach` is a macro and cannot contain angle brackets.
-  foreach (auto&& limit, map) {
+  for (auto&& limit : map) {
     set(limit.first, limit.second);
   }
 }
@@ -432,7 +432,7 @@ Option<Value::Scalar> ResourceLimits::get(const string& name) const
 {
   // Don't bother binary searching since
   // we don't expect a large number of elements.
-  foreach (auto&& limit, limits) {
+  for (auto&& limit : limits) {
     if (limit.first == name) {
       return limit.second;
     } else if (limit.first > name) {

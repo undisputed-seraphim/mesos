@@ -621,7 +621,7 @@ TEST_F(LinuxFilesystemIsolatorTest, ROOT_WorkDirMountNotNeeded)
 
   // Verifies that there's no mount for slave's working directory.
   bool mountFound = false;
-  foreach (const fs::MountInfoTable::Entry& entry, table->entries) {
+  for (const fs::MountInfoTable::Entry& entry : table->entries) {
     if (entry.target == flags.work_dir) {
       mountFound = true;
     }
@@ -661,7 +661,7 @@ TEST_F(LinuxFilesystemIsolatorTest, ROOT_WorkDirMountNeeded)
   ASSERT_SOME(table);
 
   bool mountFound = false;
-  foreach (const fs::MountInfoTable::Entry& entry, table->entries) {
+  for (const fs::MountInfoTable::Entry& entry : table->entries) {
     if (entry.target == flags.work_dir) {
       EXPECT_SOME(entry.shared());
       mountFound = true;
@@ -1091,7 +1091,7 @@ TEST_F(LinuxFilesystemIsolatorMesosTest,
 
   // Verify that the orphaned container's persistent volume and
   // the rootfs are unmounted.
-  foreach (const fs::MountInfoTable::Entry& entry, table->entries) {
+  for (const fs::MountInfoTable::Entry& entry : table->entries) {
     EXPECT_FALSE(strings::contains(entry.target, directory))
       << "Target was not unmounted: " << entry.target;
   }

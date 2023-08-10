@@ -333,7 +333,7 @@ Future<Image> StoreProcess::_get(
     // layer exists for a cached image.
     bool layerMissed = false;
 
-    foreach (const string& layerId, image->layer_ids()) {
+    for (const string& layerId : image->layer_ids()) {
       const string rootfsPath = paths::getImageLayerRootfsPath(
           flags.docker_store_dir,
           layerId,
@@ -431,7 +431,7 @@ Future<ImageInfo> StoreProcess::__get(
   CHECK_LT(0, image.layer_ids_size());
 
   vector<string> layerPaths;
-  foreach (const string& layerId, image.layer_ids()) {
+  for (const string& layerId : image.layer_ids()) {
     layerPaths.push_back(paths::getImageLayerRootfsPath(
         flags.docker_store_dir,
         layerId,
@@ -486,7 +486,7 @@ Future<Image> StoreProcess::moveLayers(
             << "' to image store for image '" << image.reference() << "'";
 
   vector<Future<Nothing>> futures;
-  foreach (const string& layerId, image.layer_ids()) {
+  for (const string& layerId : image.layer_ids()) {
     futures.push_back(moveLayer(staging, layerId, backend));
   }
 
@@ -600,7 +600,7 @@ Future<Nothing> StoreProcess::prune(
   vector<spec::ImageReference> imageReferences;
   imageReferences.reserve(excludedImages.size());
 
-  foreach (const mesos::Image& image, excludedImages) {
+  for (const mesos::Image& image : excludedImages) {
     Try<spec::ImageReference> reference =
       spec::parseImageReference(image.docker().name());
 
@@ -631,11 +631,11 @@ Future<Nothing> StoreProcess::_prune(
   // path.
   hashset<string> activeLayerPaths;
 
-  foreach (const string& rootfsPath, activeLayerRootfses) {
+  for (const string& rootfsPath : activeLayerRootfses) {
     activeLayerPaths.insert(Path(rootfsPath).dirname());
   }
 
-  foreach (const string& layerId, allLayers.get()) {
+  for (const string& layerId : allLayers.get()) {
     if (retainedLayerIds.contains(layerId)) {
       VLOG(1) << "Layer '" << layerId << "' is retained by image store cache";
       continue;
@@ -676,7 +676,7 @@ Future<Nothing> StoreProcess::_prune(
       return Nothing();
     }
 
-    foreach (const string& target, targets.get()) {
+    for (const string& target : targets.get()) {
       const string path = path::join(gcDir, target);
       // Run the removal operation with 'continueOnError = false'.
       // A possible situation is that we incorrectly marked a layer

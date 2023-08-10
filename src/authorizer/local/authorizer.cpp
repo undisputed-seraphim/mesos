@@ -95,9 +95,9 @@ static bool matches(const ACL::Entity& request, const ACL::Entity& acl)
 
     // SOME is allowed if the request values are a subset of ACL
     // values.
-    foreach (const string& value, request.values()) {
+    for (const string& value : request.values()) {
       bool found = false;
-      foreach (const string& value_, acl.values()) {
+      for (const string& value_ : acl.values()) {
         if (value == value_) {
           found = true;
           break;
@@ -151,9 +151,9 @@ static bool allows(const ACL::Entity& request, const ACL::Entity& acl)
 
     // SOME is allowed if the request values are a subset of ACL
     // values.
-    foreach (const string& value, request.values()) {
+    for (const string& value : request.values()) {
       bool found = false;
-      foreach (const string& value_, acl.values()) {
+      for (const string& value_ : acl.values()) {
         if (value == value_) {
           found = true;
           break;
@@ -456,7 +456,7 @@ private:
       const ACL::Entity& object) const
   {
     // Authorize subject/object.
-    foreach (const GenericACL& acl, acls) {
+    for (const GenericACL& acl : acls) {
       if (matches(subject, acl.subjects) && matches(object, acl.objects)) {
         return allows(subject, acl.subjects) && allows(object, acl.objects);
       }
@@ -706,7 +706,7 @@ public:
 
           // The framework needs to be allowed to register under
           // all the roles it requests.
-          foreach (const ACL::Entity& entity, objects) {
+          for (const ACL::Entity& entity : objects) {
             if (!approved(acls_, entitySubject_, entity)) {
               return false;
             }
@@ -777,7 +777,7 @@ private:
     ACL::Entity aclAny;
     aclAny.set_type(ACL::Entity::ANY);
 
-    foreach (const GenericACL& acl, acls) {
+    for (const GenericACL& acl : acls) {
       if (!isRecursiveACL(acl)) {
         // If `acl` is not recursive, treat it as a normal acl.
         if (matches(subject, acl.subjects) && matches(object, acl.objects)) {
@@ -863,11 +863,11 @@ public:
     // since the split rules appear consecutively and if an object
     // matches any of the split ACLs in any order, it will yield the same
     // results.
-    foreach (auto&& acl, someACL) {
+    for (auto&& acl : someACL) {
       switch (acl.roles().type()) {
         case ACL::Entity::SOME: {
           ACL::Entity roles;
-          foreach (const string& value, acl.roles().values()) {
+          for (const string& value : acl.roles().values()) {
             if (strings::endsWith(value, "/%")) {
               // Recursive ACLs only have one value in their object list.
               GenericACL acl_;
@@ -1031,7 +1031,7 @@ public:
     vector<GenericACL> parentRunningAsUserAcls;
 
     if (action == authorization::LAUNCH_NESTED_CONTAINER) {
-      foreach (const ACL::LaunchNestedContainerAsUser& acl,
+      for (const ACL::LaunchNestedContainerAsUser& acl :
                acls.launch_nested_containers_as_user()) {
         GenericACL acl_;
         acl_.subjects = acl.principals();
@@ -1040,7 +1040,7 @@ public:
         runAsUserAcls.push_back(acl_);
       }
 
-      foreach (const ACL::LaunchNestedContainerUnderParentWithUser& acl,
+      for (const ACL::LaunchNestedContainerUnderParentWithUser& acl :
                acls.launch_nested_containers_under_parent_with_user()) {
         GenericACL acl_;
         acl_.subjects = acl.principals();
@@ -1049,7 +1049,7 @@ public:
         parentRunningAsUserAcls.push_back(acl_);
       }
     } else {
-      foreach (const ACL::LaunchNestedContainerSessionAsUser& acl,
+      for (const ACL::LaunchNestedContainerSessionAsUser& acl :
                acls.launch_nested_container_sessions_as_user()) {
         GenericACL acl_;
         acl_.subjects = acl.principals();
@@ -1058,7 +1058,7 @@ public:
         runAsUserAcls.push_back(acl_);
       }
 
-      foreach (const ACL::LaunchNestedContainerSessionUnderParentWithUser& acl,
+      for (const ACL::LaunchNestedContainerSessionUnderParentWithUser& acl :
                acls.launch_nested_container_sessions_under_parent_with_user())
       {
         GenericACL acl_;
@@ -1092,7 +1092,7 @@ public:
            action == authorization::ATTACH_CONTAINER_OUTPUT));
 
     Option<ContainerID> subjectContainerId;
-    foreach (const Label& claim, subject->claims().labels()) {
+    for (const Label& claim : subject->claims().labels()) {
       if (claim.key() == "cid" && claim.has_value()) {
         subjectContainerId = ContainerID();
         subjectContainerId->set_value(claim.value());
@@ -1124,7 +1124,7 @@ public:
            action == authorization::VIEW_STANDALONE_CONTAINER));
 
     Option<string> subjectPrefix;
-    foreach (const Label& claim, subject->claims().labels()) {
+    for (const Label& claim : subject->claims().labels()) {
       if (claim.key() == "cid_prefix" && claim.has_value()) {
         subjectPrefix = claim.value();
       }
@@ -1277,7 +1277,7 @@ private:
 
         return acls_;
       case authorization::RUN_TASK:
-        foreach (const ACL::RunTask& acl, acls.run_tasks()) {
+        for (const ACL::RunTask& acl : acls.run_tasks()) {
           GenericACL acl_;
           acl_.subjects = acl.principals();
           acl_.objects = acl.users();
@@ -1298,7 +1298,7 @@ private:
 
         return acls_;
       case authorization::DESTROY_VOLUME:
-        foreach (const ACL::DestroyVolume& acl, acls.destroy_volumes()) {
+        for (const ACL::DestroyVolume& acl : acls.destroy_volumes()) {
           GenericACL acl_;
           acl_.subjects = acl.principals();
           acl_.objects = acl.creator_principals();
@@ -1308,7 +1308,7 @@ private:
 
         return acls_;
       case authorization::GET_ENDPOINT_WITH_PATH:
-        foreach (const ACL::GetEndpoint& acl, acls.get_endpoints()) {
+        for (const ACL::GetEndpoint& acl : acls.get_endpoints()) {
           GenericACL acl_;
           acl_.subjects = acl.principals();
           acl_.objects = acl.paths();
@@ -1318,7 +1318,7 @@ private:
 
         return acls_;
       case authorization::ACCESS_MESOS_LOG:
-        foreach (const ACL::AccessMesosLog& acl, acls.access_mesos_logs()) {
+        for (const ACL::AccessMesosLog& acl : acls.access_mesos_logs()) {
           GenericACL acl_;
           acl_.subjects = acl.principals();
           acl_.objects = acl.logs();
@@ -1328,7 +1328,7 @@ private:
 
         return acls_;
       case authorization::VIEW_FLAGS:
-        foreach (const ACL::ViewFlags& acl, acls.view_flags()) {
+        for (const ACL::ViewFlags& acl : acls.view_flags()) {
           GenericACL acl_;
           acl_.subjects = acl.principals();
           acl_.objects = acl.flags();
@@ -1338,7 +1338,7 @@ private:
 
         return acls_;
       case authorization::ACCESS_SANDBOX:
-        foreach (const ACL::AccessSandbox& acl, acls.access_sandboxes()) {
+        for (const ACL::AccessSandbox& acl : acls.access_sandboxes()) {
           GenericACL acl_;
           acl_.subjects = acl.principals();
           acl_.objects = acl.users();
@@ -1348,7 +1348,7 @@ private:
 
         return acls_;
       case authorization::ATTACH_CONTAINER_INPUT:
-        foreach (const ACL::AttachContainerInput& acl,
+        for (const ACL::AttachContainerInput& acl :
             acls.attach_containers_input()) {
           GenericACL acl_;
           acl_.subjects = acl.principals();
@@ -1359,7 +1359,7 @@ private:
 
         return acls_;
       case authorization::ATTACH_CONTAINER_OUTPUT:
-        foreach (const ACL::AttachContainerOutput& acl,
+        for (const ACL::AttachContainerOutput& acl :
             acls.attach_containers_output()) {
           GenericACL acl_;
           acl_.subjects = acl.principals();
@@ -1370,7 +1370,7 @@ private:
 
         return acls_;
       case authorization::KILL_NESTED_CONTAINER:
-        foreach (const ACL::KillNestedContainer& acl,
+        for (const ACL::KillNestedContainer& acl :
             acls.kill_nested_containers()) {
           GenericACL acl_;
           acl_.subjects = acl.principals();
@@ -1381,7 +1381,7 @@ private:
 
         return acls_;
       case authorization::WAIT_NESTED_CONTAINER:
-        foreach (const ACL::WaitNestedContainer& acl,
+        for (const ACL::WaitNestedContainer& acl :
             acls.wait_nested_containers()) {
           GenericACL acl_;
           acl_.subjects = acl.principals();
@@ -1392,7 +1392,7 @@ private:
 
         return acls_;
       case authorization::REMOVE_NESTED_CONTAINER:
-        foreach (const ACL::RemoveNestedContainer& acl,
+        for (const ACL::RemoveNestedContainer& acl :
             acls.remove_nested_containers()) {
           GenericACL acl_;
           acl_.subjects = acl.principals();
@@ -1403,7 +1403,7 @@ private:
 
         return acls_;
       case authorization::VIEW_FRAMEWORK:
-        foreach (const ACL::ViewFramework& acl, acls.view_frameworks()) {
+        for (const ACL::ViewFramework& acl : acls.view_frameworks()) {
           GenericACL acl_;
           acl_.subjects = acl.principals();
           acl_.objects = acl.users();
@@ -1413,7 +1413,7 @@ private:
 
         return acls_;
       case authorization::VIEW_TASK:
-        foreach (const ACL::ViewTask& acl, acls.view_tasks()) {
+        for (const ACL::ViewTask& acl : acls.view_tasks()) {
           GenericACL acl_;
           acl_.subjects = acl.principals();
           acl_.objects = acl.users();
@@ -1423,7 +1423,7 @@ private:
 
         return acls_;
       case authorization::VIEW_EXECUTOR:
-        foreach (const ACL::ViewExecutor& acl, acls.view_executors()) {
+        for (const ACL::ViewExecutor& acl : acls.view_executors()) {
           GenericACL acl_;
           acl_.subjects = acl.principals();
           acl_.objects = acl.users();
@@ -1433,7 +1433,7 @@ private:
 
         return acls_;
       case authorization::SET_LOG_LEVEL:
-        foreach (const ACL::SetLogLevel& acl, acls.set_log_level()) {
+        for (const ACL::SetLogLevel& acl : acls.set_log_level()) {
           GenericACL acl_;
           acl_.subjects = acl.principals();
           acl_.objects = acl.level();
@@ -1443,7 +1443,7 @@ private:
 
         return acls_;
       case authorization::VIEW_CONTAINER:
-        foreach (const ACL::ViewContainer& acl, acls.view_containers()) {
+        for (const ACL::ViewContainer& acl : acls.view_containers()) {
           GenericACL acl_;
           acl_.subjects = acl.principals();
           acl_.objects = acl.users();
@@ -1453,7 +1453,7 @@ private:
 
         return acls_;
       case authorization::REGISTER_AGENT:
-        foreach (const ACL::RegisterAgent& acl, acls.register_agents()) {
+        for (const ACL::RegisterAgent& acl : acls.register_agents()) {
           GenericACL acl_;
           acl_.subjects = acl.principals();
           acl_.objects = acl.agents();
@@ -1463,7 +1463,7 @@ private:
 
         return acls_;
       case authorization::UPDATE_MAINTENANCE_SCHEDULE:
-        foreach (const ACL::UpdateMaintenanceSchedule& acl,
+        for (const ACL::UpdateMaintenanceSchedule& acl :
                  acls.update_maintenance_schedules()) {
           GenericACL acl_;
           acl_.subjects = acl.principals();
@@ -1474,7 +1474,7 @@ private:
 
         return acls_;
       case authorization::GET_MAINTENANCE_SCHEDULE:
-        foreach (const ACL::GetMaintenanceSchedule& acl,
+        for (const ACL::GetMaintenanceSchedule& acl :
                  acls.get_maintenance_schedules()) {
           GenericACL acl_;
           acl_.subjects = acl.principals();
@@ -1485,7 +1485,7 @@ private:
 
         return acls_;
       case authorization::START_MAINTENANCE:
-        foreach (const ACL::StartMaintenance& acl, acls.start_maintenances()) {
+        for (const ACL::StartMaintenance& acl : acls.start_maintenances()) {
           GenericACL acl_;
           acl_.subjects = acl.principals();
           acl_.objects = acl.machines();
@@ -1495,7 +1495,7 @@ private:
 
         return acls_;
       case authorization::STOP_MAINTENANCE:
-        foreach (const ACL::StopMaintenance& acl, acls.stop_maintenances()) {
+        for (const ACL::StopMaintenance& acl : acls.stop_maintenances()) {
           GenericACL acl_;
           acl_.subjects = acl.principals();
           acl_.objects = acl.machines();
@@ -1505,7 +1505,7 @@ private:
 
         return acls_;
       case authorization::GET_MAINTENANCE_STATUS:
-        foreach (const ACL::GetMaintenanceStatus& acl,
+        for (const ACL::GetMaintenanceStatus& acl :
                  acls.get_maintenance_statuses()) {
           GenericACL acl_;
           acl_.subjects = acl.principals();
@@ -1517,7 +1517,7 @@ private:
         return acls_;
 
       case authorization::DRAIN_AGENT:
-        foreach (const ACL::DrainAgent& acl,
+        for (const ACL::DrainAgent& acl :
                  acls.drain_agents()) {
           GenericACL acl_;
           acl_.subjects = acl.principals();
@@ -1528,7 +1528,7 @@ private:
 
         return acls_;
       case authorization::DEACTIVATE_AGENT:
-        foreach (const ACL::DeactivateAgent& acl,
+        for (const ACL::DeactivateAgent& acl :
                  acls.deactivate_agents()) {
           GenericACL acl_;
           acl_.subjects = acl.principals();
@@ -1539,7 +1539,7 @@ private:
 
         return acls_;
       case authorization::REACTIVATE_AGENT:
-        foreach (const ACL::ReactivateAgent& acl,
+        for (const ACL::ReactivateAgent& acl :
                  acls.reactivate_agents()) {
           GenericACL acl_;
           acl_.subjects = acl.principals();
@@ -1550,7 +1550,7 @@ private:
 
         return acls_;
       case authorization::MARK_AGENT_GONE:
-        foreach (const ACL::MarkAgentGone& acl,
+        for (const ACL::MarkAgentGone& acl :
                  acls.mark_agents_gone()) {
           GenericACL acl_;
           acl_.subjects = acl.principals();
@@ -1561,7 +1561,7 @@ private:
 
         return acls_;
       case authorization::LAUNCH_STANDALONE_CONTAINER:
-        foreach (const ACL::LaunchStandaloneContainer& acl,
+        for (const ACL::LaunchStandaloneContainer& acl :
                  acls.launch_standalone_containers()) {
           GenericACL acl_;
           acl_.subjects = acl.principals();
@@ -1572,7 +1572,7 @@ private:
 
         return acls_;
       case authorization::KILL_STANDALONE_CONTAINER:
-        foreach (const ACL::KillStandaloneContainer& acl,
+        for (const ACL::KillStandaloneContainer& acl :
             acls.kill_standalone_containers()) {
           GenericACL acl_;
           acl_.subjects = acl.principals();
@@ -1583,7 +1583,7 @@ private:
 
         return acls_;
       case authorization::WAIT_STANDALONE_CONTAINER:
-        foreach (const ACL::WaitStandaloneContainer& acl,
+        for (const ACL::WaitStandaloneContainer& acl :
             acls.wait_standalone_containers()) {
           GenericACL acl_;
           acl_.subjects = acl.principals();
@@ -1594,7 +1594,7 @@ private:
 
         return acls_;
       case authorization::REMOVE_STANDALONE_CONTAINER:
-        foreach (const ACL::RemoveStandaloneContainer& acl,
+        for (const ACL::RemoveStandaloneContainer& acl :
             acls.remove_standalone_containers()) {
           GenericACL acl_;
           acl_.subjects = acl.principals();
@@ -1605,7 +1605,7 @@ private:
 
         return acls_;
       case authorization::VIEW_STANDALONE_CONTAINER:
-        foreach (const ACL::ViewStandaloneContainer& acl,
+        for (const ACL::ViewStandaloneContainer& acl :
             acls.view_standalone_containers()) {
           GenericACL acl_;
           acl_.subjects = acl.principals();
@@ -1616,7 +1616,7 @@ private:
 
         return acls_;
       case authorization::MODIFY_RESOURCE_PROVIDER_CONFIG:
-        foreach (const ACL::ModifyResourceProviderConfig& acl,
+        for (const ACL::ModifyResourceProviderConfig& acl :
                  acls.modify_resource_provider_configs()) {
           GenericACL acl_;
           acl_.subjects = acl.principals();
@@ -1627,7 +1627,7 @@ private:
 
         return acls_;
       case authorization::MARK_RESOURCE_PROVIDER_GONE:
-        foreach (const ACL::MarkResourceProvidersGone& acl,
+        for (const ACL::MarkResourceProvidersGone& acl :
                  acls.mark_resource_providers_gone()) {
           GenericACL acl_;
           acl_.subjects = acl.principals();
@@ -1650,7 +1650,7 @@ private:
 
         return acls_;
       case authorization::PRUNE_IMAGES:
-        foreach (const ACL::PruneImages& acl, acls.prune_images()) {
+        for (const ACL::PruneImages& acl : acls.prune_images()) {
           GenericACL acl_;
           acl_.subjects = acl.principals();
           acl_.objects = acl.images();
@@ -1704,7 +1704,7 @@ Try<Authorizer*> LocalAuthorizer::create(const ACLs& acls)
 Try<Authorizer*> LocalAuthorizer::create(const Parameters& parameters)
 {
   Option<string> acls;
-  foreach (const Parameter& parameter, parameters.parameter()) {
+  for (const Parameter& parameter : parameters.parameter()) {
     if (parameter.key() == "acls") {
       acls = parameter.value();
     }
@@ -1726,27 +1726,27 @@ Try<Authorizer*> LocalAuthorizer::create(const Parameters& parameters)
 
 Option<Error> LocalAuthorizer::validate(const ACLs& acls)
 {
-  foreach (const ACL::AccessMesosLog& acl, acls.access_mesos_logs()) {
+  for (const ACL::AccessMesosLog& acl : acls.access_mesos_logs()) {
     if (acl.logs().type() == ACL::Entity::SOME) {
       return Error("ACL.AccessMesosLog type must be either NONE or ANY");
     }
   }
 
-  foreach (const ACL::ViewFlags& acl, acls.view_flags()) {
+  for (const ACL::ViewFlags& acl : acls.view_flags()) {
     if (acl.flags().type() == ACL::Entity::SOME) {
       return Error("ACL.ViewFlags type must be either NONE or ANY");
     }
   }
 
-  foreach (const ACL::SetLogLevel& acl, acls.set_log_level()) {
+  for (const ACL::SetLogLevel& acl : acls.set_log_level()) {
     if (acl.level().type() == ACL::Entity::SOME) {
       return Error("ACL.SetLogLevel type must be either NONE or ANY");
     }
   }
 
-  foreach (const ACL::GetEndpoint& acl, acls.get_endpoints()) {
+  for (const ACL::GetEndpoint& acl : acls.get_endpoints()) {
     if (acl.paths().type() == ACL::Entity::SOME) {
-      foreach (const string& path, acl.paths().values()) {
+      for (const string& path : acl.paths().values()) {
         if (!authorization::AUTHORIZABLE_ENDPOINTS.contains(path)) {
           return Error("Path: '" + path + "' is not an authorizable path");
         }
@@ -1754,14 +1754,14 @@ Option<Error> LocalAuthorizer::validate(const ACLs& acls)
     }
   }
 
-  foreach (const ACL::RegisterAgent& acl, acls.register_agents()) {
+  for (const ACL::RegisterAgent& acl : acls.register_agents()) {
     if (acl.agents().type() == ACL::Entity::SOME) {
       return Error(
           "ACL.RegisterAgent type must be either NONE or ANY");
     }
   }
 
-  foreach (const ACL::UpdateMaintenanceSchedule& acl,
+  for (const ACL::UpdateMaintenanceSchedule& acl :
            acls.update_maintenance_schedules()) {
     if (acl.machines().type() == ACL::Entity::SOME) {
       return Error(
@@ -1769,7 +1769,7 @@ Option<Error> LocalAuthorizer::validate(const ACLs& acls)
     }
   }
 
-  foreach (const ACL::GetMaintenanceSchedule& acl,
+  for (const ACL::GetMaintenanceSchedule& acl :
            acls.get_maintenance_schedules()) {
     if (acl.machines().type() == ACL::Entity::SOME) {
       return Error(
@@ -1777,44 +1777,44 @@ Option<Error> LocalAuthorizer::validate(const ACLs& acls)
     }
   }
 
-  foreach (const ACL::StartMaintenance& acl, acls.start_maintenances()) {
+  for (const ACL::StartMaintenance& acl : acls.start_maintenances()) {
     if (acl.machines().type() == ACL::Entity::SOME) {
       return Error("ACL.StartMaintenance type must be either NONE or ANY");
     }
   }
 
-  foreach (const ACL::StopMaintenance& acl, acls.stop_maintenances()) {
+  for (const ACL::StopMaintenance& acl : acls.stop_maintenances()) {
     if (acl.machines().type() == ACL::Entity::SOME) {
       return Error("ACL.StopMaintenance type must be either NONE or ANY");
     }
   }
 
-  foreach (const ACL::GetMaintenanceStatus& acl,
+  for (const ACL::GetMaintenanceStatus& acl :
            acls.get_maintenance_statuses()) {
     if (acl.machines().type() == ACL::Entity::SOME) {
       return Error("ACL.GetMaintenanceStatus type must be either NONE or ANY");
     }
   }
 
-  foreach (const ACL::DrainAgent& acl, acls.drain_agents()) {
+  for (const ACL::DrainAgent& acl : acls.drain_agents()) {
     if (acl.agents().type() == ACL::Entity::SOME) {
       return Error("ACL.DrainAgent type must be either NONE or ANY");
     }
   }
 
-  foreach (const ACL::DeactivateAgent& acl, acls.deactivate_agents()) {
+  for (const ACL::DeactivateAgent& acl : acls.deactivate_agents()) {
     if (acl.agents().type() == ACL::Entity::SOME) {
       return Error("ACL.DeactivateAgent type must be either NONE or ANY");
     }
   }
 
-  foreach (const ACL::ReactivateAgent& acl, acls.reactivate_agents()) {
+  for (const ACL::ReactivateAgent& acl : acls.reactivate_agents()) {
     if (acl.agents().type() == ACL::Entity::SOME) {
       return Error("ACL.ReactivateAgent type must be either NONE or ANY");
     }
   }
 
-  foreach (const ACL::LaunchStandaloneContainer& acl,
+  for (const ACL::LaunchStandaloneContainer& acl :
            acls.launch_standalone_containers()) {
     if (acl.users().type() == ACL::Entity::SOME) {
       return Error(
@@ -1822,7 +1822,7 @@ Option<Error> LocalAuthorizer::validate(const ACLs& acls)
     }
   }
 
-  foreach (const ACL::KillStandaloneContainer& acl,
+  for (const ACL::KillStandaloneContainer& acl :
            acls.kill_standalone_containers()) {
     if (acl.users().type() == ACL::Entity::SOME) {
       return Error(
@@ -1830,7 +1830,7 @@ Option<Error> LocalAuthorizer::validate(const ACLs& acls)
     }
   }
 
-  foreach (const ACL::WaitStandaloneContainer& acl,
+  for (const ACL::WaitStandaloneContainer& acl :
            acls.wait_standalone_containers()) {
     if (acl.users().type() == ACL::Entity::SOME) {
       return Error(
@@ -1838,7 +1838,7 @@ Option<Error> LocalAuthorizer::validate(const ACLs& acls)
     }
   }
 
-  foreach (const ACL::RemoveStandaloneContainer& acl,
+  for (const ACL::RemoveStandaloneContainer& acl :
            acls.remove_standalone_containers()) {
     if (acl.users().type() == ACL::Entity::SOME) {
       return Error(
@@ -1846,7 +1846,7 @@ Option<Error> LocalAuthorizer::validate(const ACLs& acls)
     }
   }
 
-  foreach (const ACL::ViewStandaloneContainer& acl,
+  for (const ACL::ViewStandaloneContainer& acl :
            acls.view_standalone_containers()) {
     if (acl.users().type() == ACL::Entity::SOME) {
       return Error(
@@ -1854,7 +1854,7 @@ Option<Error> LocalAuthorizer::validate(const ACLs& acls)
     }
   }
 
-  foreach (const ACL::MarkResourceProvidersGone& acl,
+  for (const ACL::MarkResourceProvidersGone& acl :
            acls.mark_resource_providers_gone()) {
     if (acl.resource_providers().type() == ACL::Entity::SOME) {
       return Error(
@@ -1862,14 +1862,14 @@ Option<Error> LocalAuthorizer::validate(const ACLs& acls)
     }
   }
 
-  foreach (const ACL::ViewResourceProvider& acl,
+  for (const ACL::ViewResourceProvider& acl :
            acls.view_resource_providers()) {
     if (acl.resource_providers().type() == ACL::Entity::SOME) {
       return Error("ACL.ViewResourceProvider type must be either NONE or ANY");
     }
   }
 
-  foreach (const ACL::ModifyResourceProviderConfig& acl,
+  for (const ACL::ModifyResourceProviderConfig& acl :
            acls.modify_resource_provider_configs()) {
     if (acl.resource_providers().type() == ACL::Entity::SOME) {
       return Error(
@@ -1877,7 +1877,7 @@ Option<Error> LocalAuthorizer::validate(const ACLs& acls)
     }
   }
 
-  foreach (const ACL::PruneImages& acl, acls.prune_images()) {
+  for (const ACL::PruneImages& acl : acls.prune_images()) {
     if (acl.images().type() == ACL::Entity::SOME) {
       return Error("ACL.PruneImages type must be either NONE or ANY");
     }

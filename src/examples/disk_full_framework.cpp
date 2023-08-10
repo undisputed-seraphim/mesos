@@ -152,7 +152,7 @@ public:
             (double) DISK_PER_TASK.bytes() / Bytes::MEGABYTES)).get();
     taskResources.allocate(role);
 
-    foreach (const Offer& offer, offers) {
+    for (const Offer& offer : offers) {
       LOG(INFO) << "Received offer " << offer.id() << " from agent "
                 << offer.slave_id() << " (" << offer.hostname() << ") "
                 << "with " << offer.resources();
@@ -459,7 +459,7 @@ int main(int argc, char** argv)
   internal::logging::initialize(argv[0], false);
 
   // Log any flag warnings.
-  foreach (const flags::Warning& warning, load->warnings) {
+  for (const flags::Warning& warning : load->warnings) {
     LOG(WARNING) << warning.message;
   }
 

@@ -102,7 +102,7 @@ public:
     newLabel->set_value(testLabelValue);
 
     // Remove the 'testRemoveLabelKey' label which was set by the test.
-    foreach (const Label& oldLabel, taskInfo.labels().labels()) {
+    for (const Label& oldLabel : taskInfo.labels().labels()) {
       if (oldLabel.key() != testRemoveLabelKey) {
         labels.add_labels()->CopyFrom(oldLabel);
       }
@@ -184,7 +184,7 @@ public:
     newLabel->set_value("qux");
 
     // Remove label which was set by test.
-    foreach (const Label& oldLabel, taskInfo.labels().labels()) {
+    for (const Label& oldLabel : taskInfo.labels().labels()) {
       if (oldLabel.key() != "foo") {
         labels.add_labels()->CopyFrom(oldLabel);
       }
@@ -232,7 +232,7 @@ public:
     LOG(INFO) << "Executing 'slavePreLaunchDockerTaskExecutorDecorator' hook";
 
     if (taskInfo.isSome()) {
-      foreach (const Label& label, taskInfo->labels().labels()) {
+      for (const Label& label : taskInfo->labels().labels()) {
         if (label.key() == testErrorLabelKey) {
           return Failure("Spotted error label");
         }
@@ -319,7 +319,7 @@ public:
     newLabel->set_value("qux");
 
     // Remove label which was set by test.
-    foreach (const Label& oldLabel, status.labels().labels()) {
+    for (const Label& oldLabel : status.labels().labels()) {
       if (oldLabel.key() != "foo") {
         labels.add_labels()->CopyFrom(oldLabel);
       }
@@ -354,7 +354,7 @@ public:
     Resources resources;
     // Remove the existing "cpus" resource, it will be overwritten by the
     // current hook. Keep other resources unchanged.
-    foreach (const Resource& resource, slaveInfo.resources()) {
+    for (const Resource& resource : slaveInfo.resources()) {
       if (resource.name() != "cpus") {
         resources += resource;
       }

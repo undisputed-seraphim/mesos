@@ -48,9 +48,9 @@ Try<bool> UpdateSchedule::perform(
 {
   // Put the machines in the existing schedule into a set.
   hashset<MachineID> existing;
-  foreach (const maintenance::Schedule& agenda, registry->schedules()) {
-    foreach (const maintenance::Window& window, agenda.windows()) {
-      foreach (const MachineID& id, window.machine_ids()) {
+  for (const maintenance::Schedule& agenda : registry->schedules()) {
+    for (const maintenance::Window& window : agenda.windows()) {
+      for (const MachineID& id : window.machine_ids()) {
         existing.insert(id);
       }
     }
@@ -59,8 +59,8 @@ Try<bool> UpdateSchedule::perform(
   // Put the machines in the updated schedule into a set.
   // Keep the relevant unavailability to help update existing machines.
   hashmap<MachineID, Unavailability> updated;
-  foreach (const maintenance::Window& window, schedule.windows()) {
-    foreach (const MachineID& id, window.machine_ids()) {
+  for (const maintenance::Window& window : schedule.windows()) {
+    for (const MachineID& id : window.machine_ids()) {
       updated[id] = window.unavailability();
     }
   }
@@ -88,8 +88,8 @@ Try<bool> UpdateSchedule::perform(
   }
 
   // Create new `MachineInfo` entries for each new machine.
-  foreach (const maintenance::Window& window, schedule.windows()) {
-    foreach (const MachineID& id, window.machine_ids()) {
+  for (const maintenance::Window& window : schedule.windows()) {
+    for (const MachineID& id : window.machine_ids()) {
       if (existing.contains(id)) {
         continue;
       }
@@ -114,7 +114,7 @@ Try<bool> UpdateSchedule::perform(
 StartMaintenance::StartMaintenance(
     const RepeatedPtrField<MachineID>& _ids)
 {
-  foreach (const MachineID& id, _ids) {
+  for (const MachineID& id : _ids) {
     ids.insert(id);
   }
 }
@@ -143,7 +143,7 @@ Try<bool> StartMaintenance::perform(
 StopMaintenance::StopMaintenance(
     const RepeatedPtrField<MachineID>& _ids)
 {
-  foreach (const MachineID& id, _ids) {
+  for (const MachineID& id : _ids) {
     ids.insert(id);
   }
 }
@@ -201,7 +201,7 @@ Try<Nothing> schedule(
     const hashmap<MachineID, Machine>& machines)
 {
   hashset<MachineID> updated;
-  foreach (const maintenance::Window& window, schedule.windows()) {
+  for (const maintenance::Window& window : schedule.windows()) {
     // Check that each window has at least one machine.
     if (window.machine_ids().size() == 0) {
       return Error("List of machines in the maintenance window is empty");
@@ -216,7 +216,7 @@ Try<Nothing> schedule(
     }
 
     // Collect machines from the updated schedule into a set.
-    foreach (const MachineID& id, window.machine_ids()) {
+    for (const MachineID& id : window.machine_ids()) {
       // Validate the single machine.
       Try<Nothing> validId = validation::machine(id);
       if (validId.isError()) {
@@ -269,7 +269,7 @@ Try<Nothing> machines(const RepeatedPtrField<MachineID>& ids)
 
   // Verify that the machine has at least one non-empty field value.
   hashset<MachineID> uniques;
-  foreach (const MachineID& id, ids) {
+  for (const MachineID& id : ids) {
     // Validate the single machine.
     Try<Nothing> validId = validation::machine(id);
     if (validId.isError()) {

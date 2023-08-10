@@ -116,7 +116,7 @@ TEST_F(RoutingTest, LinkIndex)
   Try<set<string>> links = net::links();
   ASSERT_SOME(links);
 
-  foreach (const string& link, links.get()) {
+  for (const string& link : links.get()) {
     EXPECT_SOME_NE(0, link::index(link));
   }
 
@@ -129,7 +129,7 @@ TEST_F(RoutingTest, LinkName)
   Try<set<string>> links = net::links();
   ASSERT_SOME(links);
 
-  foreach (const string& link, links.get()) {
+  for (const string& link : links.get()) {
     EXPECT_SOME_NE(0, link::index(link));
     EXPECT_SOME_EQ(link, link::name(link::index(link).get()));
   }
@@ -141,7 +141,7 @@ TEST_F(RoutingTest, LinkStatistics)
   Try<set<string>> links = net::links();
   ASSERT_SOME(links);
 
-  foreach (const string& link, links.get()) {
+  for (const string& link : links.get()) {
     Result<hashmap<string, uint64_t>> statistics = link::statistics(link);
 
     ASSERT_SOME(statistics);
@@ -160,7 +160,7 @@ TEST_F(RoutingTest, LinkExists)
   Try<set<string>> links = net::links();
   ASSERT_SOME(links);
 
-  foreach (const string& link, links.get()) {
+  for (const string& link : links.get()) {
     EXPECT_SOME_TRUE(link::exists(link));
   }
 
@@ -222,7 +222,7 @@ TEST_F(RoutingAdvancedTest, INETSockets)
 
   EXPECT_SOME(infos);
 
-  foreach (const diagnosis::socket::Info& info, infos.get()) {
+  for (const diagnosis::socket::Info& info : infos.get()) {
     // Both source and destination IPs should be present since
     // 'AF_INET' is asked for.
     EXPECT_SOME(info.sourceIP);

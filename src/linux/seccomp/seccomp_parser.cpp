@@ -110,7 +110,7 @@ Try<Nothing> parseArchMap(
         (archMap.isError() ? archMap.error() : "Not found"));
   }
 
-  foreach (const JSON::Value& item, archMap->values) {
+  for (const JSON::Value& item : archMap->values) {
     if (!item.is<JSON::Object>()) {
       return Error("'archMap' contains a non-object item");
     }
@@ -152,7 +152,7 @@ Try<Nothing> parseArchMap(
                                       : "Not found"));
     }
 
-    foreach (const JSON::Value& subItem, subArchitectures->values) {
+    for (const JSON::Value& subItem : subArchitectures->values) {
       if (!subItem.is<JSON::String>()) {
         return Error("'subArchitectures' contains a non-string item");
       }
@@ -202,7 +202,7 @@ Try<ContainerSeccompProfile::Syscall::Filter> parseSyscallFilter(
                      {"s390", ContainerSeccompProfile::ARCH_S390},
                      {"s390x", ContainerSeccompProfile::ARCH_S390X}});
 
-    foreach (const JSON::Value& item, arches->values) {
+    for (const JSON::Value& item : arches->values) {
       if (!item.is<JSON::String>()) {
         return Error("'arches' contains non-string item");
       }
@@ -233,7 +233,7 @@ Try<ContainerSeccompProfile::Syscall::Filter> parseSyscallFilter(
   }
 
   if (caps.isSome()) {
-    foreach (const JSON::Value& item, caps->values) {
+    for (const JSON::Value& item : caps->values) {
       if (!item.is<JSON::String>()) {
         return Error("'caps' contains non-string item");
       }
@@ -332,7 +332,7 @@ Try<Nothing> parseSyscalls(
 
   // Each item in `syscalls` section defines a seccomp filter for a subset
   // of system calls.
-  foreach (const JSON::Value& item, syscalls->values) {
+  for (const JSON::Value& item : syscalls->values) {
     if (!item.is<JSON::Object>()) {
       return Error("'syscalls' contains a non-object item");
     }
@@ -406,7 +406,7 @@ Try<Nothing> parseSyscalls(
           (names.isError() ? names.error() : "Not found"));
     }
 
-    foreach (const JSON::Value& namesItem, names->values) {
+    for (const JSON::Value& namesItem : names->values) {
       if (!namesItem.is<JSON::String>()) {
         return Error("'names' contains a non-string item");
       }
@@ -444,7 +444,7 @@ Try<Nothing> parseSyscalls(
 
     // `args` can be either `null` or an array.
     if (args->is<JSON::Array>()) {
-      foreach (const JSON::Value& argsItem, args->as<JSON::Array>().values) {
+      for (const JSON::Value& argsItem : args->as<JSON::Array>().values) {
         if (!argsItem.is<JSON::Object>()) {
           return Error("'args' contains a non-object item");
         }

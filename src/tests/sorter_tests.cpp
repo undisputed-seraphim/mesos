@@ -1799,8 +1799,8 @@ TYPED_TEST(CommonSorterTest, BENCHMARK_FullSort)
   size_t agentCounts[] = {1000U, 5000U, 10000U, 20000U, 30000U, 50000U};
   size_t clientCounts[] = {1U, 50U, 100U, 200U, 500U, 1000U};
 
-  foreach (size_t agentCount, agentCounts) {
-    foreach (size_t clientCount, clientCounts) {
+  for (size_t agentCount : agentCounts) {
+    for (size_t clientCount : clientCounts) {
       cout << "Using " << agentCount << " agents and "
            << clientCount << " clients" << endl;
 
@@ -1862,7 +1862,7 @@ TYPED_TEST(CommonSorterTest, BENCHMARK_FullSort)
       {
         // Allocate resources on all agents, round-robin through the clients.
         size_t clientIndex = 0;
-        foreach (const SlaveID& slaveId, agents) {
+        for (const SlaveID& slaveId : agents) {
           const string& client = clients[clientIndex++ % clients.size()];
           sorter.allocated(client, slaveId, allocated);
         }
@@ -1894,7 +1894,7 @@ TYPED_TEST(CommonSorterTest, BENCHMARK_FullSort)
       {
         // Unallocate resources on all agents, round-robin through the clients.
         size_t clientIndex = 0;
-        foreach (const SlaveID& slaveId, agents) {
+        for (const SlaveID& slaveId : agents) {
           const string& client = clients[clientIndex++ % clients.size()];
           sorter.unallocated(client, slaveId, allocated);
         }
@@ -1906,7 +1906,7 @@ TYPED_TEST(CommonSorterTest, BENCHMARK_FullSort)
 
       watch.start();
       {
-        foreach (const SlaveID& slaveId, agents) {
+        for (const SlaveID& slaveId : agents) {
           sorter.removeSlave(slaveId);
         }
       }
@@ -1917,7 +1917,7 @@ TYPED_TEST(CommonSorterTest, BENCHMARK_FullSort)
 
       watch.start();
       {
-        foreach (const string& clientId, clients) {
+        for (const string& clientId : clients) {
           sorter.remove(clientId);
         }
       }
@@ -1952,8 +1952,8 @@ TYPED_TEST(CommonSorterTest, BENCHMARK_HierarchyFullSort)
       {10U, 2U}, // Tall and thin: 1022 clients.
   };
 
-  foreach (size_t agentCount, agentCounts) {
-    foreach (HeightAndBranchingFactor pair, heightAndBranchingFactors) {
+  for (size_t agentCount : agentCounts) {
+    for (HeightAndBranchingFactor pair : heightAndBranchingFactors) {
       const size_t treeHeight = std::get<0>(pair);
       const size_t branchingFactor = std::get<1>(pair);
 
@@ -2042,7 +2042,7 @@ TYPED_TEST(CommonSorterTest, BENCHMARK_HierarchyFullSort)
       {
         // Allocate resources on all agents, round-robin through the clients.
         size_t clientIndex = 0;
-        foreach (const SlaveID& slaveId, agents) {
+        for (const SlaveID& slaveId : agents) {
           const string& client = clients[clientIndex++ % clients.size()];
           sorter.allocated(client, slaveId, allocated);
         }
@@ -2074,7 +2074,7 @@ TYPED_TEST(CommonSorterTest, BENCHMARK_HierarchyFullSort)
       {
         // Unallocate resources on all agents, round-robin through the clients.
         size_t clientIndex = 0;
-        foreach (const SlaveID& slaveId, agents) {
+        for (const SlaveID& slaveId : agents) {
           const string& client = clients[clientIndex++ % clients.size()];
           sorter.unallocated(client, slaveId, allocated);
         }
@@ -2086,7 +2086,7 @@ TYPED_TEST(CommonSorterTest, BENCHMARK_HierarchyFullSort)
 
       watch.start();
       {
-        foreach (const SlaveID& slaveId, agents) {
+        for (const SlaveID& slaveId : agents) {
           sorter.removeSlave(slaveId);
         }
       }
@@ -2097,7 +2097,7 @@ TYPED_TEST(CommonSorterTest, BENCHMARK_HierarchyFullSort)
 
       watch.start();
       {
-        foreach (const string& clientId, clients) {
+        for (const string& clientId : clients) {
           sorter.remove(clientId);
         }
       }

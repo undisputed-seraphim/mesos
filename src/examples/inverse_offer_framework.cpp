@@ -257,7 +257,7 @@ private:
       }
     }
 
-    foreach (const Offer& offer, offers) {
+    for (const Offer& offer : offers) {
       const Resources taskResources = [this]() {
         Resources resources = Resources::parse(
             "cpus:" + stringify(CPUS_PER_TASK) +
@@ -372,7 +372,7 @@ private:
 
   void inverseOffers(const std::vector<InverseOffer>& offers)
   {
-    foreach (const InverseOffer& offer, offers) {
+    for (const InverseOffer& offer : offers) {
       if (!sleepers.contains(offer.agent_id())) {
         LOG(INFO) << "Inverse offer received for " << offer.agent_id()
                   << " which does not hold an active sleep task.";
@@ -590,7 +590,7 @@ int main(int argc, char** argv)
   mesos::internal::logging::initialize(argv[0], true, flags); // Catch signals.
 
   // Log any flag warnings.
-  foreach (const flags::Warning& warning, load->warnings) {
+  for (const flags::Warning& warning : load->warnings) {
     LOG(WARNING) << warning.message;
   }
 

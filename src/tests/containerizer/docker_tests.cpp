@@ -101,7 +101,7 @@ class DockerTest : public MesosTest
     AWAIT_READY(containers);
 
     // Cleanup all mesos launched containers.
-    foreach (const Docker::Container& container, containers.get()) {
+    for (const Docker::Container& container : containers.get()) {
       AWAIT_READY_FOR(docker.get()->rm(container.id, true), Seconds(30));
     }
 
@@ -155,7 +155,7 @@ TEST_F(DockerTest, ROOT_DOCKER_interface)
     docker->ps(true, containerName);
   AWAIT_READY(containers);
 
-  foreach (const Docker::Container& container, containers.get()) {
+  for (const Docker::Container& container : containers.get()) {
     EXPECT_NE("/" + containerName, container.name);
   }
 
@@ -195,7 +195,7 @@ TEST_F(DockerTest, ROOT_DOCKER_interface)
   containers = docker->ps();
   AWAIT_READY(containers);
   bool found = false;
-  foreach (const Docker::Container& container, containers.get()) {
+  for (const Docker::Container& container : containers.get()) {
     if ("/" + containerName == container.name) {
       found = true;
       break;
@@ -218,14 +218,14 @@ TEST_F(DockerTest, ROOT_DOCKER_interface)
   // But it should appear in the result of ps(true).
   containers = docker->ps();
   AWAIT_READY(containers);
-  foreach (const Docker::Container& container, containers.get()) {
+  for (const Docker::Container& container : containers.get()) {
     EXPECT_NE("/" + containerName, container.name);
   }
 
   containers = docker->ps(true, containerName);
   AWAIT_READY(containers);
   found = false;
-  foreach (const Docker::Container& container, containers.get()) {
+  for (const Docker::Container& container : containers.get()) {
     if ("/" + containerName == container.name) {
       found = true;
       break;
@@ -255,7 +255,7 @@ TEST_F(DockerTest, ROOT_DOCKER_interface)
   // ps(true).
   containers = docker->ps(true, containerName);
   AWAIT_READY(containers);
-  foreach (const Docker::Container& container, containers.get()) {
+  for (const Docker::Container& container : containers.get()) {
     EXPECT_NE("/" + containerName, container.name);
   }
 
@@ -280,7 +280,7 @@ TEST_F(DockerTest, ROOT_DOCKER_interface)
   containers = docker->ps();
   AWAIT_READY(containers);
   found = false;
-  foreach (const Docker::Container& container, containers.get()) {
+  for (const Docker::Container& container : containers.get()) {
     if ("/" + containerName == container.name) {
       found = true;
       break;
@@ -298,12 +298,12 @@ TEST_F(DockerTest, ROOT_DOCKER_interface)
   // find it by ps() or ps(true).
   containers = docker->ps();
   AWAIT_READY(containers);
-  foreach (const Docker::Container& container, containers.get()) {
+  for (const Docker::Container& container : containers.get()) {
     EXPECT_NE("/" + containerName, container.name);
   }
   containers = docker->ps(true, containerName);
   AWAIT_READY(containers);
-  foreach (const Docker::Container& container, containers.get()) {
+  for (const Docker::Container& container : containers.get()) {
     EXPECT_NE("/" + containerName, container.name);
   }
 }

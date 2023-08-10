@@ -118,7 +118,7 @@ Future<Nothing> VolumeSandboxPathIsolatorProcess::recover(
     const vector<ContainerState>& states,
     const hashset<ContainerID>& orphans)
 {
-  foreach (const ContainerState& state, states) {
+  for (const ContainerState& state : states) {
     sandboxes[state.container_id()] = state.directory();
   }
 
@@ -154,7 +154,7 @@ Future<Option<ContainerLaunchInfo>> VolumeSandboxPathIsolatorProcess::prepare(
   ContainerLaunchInfo launchInfo;
   vector<Future<gid_t>> futures;
 
-  foreach (const Volume& volume, containerInfo.volumes()) {
+  for (const Volume& volume : containerInfo.volumes()) {
     // NOTE: The validation here is for backwards compatibility. For
     // example, if an old master (no validation code) is used to
     // launch a task with a volume.
@@ -456,7 +456,7 @@ Future<Option<ContainerLaunchInfo>> VolumeSandboxPathIsolatorProcess::prepare(
   return collect(futures)
     .then([launchInfo](const vector<gid_t>& gids) mutable
         -> Future<Option<ContainerLaunchInfo>> {
-      foreach (gid_t gid, gids) {
+      for (gid_t gid : gids) {
         launchInfo.add_supplementary_groups(gid);
       }
 

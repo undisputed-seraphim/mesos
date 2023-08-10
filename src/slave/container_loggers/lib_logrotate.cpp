@@ -120,7 +120,7 @@ public:
       // Search the environment for prefixed environment variables.
       // We un-prefix those variables before parsing the flag values.
       map<string, string> containerEnvironment;
-      foreach (const Environment::Variable& variable,
+      for (const Environment::Variable& variable :
                containerConfig.command_info().environment().variables()) {
         if (strings::startsWith(
               variable.name(), flags.environment_variable_prefix)) {
@@ -141,7 +141,7 @@ public:
       }
 
       // Log any flag warnings.
-      foreach (const flags::Warning& warning, load->warnings) {
+      for (const flags::Warning& warning : load->warnings) {
         LOG(WARNING) << warning.message;
       }
     }
@@ -300,7 +300,7 @@ org_apache_mesos_LogrotateContainerLogger(
     [](const Parameters& parameters) -> ContainerLogger* {
       // Convert `parameters` into a map.
       map<string, string> values;
-      foreach (const Parameter& parameter, parameters.parameter()) {
+      for (const Parameter& parameter : parameters.parameter()) {
         values[parameter.key()] = parameter.value();
       }
 
@@ -314,7 +314,7 @@ org_apache_mesos_LogrotateContainerLogger(
       }
 
       // Log any flag warnings.
-      foreach (const flags::Warning& warning, load->warnings) {
+      for (const flags::Warning& warning : load->warnings) {
         LOG(WARNING) << warning.message;
       }
 

@@ -2721,7 +2721,7 @@ TEST_P(MasterOperationAuthorizationTest, Accept)
         v1::Offer::Operation& operation,
         createOperations(frameworkId, agentId, authorization::RUN_TASK)) {
       if (operation.type() == v1::Offer::Operation::LAUNCH) {
-        foreach (const v1::TaskInfo& task, operation.launch().task_infos()) {
+        for (const v1::TaskInfo& task : operation.launch().task_infos()) {
           totalResources += task.resources();
           totalResources += task.executor().resources();
 
@@ -2835,7 +2835,7 @@ TEST_P(MasterOperationAuthorizationTest, Accept)
         const Option<bool>& launchExecutor) {
       ASSERT_TRUE(frameworkInfo.has_id());
 
-      foreach (const TaskInfo& task, taskGroup.tasks()) {
+      for (const TaskInfo& task : taskGroup.tasks()) {
         StatusUpdateMessage message;
         message.set_pid(slave.get()->pid);
         *message.mutable_update() = protobuf::createStatusUpdate(

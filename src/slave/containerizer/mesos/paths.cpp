@@ -402,7 +402,7 @@ Try<vector<ContainerID>> getContainerIds(const string& runtimeDir)
     // the hashmap 'containers_' in 'Containerizer::recover()'.
     vector<ContainerID> containers;
 
-    foreach (const string& entry, entries.get()) {
+    for (const string& entry : entries.get()) {
       // We're not expecting anything else but directories here
       // representing each container.
       CHECK(os::stat::isdir(path::join(path, entry)));

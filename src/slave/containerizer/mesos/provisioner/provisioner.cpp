@@ -267,7 +267,7 @@ Try<Owned<Provisioner>> Provisioner::create(
       COPY_BACKEND
     };
 
-    foreach (const string& backendName, backendNames) {
+    for (const string& backendName : backendNames) {
       if (!backends.contains(backendName)) {
         continue;
       }
@@ -417,7 +417,7 @@ Future<Nothing> ProvisionerProcess::recover(
   // but mark unknown containers for immediate cleanup.
   hashset<ContainerID> unknownContainerIds;
 
-  foreach (const ContainerID& containerId, containers.get()) {
+  for (const ContainerID& containerId : containers.get()) {
     Owned<Info> info = Owned<Info>(new Info());
     info->provisioning = ProvisionInfo{};
 
@@ -481,7 +481,7 @@ Future<Nothing> ProvisionerProcess::recover(
 
   // Cleanup unknown orphan containers' rootfses.
   vector<Future<bool>> cleanups;
-  foreach (const ContainerID& containerId, unknownContainerIds) {
+  for (const ContainerID& containerId : unknownContainerIds) {
     LOG(INFO) << "Cleaning up unknown container " << containerId;
 
     // If a container is unknown, it means the launcher has not forked
@@ -619,7 +619,7 @@ Future<ProvisionInfo> ProvisionerProcess::_provision(
 
       ContainerLayers containerLayers;
 
-      foreach (const string& layer, imageInfo.layers) {
+      for (const string& layer : imageInfo.layers) {
         containerLayers.add_paths(layer);
       }
 
@@ -704,7 +704,7 @@ Future<bool> ProvisionerProcess::_destroy(
   CHECK(infos[containerId]->destroying);
 
   vector<string> errors;
-  foreach (const Future<bool>& future, destroys) {
+  for (const Future<bool>& future : destroys) {
     if (!future.isReady()) {
       errors.push_back(future.isFailed()
         ? future.failure()
@@ -733,7 +733,7 @@ Future<bool> ProvisionerProcess::_destroy(
           return;
         }
 
-        foreach (const string& rootfsId, info->rootfses[backend]) {
+        for (const string& rootfsId : info->rootfses[backend]) {
           string rootfs = provisioner::paths::getContainerRootfsDir(
               rootDir,
               containerId,
@@ -775,7 +775,7 @@ void ProvisionerProcess::__destroy(
   CHECK_READY(futures);
 
   vector<string> messages;
-  foreach (const Future<bool>& future, futures.get()) {
+  for (const Future<bool>& future : futures.get()) {
     if (!future.isReady()) {
       messages.push_back(
           future.isFailed() ? future.failure() : "discarded");
@@ -846,7 +846,7 @@ Future<Nothing> ProvisionerProcess::pruneImages(
       foreachpair (
           const Image::Type& type, const Owned<Store>& store, stores) {
         vector<Image> images;
-        foreach (const Image& image, excludedImages) {
+        for (const Image& image : excludedImages) {
           if (image.type() == type) {
             images.push_back(image);
           }

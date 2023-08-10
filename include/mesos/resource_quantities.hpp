@@ -101,7 +101,7 @@ public:
   {
     ResourceQuantities result;
 
-    foreachvalue (const ResourceQuantities& quantities, map) {
+    for (const auto& [_, quantities] : map) {
       result += quantities;
     }
 

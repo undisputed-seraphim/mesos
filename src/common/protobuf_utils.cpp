@@ -138,7 +138,7 @@ bool frameworkHasCapability(
     const FrameworkInfo& framework,
     FrameworkInfo::Capability::Type capability)
 {
-  foreach (const FrameworkInfo::Capability& c,
+  for (const FrameworkInfo::Capability& c :
            framework.capabilities()) {
     if (c.type() == capability) {
       return true;
@@ -471,7 +471,7 @@ Option<ContainerStatus> getTaskContainerStatus(const Task& task)
   // The statuses list only keeps the most recent TaskStatus for
   // each state, and appends later states at the end. Let's find
   // the most recent TaskStatus with a valid container_status.
-  foreach (const TaskStatus& status, adaptor::reverse(task.statuses())) {
+  for (const TaskStatus& status : adaptor::reverse(task.statuses())) {
     if (status.has_container_status()) {
       return status.container_status();
     }
@@ -647,7 +647,7 @@ MasterInfo createMasterInfo(const UPID& pid)
     info.mutable_address()->set_hostname(hostname.get());
   }
 
-  foreach (const MasterInfo::Capability& capability,
+  for (const MasterInfo::Capability& capability :
            mesos::internal::master::MASTER_CAPABILITIES()) {
     info.add_capabilities()->CopyFrom(capability);
   }
@@ -671,7 +671,7 @@ Labels convertStringMapToLabels(const Map<string, string>& map)
 {
   Labels labels;
 
-  foreach (const auto& entry, map) {
+  for (const auto& entry : map) {
     Label* label = labels.mutable_labels()->Add();
     label->set_key(entry.first);
     label->set_value(entry.second);
@@ -685,7 +685,7 @@ Try<Map<string, string>> convertLabelsToStringMap(const Labels& labels)
 {
   Map<string, string> map;
 
-  foreach (const Label& label, labels.labels()) {
+  for (const Label& label : labels.labels()) {
     if (map.count(label.key())) {
       return Error("Repeated key '" + label.key() + "' in labels");
     }
@@ -719,7 +719,7 @@ void injectAllocationInfo(
         RepeatedPtrField<Resource>* resources,
         const Resource::AllocationInfo& allocationInfo)
     {
-      foreach (Resource& resource, *resources) {
+      for (Resource& resource : *resources) {
         operator()(resource, allocationInfo);
       }
     }
@@ -729,7 +729,7 @@ void injectAllocationInfo(
     case Offer::Operation::LAUNCH: {
       Offer::Operation::Launch* launch = operation->mutable_launch();
 
-      foreach (TaskInfo& task, *launch->mutable_task_infos()) {
+      for (TaskInfo& task : *launch->mutable_task_infos()) {
         inject(task.mutable_resources(), allocationInfo);
 
         if (task.has_executor()) {
@@ -753,7 +753,7 @@ void injectAllocationInfo(
 
       TaskGroupInfo* taskGroup = launchGroup->mutable_task_group();
 
-      foreach (TaskInfo& task, *taskGroup->mutable_tasks()) {
+      for (TaskInfo& task : *taskGroup->mutable_tasks()) {
         inject(task.mutable_resources(), allocationInfo);
 
         if (task.has_executor()) {
@@ -852,7 +852,7 @@ void stripAllocationInfo(Offer::Operation* operation)
 
     void operator()(RepeatedPtrField<Resource>* resources)
     {
-      foreach (Resource& resource, *resources) {
+      for (Resource& resource : *resources) {
         operator()(resource);
       }
     }
@@ -862,7 +862,7 @@ void stripAllocationInfo(Offer::Operation* operation)
     case Offer::Operation::LAUNCH: {
       Offer::Operation::Launch* launch = operation->mutable_launch();
 
-      foreach (TaskInfo& task, *launch->mutable_task_infos()) {
+      for (TaskInfo& task : *launch->mutable_task_infos()) {
         strip(task.mutable_resources());
 
         if (task.has_executor()) {
@@ -882,7 +882,7 @@ void stripAllocationInfo(Offer::Operation* operation)
 
       TaskGroupInfo* taskGroup = launchGroup->mutable_task_group();
 
-      foreach (TaskInfo& task, *taskGroup->mutable_tasks()) {
+      for (TaskInfo& task : *taskGroup->mutable_tasks()) {
         strip(task.mutable_resources());
 
         if (task.has_executor()) {
@@ -1073,7 +1073,7 @@ ContainerID parseContainerId(const string& value)
   vector<string> tokens = strings::split(value, ".");
 
   Option<ContainerID> result;
-  foreach (const string& token, tokens) {
+  for (const string& token : tokens) {
     ContainerID id;
     id.set_value(token);
 
@@ -1110,7 +1110,7 @@ Try<Resources> getConsumedResources(const Offer::Operation& operation)
       }
 
       Resources consumed;
-      foreach (const ResourceConversion& conversion, conversions.get()) {
+      for (const ResourceConversion& conversion : conversions.get()) {
         consumed += conversion.consumed;
       }
 
@@ -1156,7 +1156,7 @@ ostream& operator<<(ostream& stream, const Capabilities& c)
 {
   set<string> names;
 
-  foreach (const SlaveInfo::Capability& capability, c.toRepeatedPtrField()) {
+  for (const SlaveInfo::Capability& capability : c.toRepeatedPtrField()) {
     names.insert(SlaveInfo::Capability::Type_Name(capability.type()));
   }
 
@@ -1170,7 +1170,7 @@ ContainerLimitation createContainerLimitation(
     const TaskStatus::Reason& reason)
 {
   ContainerLimitation limitation;
-  foreach (Resource resource, resources) {
+  for (Resource resource : resources) {
     limitation.add_resources()->CopyFrom(resource);
   }
   limitation.set_message(message);
@@ -1332,7 +1332,7 @@ RepeatedPtrField<MachineID> createMachineList(
 {
   RepeatedPtrField<MachineID> array;
 
-  foreach (const MachineID& id, ids) {
+  for (const MachineID& id : ids) {
     array.Add()->CopyFrom(id);
   }
 
@@ -1347,7 +1347,7 @@ mesos::maintenance::Window createWindow(
   mesos::maintenance::Window window;
   window.mutable_unavailability()->CopyFrom(unavailability);
 
-  foreach (const MachineID& id, ids) {
+  for (const MachineID& id : ids) {
     window.add_machine_ids()->CopyFrom(id);
   }
 
@@ -1360,7 +1360,7 @@ mesos::maintenance::Schedule createSchedule(
 {
   mesos::maintenance::Schedule schedule;
 
-  foreach (const mesos::maintenance::Window& window, windows) {
+  for (const mesos::maintenance::Window& window : windows) {
     schedule.add_windows()->CopyFrom(window);
   }
 
@@ -1532,27 +1532,27 @@ mesos::master::Response::GetAgents::Agent createAgentResponse(
   }
 
   agent.mutable_agent_info()->clear_resources();
-  foreach (const Resource& resource, slave.info.resources()) {
+  for (const Resource& resource : slave.info.resources()) {
     if (approvers.isNone() || approvers.get()->approved<VIEW_ROLE>(resource)) {
       agent.mutable_agent_info()->add_resources()->CopyFrom(resource);
     }
   }
 
-  foreach (Resource resource, slave.totalResources) {
+  for (Resource resource : slave.totalResources) {
     if (approvers.isNone() || approvers.get()->approved<VIEW_ROLE>(resource)) {
       convertResourceFormat(&resource, ENDPOINT);
       agent.add_total_resources()->CopyFrom(resource);
     }
   }
 
-  foreach (Resource resource, Resources::sum(slave.usedResources)) {
+  for (Resource resource : Resources::sum(slave.usedResources)) {
     if (approvers.isNone() || approvers.get()->approved<VIEW_ROLE>(resource)) {
       convertResourceFormat(&resource, ENDPOINT);
       agent.add_allocated_resources()->CopyFrom(resource);
     }
   }
 
-  foreach (Resource resource, slave.offeredResources) {
+  for (Resource resource : slave.offeredResources) {
     if (approvers.isNone() || approvers.get()->approved<VIEW_ROLE>(resource)) {
       convertResourceFormat(&resource, ENDPOINT);
       agent.add_offered_resources()->CopyFrom(resource);

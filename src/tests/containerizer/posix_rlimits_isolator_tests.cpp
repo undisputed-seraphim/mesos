@@ -415,7 +415,7 @@ TEST_F(PosixRLimitsIsolatorTest, NestedContainers)
     // This variable doesn't have to be used explicitly.
     testing::InSequence inSequence;
 
-    foreach (Future<TaskStatus>& taskStatus, taskStatuses) {
+    for (Future<TaskStatus>& taskStatus : taskStatuses) {
       EXPECT_CALL(sched, statusUpdate(&driver, _))
         .WillOnce(FutureArg<1>(&taskStatus));
     }
@@ -507,7 +507,7 @@ TEST_F(PosixRLimitsIsolatorTest, NestedContainers)
   taskStages[task1.task_id()] = Stage::STARTING;
   taskStages[task2.task_id()] = Stage::STARTING;
 
-  foreach (const Future<TaskStatus>& taskStatus, taskStatuses) {
+  for (const Future<TaskStatus>& taskStatus : taskStatuses) {
     AWAIT_READY(taskStatus);
 
     Option<Stage> taskStage = taskStages.get(taskStatus->task_id());

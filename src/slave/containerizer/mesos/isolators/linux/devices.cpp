@@ -62,7 +62,7 @@ Try<Isolator*> LinuxDevicesIsolatorProcess::create(const Flags& flags)
   hashmap<string, Device> whitelistedDevices;
 
   if (flags.allowed_devices.isSome()) {
-    foreach (const DeviceAccess& deviceAccess,
+    for (const DeviceAccess& deviceAccess :
              flags.allowed_devices->allowed_devices()) {
       if (!deviceAccess.device().has_path()) {
         return Error("Whitelisted device has no device path provided");

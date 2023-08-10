@@ -639,7 +639,7 @@ public:
     Try<list<string>> imageBundles = os::ls(imagesDir);
     ASSERT_SOME(imageBundles);
 
-    foreach (const string& imageName, imageBundles.get()) {
+    for (const string& imageName : imageBundles.get()) {
       route("/" + imageName, None(), &TestAppcImageServer::serveRequest);
     }
   }

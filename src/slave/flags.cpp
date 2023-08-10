@@ -1090,7 +1090,7 @@ mesos::internal::slave::Flags::Flags()
           Option<ContainerDNSInfo::DockerInfo> defaultDockerUserDNS;
           hashmap<string, ContainerDNSInfo::DockerInfo> dockerUserDNS;
 
-          foreach (const ContainerDNSInfo::MesosInfo& dnsInfo,
+          for (const ContainerDNSInfo::MesosInfo& dnsInfo :
                    defaultContainerDNS->mesos()) {
             if (dnsInfo.network_mode() ==
                 ContainerDNSInfo::MesosInfo::UNKNOWN) {
@@ -1123,7 +1123,7 @@ mesos::internal::slave::Flags::Flags()
             }
           }
 
-          foreach (const ContainerDNSInfo::DockerInfo& dnsInfo,
+          for (const ContainerDNSInfo::DockerInfo& dnsInfo :
                    defaultContainerDNS->docker()) {
             if (dnsInfo.network_mode() ==
                 ContainerDNSInfo::DockerInfo::UNKNOWN) {

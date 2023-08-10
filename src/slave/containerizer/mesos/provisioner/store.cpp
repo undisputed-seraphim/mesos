@@ -65,7 +65,7 @@ Try<hashmap<Image::Type, Owned<Store>>> Store::create(
 
   hashmap<Image::Type, Owned<Store>> stores;
 
-  foreach (const string& type,
+  for (const string& type :
            strings::tokenize(flags.image_providers.get(), ",")) {
     Image::Type imageType;
     if (!Image::Type_Parse(strings::upper(type), &imageType)) {

@@ -321,7 +321,7 @@ protected:
 
   void resourceOffers(const vector<Offer>& offers)
   {
-    foreach (const Offer& offer, offers) {
+    for (const Offer& offer : offers) {
       VLOG(1) << "Offer " << offer.id()
               << " from agent " << offer.agent_id()
               << " contained resources " << offer.resources();
@@ -343,8 +343,8 @@ protected:
       // don't expect to receive any operation status updates for them.
       if (cleanupUnknownReservations) {
         Resources reserved = remaining.reserved(role);
-        foreach (const Resource& resource, reserved) {
-          foreach (Label label, resource.reservations(0).labels().labels()) {
+        for (const Resource& resource : reserved) {
+          for (Label label : resource.reservations(0).labels().labels()) {
             if (label.key() != RESERVATIONS_LABEL) {
               continue;
             }
@@ -897,7 +897,7 @@ int main(int argc, char** argv)
   }
 
   mesos::internal::logging::initialize(argv[0], false);
-  foreach (const flags::Warning& warning, load->warnings) {
+  for (const flags::Warning& warning : load->warnings) {
     LOG(WARNING) << warning.message;
   }
 

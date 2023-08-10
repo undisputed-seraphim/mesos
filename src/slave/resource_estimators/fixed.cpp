@@ -53,7 +53,7 @@ public:
   Future<Resources> _oversubscribable(const ResourceUsage& usage)
   {
     Resources allocatedRevocable;
-    foreach (const ResourceUsage::Executor& executor, usage.executors()) {
+    for (const ResourceUsage::Executor& executor : usage.executors()) {
       allocatedRevocable += Resources(executor.allocated()).revocable();
     }
 
@@ -78,7 +78,7 @@ public:
   FixedResourceEstimator(const Resources& _totalRevocable)
   {
     // Mark all resources as revocable.
-    foreach (Resource resource, _totalRevocable) {
+    for (Resource resource : _totalRevocable) {
       resource.mutable_revocable();
       totalRevocable += resource;
     }
@@ -133,7 +133,7 @@ static ResourceEstimator* create(const Parameters& parameters)
 {
   // Obtain the *fixed* resources from parameters.
   Option<Resources> resources;
-  foreach (const Parameter& parameter, parameters.parameter()) {
+  for (const Parameter& parameter : parameters.parameter()) {
     if (parameter.key() == "resources") {
       Try<Resources> _resources = Resources::parse(parameter.value());
       if (_resources.isError()) {

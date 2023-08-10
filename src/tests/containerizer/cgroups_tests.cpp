@@ -132,7 +132,7 @@ protected:
   {
     CgroupsTest::SetUp();
 
-    foreach (const string& subsystem, strings::tokenize(subsystems, ",")) {
+    for (const string& subsystem : strings::tokenize(subsystems, ",")) {
       // Establish the base hierarchy if this is the first subsystem checked.
       if (baseHierarchy.empty()) {
         Result<string> hierarchy = cgroups::hierarchy(subsystem);
@@ -171,7 +171,7 @@ protected:
       Try<vector<string>> cgroups = cgroups::get(hierarchy);
       ASSERT_SOME(cgroups);
 
-      foreach (const string& cgroup, cgroups.get()) {
+      for (const string& cgroup : cgroups.get()) {
         // Remove any cgroups that start with TEST_CGROUPS_ROOT.
         if (cgroup == TEST_CGROUPS_ROOT) {
           AWAIT_READY(cgroups::destroy(hierarchy, cgroup));
@@ -183,13 +183,13 @@ protected:
   void TearDown() override
   {
     // Remove all *our* cgroups.
-    foreach (const string& subsystem, strings::tokenize(subsystems, ",")) {
+    for (const string& subsystem : strings::tokenize(subsystems, ",")) {
       string hierarchy = path::join(baseHierarchy, subsystem);
 
       Try<vector<string>> cgroups = cgroups::get(hierarchy);
       ASSERT_SOME(cgroups);
 
-      foreach (const string& cgroup, cgroups.get()) {
+      for (const string& cgroup : cgroups.get()) {
         // Remove any cgroups that start with TEST_CGROUPS_ROOT.
         if (cgroup == TEST_CGROUPS_ROOT) {
           // Since we are tearing down the tests, kill any processes
@@ -269,7 +269,7 @@ TEST_F(CgroupsAnyHierarchyTest, ROOT_CGROUPS_Subsystems)
 
   Option<string> cpu;
   Option<string> memory;
-  foreach (const string& name, names.get()) {
+  for (const string& name : names.get()) {
     if (name == "cpu") {
       cpu = name;
     } else if (name == "memory") {
@@ -291,7 +291,7 @@ TEST_F(CgroupsAnyHierarchyWithCpuMemoryTest, ROOT_CGROUPS_SubsystemsHierarchy)
 
   Option<string> cpu;
   Option<string> memory;
-  foreach (const string& name, names.get()) {
+  for (const string& name : names.get()) {
     if (name == "cpu") {
       cpu = name;
     } else if (name == "memory") {
@@ -308,7 +308,7 @@ TEST_F(CgroupsAnyHierarchyWithCpuMemoryTest, ROOT_CGROUPS_SubsystemsHierarchy)
 
   cpu = None();
   memory = None();
-  foreach (const string& name, names.get()) {
+  for (const string& name : names.get()) {
     if (name == "cpu") {
       cpu = name;
     } else if (name == "memory") {
@@ -1072,7 +1072,7 @@ protected:
       Level::CRITICAL
     };
 
-    foreach (Level level, levels) {
+    for (Level level : levels) {
       Try<Owned<Counter>> counter = Counter::create(hierarchy, cgroup, level);
       EXPECT_SOME(counter);
 

@@ -587,7 +587,7 @@ protected:
 
         vector<string> pids;
 
-        foreach (const Offer& offer, offers) {
+        for (const Offer& offer : offers) {
           CHECK(offer.has_url())
             << "Offer.url required for Event support";
           CHECK(offer.url().has_path())
@@ -1286,7 +1286,7 @@ protected:
     call.set_type(Call::REQUEST);
 
     Call::Request* request = call.mutable_request();
-    foreach (const Request& _request, requests) {
+    for (const Request& _request : requests) {
       request->add_requests()->CopyFrom(_request);
     }
 
@@ -1302,7 +1302,7 @@ protected:
     operation.set_type(Offer::Operation::LAUNCH);
 
     Offer::Operation::Launch* launch = operation.mutable_launch();
-    foreach (const TaskInfo& task, tasks) {
+    for (const TaskInfo& task : tasks) {
       launch->add_task_infos()->CopyFrom(task);
     }
 
@@ -1329,12 +1329,12 @@ protected:
         newTaskState = TASK_LOST;
       }
 
-      foreach (const Offer::Operation& operation, operations) {
+      for (const Offer::Operation& operation : operations) {
         if (operation.type() != Offer::Operation::LAUNCH) {
           continue;
         }
 
-        foreach (const TaskInfo& task, operation.launch().task_infos()) {
+        for (const TaskInfo& task : operation.launch().task_infos()) {
           StatusUpdate update = protobuf::createStatusUpdate(
               framework.id(),
               None(),
@@ -1359,7 +1359,7 @@ protected:
     Call::Accept* accept = call.mutable_accept();
 
     // Setting accept.operations.
-    foreach (const Offer::Operation& _operation, operations) {
+    for (const Offer::Operation& _operation : operations) {
       if (_operation.has_id()) {
         ABORT("An offer operation's 'id' field was set, which is disallowed"
               " because the SchedulerDriver cannot handle offer operation"
@@ -1371,7 +1371,7 @@ protected:
     }
 
     // Setting accept.offer_ids.
-    foreach (const OfferID& offerId, offerIds) {
+    for (const OfferID& offerId : offerIds) {
       accept->add_offer_ids()->CopyFrom(offerId);
 
       if (!savedOffers.contains(offerId)) {
@@ -1382,12 +1382,12 @@ protected:
       } else {
         // Keep only the slave PIDs where we run tasks so we can send
         // framework messages directly.
-        foreach (const Offer::Operation& operation, operations) {
+        for (const Offer::Operation& operation : operations) {
           if (operation.type() != Offer::Operation::LAUNCH) {
             continue;
           }
 
-          foreach (const TaskInfo& task, operation.launch().task_infos()) {
+          for (const TaskInfo& task : operation.launch().task_infos()) {
             const SlaveID& slaveId = task.slave_id();
 
             if (savedOffers[offerId].contains(slaveId)) {
@@ -1634,7 +1634,7 @@ protected:
 
     Call::Reconcile* reconcile = call.mutable_reconcile();
 
-    foreach (const TaskStatus& status, statuses) {
+    for (const TaskStatus& status : statuses) {
       Call::Reconcile::Task* task = reconcile->add_tasks();
       task->mutable_task_id()->CopyFrom(status.task_id());
       if (status.has_slave_id()) {
@@ -1871,7 +1871,7 @@ void MesosSchedulerDriver::initialize() {
   }
 
   // Log any flag warnings (after logging is initialized).
-  foreach (const flags::Warning& warning, load->warnings) {
+  for (const flags::Warning& warning : load->warnings) {
     LOG(WARNING) << warning.message;
   }
 
@@ -2108,7 +2108,7 @@ Status MesosSchedulerDriver::start()
     }
 
     // Log any flag warnings.
-    foreach (const flags::Warning& warning, load->warnings) {
+    for (const flags::Warning& warning : load->warnings) {
       LOG(WARNING) << warning.message;
     }
 

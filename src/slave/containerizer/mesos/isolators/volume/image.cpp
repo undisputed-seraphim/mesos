@@ -220,7 +220,7 @@ Future<Option<ContainerLaunchInfo>> VolumeImageIsolatorProcess::_prepare(
   vector<string> messages;
   vector<string> sources;
 
-  foreach (const Future<ProvisionInfo>& future, futures) {
+  for (const Future<ProvisionInfo>& future : futures) {
     if (!future.isReady()) {
       messages.push_back(future.isFailed() ? future.failure() : "discarded");
       continue;

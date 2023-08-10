@@ -128,7 +128,7 @@ Future<Nothing> VolumeManagerProcess::recover()
 
       vector<Future<Nothing>> futures;
 
-      foreach (const string& path, volumePaths.get()) {
+      for (const string& path : volumePaths.get()) {
         Try<paths::VolumePath> volumePath =
           paths::parseVolumePath(rootDir, path);
 
@@ -224,7 +224,7 @@ Future<Nothing> VolumeManagerProcess::recover()
             "' and name '" + info.name() + "': " + mountPaths.error());
       }
 
-      foreach (const string& path, mountPaths.get()) {
+      for (const string& path : mountPaths.get()) {
         Try<string> volumeId = paths::parseMountPath(mountRootDir, path);
         if (volumeId.isError()) {
           return Failure(
@@ -252,7 +252,7 @@ Future<vector<VolumeInfo>> VolumeManagerProcess::listVolumes()
   return call(CONTROLLER_SERVICE, &Client::listVolumes, ListVolumesRequest())
     .then(process::defer(self(), [](const ListVolumesResponse& response) {
       vector<VolumeInfo> result;
-      foreach (const auto& entry, response.entries()) {
+      for (const auto& entry : response.entries()) {
         result.push_back(VolumeInfo{Bytes(entry.volume().capacity_bytes()),
                                     entry.volume().volume_id(),
                                     entry.volume().volume_context()});
@@ -670,7 +670,7 @@ Future<Nothing> VolumeManagerProcess::prepareServices()
     // Check if all services have consistent plugin infos.
     .then(process::defer(self(), [this] {
       vector<Future<GetPluginInfoResponse>> futures;
-      foreach (const Service& service, services) {
+      for (const Service& service : services) {
         futures.push_back(call(
             service, &Client::getPluginInfo, GetPluginInfoRequest())
           .onReady([service](const GetPluginInfoResponse& response) {

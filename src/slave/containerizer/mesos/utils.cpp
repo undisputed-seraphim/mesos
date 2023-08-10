@@ -82,7 +82,7 @@ Try<pid_t> getMountNamespaceTarget(pid_t parent)
   int numCandidates = 0;
   bool hasGrandchild = false;
 
-  foreach (pid_t child, children.get()) {
+  for (pid_t child : children.get()) {
     Result<ino_t> childNamespace = ns::getns(child, "mnt");
     if (childNamespace.isError()) {
       return Error("Cannot get 'mnt' namespace for child process"
@@ -106,7 +106,7 @@ Try<pid_t> getMountNamespaceTarget(pid_t parent)
                    " '" + stringify(child) + "': " + children2.error());
     }
 
-    foreach (pid_t child2, children2.get()) {
+    for (pid_t child2 : children2.get()) {
       Result<ino_t> child2Namespace = ns::getns(child2, "mnt");
       if (child2Namespace.isError()) {
         return Error("Cannot get 'mnt' namespace for 2nd-level child process"

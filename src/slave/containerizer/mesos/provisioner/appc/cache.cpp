@@ -63,7 +63,7 @@ Try<Nothing> Cache::recover()
         imageDirs.error());
   }
 
-  foreach (const string& imageId, imageDirs.get()) {
+  for (const string& imageId : imageDirs.get()) {
     Try<Nothing> adding = add(imageId);
     if (adding.isError()) {
       LOG(WARNING) << "Failed to add image with id '" << imageId
@@ -96,7 +96,7 @@ Try<Nothing> Cache::add(const string& imageId)
   }
 
   map<string, string> labels;
-  foreach (const spec::ImageManifest::Label& label, manifest->labels()) {
+  for (const spec::ImageManifest::Label& label : manifest->labels()) {
     labels.insert({label.name(), label.value()});
   }
 
@@ -130,7 +130,7 @@ Cache::Key::Key(const Image::Appc& image)
 
   // TODO(jojy): Do we need to normalize the labels by adding default labels
   // like os, version and arch if they are missing?
-  foreach (const Label& label, image.labels().labels()) {
+  for (const Label& label : image.labels().labels()) {
     labels.insert({label.key(), label.value()});
   }
 }

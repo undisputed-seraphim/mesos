@@ -61,7 +61,7 @@ TEST(NsTest, ROOT_setns)
   // each available namespace.
   int flags = 0;
 
-  foreach (int nsType, ns::nstypes()) {
+  for (int nsType : ns::nstypes()) {
     // Skip 'user' namespace because it causes 'clone' to change us
     // from being user 'root' to user 'nobody', but these tests
     // require root. See MESOS-3083.
@@ -110,7 +110,7 @@ TEST(NsTest, SupportedNamespaces)
   // constants, so we can use them to test the negative case.
   EXPECT_SOME_FALSE(ns::supported(SIGCHLD));
 
-  foreach (const int& n, namespaces) {
+  for (const int& n : namespaces) {
     // Exclude user namespaces because they depend on the kernel version.
     if (n == CLONE_NEWUSER) {
       continue;
@@ -146,7 +146,7 @@ TEST(NsTest, ROOT_setnsMultipleThreads)
     latch->await();
   });
 
-  foreach (int nsType, namespaces) {
+  for (int nsType : namespaces) {
     EXPECT_ERROR(ns::setns(::getpid(), ns::nsname(nsType).get()));
   }
 
@@ -216,7 +216,7 @@ TEST(NsTest, ROOT_clone)
   // skipping the user namespace for now because it's not fully
   // supported depending on the filesystem, which we don't check for.
   int nstypes = 0;
-  foreach (int nstype, ns::nstypes()) {
+  for (int nstype : ns::nstypes()) {
     if (nstype != CLONE_NEWUSER) {
       nstypes |= nstype;
     }
@@ -240,7 +240,7 @@ TEST(NsTest, ROOT_clone)
 
   ASSERT_SOME(child);
 
-  foreach (int nsType, ns::nstypes()) {
+  for (int nsType : ns::nstypes()) {
     // See comment above as to why we're skipping the namespace.
     if (nsType == CLONE_NEWUSER) {
       continue;

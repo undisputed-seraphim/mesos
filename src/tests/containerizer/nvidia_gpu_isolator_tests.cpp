@@ -758,7 +758,7 @@ TEST_F(NvidiaGpuTest, ROOT_NVIDIA_GPU_VolumeCreation)
   ASSERT_TRUE(os::exists(volume->HOST_PATH()));
 
   vector<string> directories = { "bin", "lib", "lib64" };
-  foreach (const string& directory, directories) {
+  for (const string& directory : directories) {
     EXPECT_TRUE(os::exists(volume->HOST_PATH() + "/" + directory));
   }
 

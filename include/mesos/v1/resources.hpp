@@ -36,7 +36,6 @@
 #include <stout/bytes.hpp>
 #include <stout/check.hpp>
 #include <stout/error.hpp>
-#include <stout/foreach.hpp>
 #include <stout/hashmap.hpp>
 #include <stout/json.hpp>
 #include <stout/lambda.hpp>
@@ -392,7 +391,7 @@ public:
   {
     Resources result;
 
-    foreachvalue (const Resources& resources, _resources) {
+    for (const auto& [_, resources] : _resources) {
       result += resources;
     }
 
@@ -573,7 +572,7 @@ public:
   {
     Resources result = *this;
 
-    foreach (const auto& t, iterable) {
+    for (const auto& t : iterable) {
       Try<Resources> converted = result.apply(t);
       if (converted.isError()) {
         return Error(converted.error());
@@ -802,7 +801,7 @@ hashmap<Key, Resources>& operator+=(
     hashmap<Key, Resources>& left,
     const hashmap<Key, Resources>& right)
 {
-  foreachpair (const Key& key, const Resources& resources, right) {
+  for (const auto& [key, resources] : right) {
     left[key] += resources;
   }
   return left;

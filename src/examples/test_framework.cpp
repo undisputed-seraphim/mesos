@@ -92,7 +92,7 @@ public:
   void resourceOffers(SchedulerDriver* driver,
                               const vector<Offer>& offers) override
   {
-    foreach (const Offer& offer, offers) {
+    for (const Offer& offer : offers) {
       cout << "Received offer " << offer.id() << " with " << offer.resources()
            << endl;
 
@@ -246,7 +246,7 @@ int main(int argc, char** argv)
   internal::logging::initialize(argv[0], true, flags); // Catch signals.
 
   // Log any flag warnings (after logging is initialized).
-  foreach (const flags::Warning& warning, load->warnings) {
+  for (const flags::Warning& warning : load->warnings) {
     LOG(WARNING) << warning.message;
   }
 

@@ -58,7 +58,7 @@ Try<bool> UpdateQuota::perform(
     Registry* registry, hashset<SlaveID>* /*slaveIDs*/)
 {
   // Sanity check that we're not writing any invalid configs.
-  foreach (const QuotaConfig& config, configs) {
+  for (const QuotaConfig& config : configs) {
     Option<Error> error = validate(config);
 
     if (error.isSome()) {
@@ -78,7 +78,7 @@ Try<bool> UpdateQuota::perform(
   google::protobuf::RepeatedPtrField<QuotaConfig>& registryConfigs =
     *registry->mutable_quota_configs();
 
-  foreach (const QuotaConfig& config, configs) {
+  for (const QuotaConfig& config : configs) {
     // Check if there is already quota stored for the role.
     int configIndex = std::find_if(
         registryConfigs.begin(),
@@ -187,7 +187,7 @@ Option<Error> quotaInfo(const QuotaInfo& quotaInfo)
 
   hashset<string> names;
 
-  foreach (const Resource& resource, quotaInfo.guarantee()) {
+  for (const Resource& resource : quotaInfo.guarantee()) {
     // Check that `resource` does not contain fields that are
     // irrelevant for quota.
     if (resource.reservations_size() > 0) {
@@ -260,7 +260,7 @@ Option<Error> validate(const QuotaConfig& config)
 
   auto validateTooLarge = [&](
       const Map<string, Value::Scalar>& m) -> Option<Error> {
-    foreach (auto&& pair, m) {
+    for (auto&& pair : m) {
       if (pair.first == "mem" || pair.first == "disk") {
         if (pair.second.value() > exabyteInMegabytes) {
           return Error(
@@ -290,7 +290,7 @@ Option<Error> validate(const QuotaConfig& config)
   }
 
   // Validate scalar values.
-  foreach (auto&& guarantee, config.guarantees()) {
+  for (auto&& guarantee : config.guarantees()) {
     Option<Error> error =
       common::validation::validateInputScalarValue(guarantee.second.value());
 
@@ -301,7 +301,7 @@ Option<Error> validate(const QuotaConfig& config)
     }
   }
 
-  foreach (auto&& limit, config.limits()) {
+  for (auto&& limit : config.limits()) {
     Option<Error> error =
       common::validation::validateInputScalarValue(limit.second.value());
 
@@ -344,7 +344,7 @@ Quota::Quota(const QuotaInfo& info)
   // For legacy `QuotaInfo`, guarantee also acts as limit.
   limits = [&info]() {
     google::protobuf::Map<string, Value::Scalar> limits;
-    foreach (const Resource& r, info.guarantee()) {
+    for (const Resource& r : info.guarantee()) {
       limits[r.name()] = r.scalar();
     }
     return ResourceLimits(limits);
@@ -359,7 +359,7 @@ Quota::Quota(const QuotaRequest& request)
   // For legacy `QuotaInfo`, guarantee also acts as limit.
   limits = [&request]() {
     google::protobuf::Map<string, Value::Scalar> limits;
-    foreach (const Resource& r, request.guarantee()) {
+    for (const Resource& r : request.guarantee()) {
       limits[r.name()] = r.scalar();
     }
     return ResourceLimits(limits);

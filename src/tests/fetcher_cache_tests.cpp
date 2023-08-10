@@ -246,7 +246,7 @@ static void logSandbox(const Path& path)
   Try<list<string>> entries = os::ls(path.string());
   if (entries.isSome()) {
     cout << "Begin listing sandbox `" << path.string() << "`:" << endl;
-    foreach (const string& entry, entries.get()) {
+    for (const string& entry : entries.get()) {
       logFile(path, entry);
     }
     cout << "End sandbox" << endl;
@@ -275,7 +275,7 @@ void FetcherCacheTest::verifyCacheMetrics()
 
   Bytes used;
 
-  foreach (const auto& file, files.get()) {
+  for (const auto& file : files.get()) {
     Try<Bytes> size = os::stat::size(file);
     ASSERT_SOME(size);
 
@@ -302,7 +302,7 @@ void FetcherCacheTest::TearDown()
     // gtest writes its output: cout.
 
     cout << "Begin listing sandboxes" << endl;
-    foreach (const Path& path, sandboxes) {
+    for (const Path& path : sandboxes) {
       logSandbox(path);
     }
     cout << "End sandboxes" << endl;
@@ -418,7 +418,7 @@ static Future<vector<Nothing>> awaitFinished(
 {
   vector<Future<Nothing>> futures;
 
-  foreach (FetcherCacheTest::Task task, tasks) {
+  for (FetcherCacheTest::Task task : tasks) {
     futures.push_back(awaitFinished(task));
   }
 
@@ -526,7 +526,7 @@ ACTION_TEMPLATE(PushIndexedTaskStatus,
 // Satisfies the first promise in the list that is not satisfied yet.
 ACTION_P(SatisfyOne, promises)
 {
-  foreach (const Owned<Promise<Nothing>>& promise, *promises) {
+  for (const Owned<Promise<Nothing>>& promise : *promises) {
     if (promise->future().isPending()) {
       promise->set(Nothing());
       return;
@@ -573,7 +573,7 @@ Try<vector<FetcherCacheTest::Task>> FetcherCacheTest::launchTasks(
   const Offer offer = offers.get()[0];
 
   vector<TaskInfo> tasks;
-  foreach (const CommandInfo& commandInfo, commandInfos) {
+  for (const CommandInfo& commandInfo : commandInfos) {
     size_t taskIndex = tasks.size();
 
     // Grabbing the framework ID from somewhere. It should not matter
@@ -1153,7 +1153,7 @@ TEST_F(FetcherCacheHttpTest, HttpCachedConcurrent)
   // Having paused the HTTP server, ensure that FetcherProcess::_fetch()
   // has been called for each task, which means that all tasks are competing
   // for downloading the same URIs.
-  foreach (const Owned<Promise<Nothing>>& waypoint, fetchContentionWaypoints) {
+  for (const Owned<Promise<Nothing>>& waypoint : fetchContentionWaypoints) {
     AWAIT(waypoint->future());
   }
 
@@ -1264,7 +1264,7 @@ TEST_F(FetcherCacheHttpTest, HttpMixed)
   // Having paused the HTTP server, ensure that FetcherProcess::_fetch()
   // has been called for each task, which means that all tasks are competing
   // for downloading the same URIs.
-  foreach (const Owned<Promise<Nothing>>& waypoint, fetchContentionWaypoints) {
+  for (const Owned<Promise<Nothing>>& waypoint : fetchContentionWaypoints) {
     AWAIT(waypoint->future());
   }
 
@@ -1688,7 +1688,7 @@ TEST_F(FetcherCacheTest, RemoveLRUCacheEntries)
   int taskIndex = 0;
 
   // Fill up the cache
-  foreach (const int i, commandCreationPattern) {
+  for (const int i : commandCreationPattern) {
     string commandFilename = "cmd" + stringify(i);
     string command = commandFilename + " " + taskName(taskIndex);
 
@@ -1731,7 +1731,7 @@ TEST_F(FetcherCacheTest, RemoveLRUCacheEntries)
   bool cmd1Found = false;
   bool cmd2Found = false;
 
-  foreach (const Path& cacheFile, cacheFiles.get()) {
+  for (const Path& cacheFile : cacheFiles.get()) {
     if (strings::contains(cacheFile.basename(), "cmd1")) {
       cmd1Found = true;
     }

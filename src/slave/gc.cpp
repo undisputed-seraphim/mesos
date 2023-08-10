@@ -136,7 +136,7 @@ Future<bool> GarbageCollectorProcess::unschedule(const string& path)
   CHECK(paths.contains(timeout));
 
   // Locate the path.
-  foreach (const Owned<PathInfo>& info, paths.get(timeout)) {
+  for (const Owned<PathInfo>& info : paths.get(timeout)) {
     if (info->path == path) {
       // If the path is currently undergoing removal, we cannot
       // prevent path removal and wait for removal completion.
@@ -183,7 +183,7 @@ void GarbageCollectorProcess::remove(const Timeout& removalTime)
   if (paths.count(removalTime) > 0) {
     list<Owned<PathInfo>> infos;
 
-    foreach (const Owned<PathInfo>& info, paths.get(removalTime)) {
+    for (const Owned<PathInfo>& info : paths.get(removalTime)) {
       if (info->removing) {
         VLOG(1) << "Skipping deletion of '" << info-> path
                 << "'  as it is already in progress";
@@ -215,7 +215,7 @@ void GarbageCollectorProcess::remove(const Timeout& removalTime)
                       "MountInfoTable for agent process: "
                    << mountTable.error();
 
-        foreach (const Owned<PathInfo>& info, infos) {
+        for (const Owned<PathInfo>& info : infos) {
           info->promise.fail(mountTable.error());
           ++failed;
         }
@@ -223,7 +223,7 @@ void GarbageCollectorProcess::remove(const Timeout& removalTime)
         return Failure(mountTable.error());
       }
 
-      foreach (const fs::MountInfoTable::Entry& entry,
+      for (const fs::MountInfoTable::Entry& entry :
                adaptor::reverse(mountTable->entries)) {
         // Ignore mounts whose targets are not under `workDir`.
         if (!strings::startsWith(
@@ -263,7 +263,7 @@ void GarbageCollectorProcess::remove(const Timeout& removalTime)
       }
 #endif // __linux__
 
-      foreach (const Owned<PathInfo>& info, infos) {
+      for (const Owned<PathInfo>& info : infos) {
         // Run the removal operation with 'continueOnError = true'.
         // It's possible for tasks and isolators to lay down files
         // that are not deletable by GC. In the face of such errors
@@ -315,7 +315,7 @@ void GarbageCollectorProcess::_remove(const Future<Nothing>& result,
                                       const list<Owned<PathInfo>> infos)
 {
   // Remove path records from `paths` and `timeouts` data structures.
-  foreach (const Owned<PathInfo>& info, infos) {
+  for (const Owned<PathInfo>& info : infos) {
     CHECK(paths.remove(timeouts[info->path], info));
     CHECK_EQ(timeouts.erase(info->path), 1u);
   }
@@ -326,7 +326,7 @@ void GarbageCollectorProcess::_remove(const Future<Nothing>& result,
 
 void GarbageCollectorProcess::prune(const Duration& d)
 {
-  foreach (const Timeout& removalTime, paths.keys()) {
+  for (const Timeout& removalTime : paths.keys()) {
     if (removalTime.remaining() <= d) {
       LOG(INFO) << "Pruning directories with remaining removal time "
                 << removalTime.remaining();

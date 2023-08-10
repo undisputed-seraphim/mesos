@@ -143,7 +143,7 @@ Option<Error> validateSecret(const Secret& secret)
 
 Option<Error> validateEnvironment(const Environment& environment)
 {
-  foreach (const Environment::Variable& variable, environment.variables()) {
+  for (const Environment::Variable& variable : environment.variables()) {
     switch (variable.type()) {
       case Environment::Variable::SECRET: {
         if (!variable.has_secret()) {
@@ -290,7 +290,7 @@ Option<Error> validateContainerInfo(const ContainerInfo& containerInfo)
       << "): " << unionError.get();
   }
 
-  foreach (const Volume& volume, containerInfo.volumes()) {
+  for (const Volume& volume : containerInfo.volumes()) {
     Option<Error> error = validateVolume(volume);
     if (error.isSome()) {
       return Error("Invalid volume: " + error->message);
@@ -307,7 +307,7 @@ Option<Error> validateContainerInfo(const ContainerInfo& containerInfo)
     // Docker containerizer has its own way to name the Docker container,
     // otherwise Docker containerizer will not be able to recognize the
     // created container, see MESOS-8497 for details.
-    foreach (const Parameter& parameter,
+    for (const Parameter& parameter :
              containerInfo.docker().parameters()) {
       if (parameter.key() == "name") {
         return Error("Parameter in DockerInfo must not be 'name'");
@@ -654,7 +654,7 @@ Option<Error> validateOfferFilters(const OfferFilters& offerFilters)
 
       // Use `auto` instead of `protobuf::MapPair<string, Value::>` since
       // `foreach` is a macro and does not allow angle brackets.
-      foreach (auto&& quantity, quantities.quantities()) {
+      for (auto&& quantity : quantities.quantities()) {
         Option<Error> error = validateInputScalarValue(quantity.second.value());
         if (error.isSome()) {
           return Error(

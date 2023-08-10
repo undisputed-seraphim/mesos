@@ -59,7 +59,7 @@ static Offer::Operation LAUNCH(const vector<TaskInfo>& tasks)
   Offer::Operation operation;
   operation.set_type(Offer::Operation::LAUNCH);
 
-  foreach (const TaskInfo& task, tasks) {
+  for (const TaskInfo& task : tasks) {
     operation.mutable_launch()->add_task_infos()->CopyFrom(task);
   }
 
@@ -110,7 +110,7 @@ public:
       SchedulerDriver* driver,
       const vector<Offer>& offers) override
   {
-    foreach (const Offer& offer, offers) {
+    for (const Offer& offer : offers) {
       LOG(INFO) << "Received offer " << offer.id() << " from agent "
                 << offer.slave_id() << " (" << offer.hostname() << ") "
                 << "with " << offer.resources();
@@ -285,7 +285,7 @@ int main(int argc, char** argv)
   logging::initialize(argv[0], true, flags); // Catch signals.
 
   // Log any flag warnings.
-  foreach (const flags::Warning& warning, load->warnings) {
+  for (const flags::Warning& warning : load->warnings) {
     LOG(WARNING) << warning.message;
   }
 
@@ -322,7 +322,7 @@ int main(int argc, char** argv)
                          << revocableResources.error();
     }
 
-    foreach (Resource revocable, revocableResources.get()) {
+    for (Resource revocable : revocableResources.get()) {
       revocable.mutable_revocable();
       taskResources += revocable;
     }

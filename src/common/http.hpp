@@ -446,7 +446,7 @@ inline bool ObjectApprovers::approved<authorization::VIEW_ROLE>(
   // Reservations follow a path model where each entry is a child of the
   // previous one. Therefore, to accept the resource the acceptor has to
   // accept all entries.
-  foreach (Resource::ReservationInfo reservation, resource.reservations()) {
+  for (Resource::ReservationInfo reservation : resource.reservations()) {
     if (!approved<authorization::VIEW_ROLE>(reservation.role())) {
       return false;
     }

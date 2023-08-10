@@ -157,7 +157,7 @@ public:
     ASSERT_SOME(read);
 
     Option<string> nameServer;
-    foreach (const string& line, strings::split(read.get(), "\n")) {
+    for (const string& line : strings::split(read.get(), "\n")) {
       if (!strings::startsWith(line, "nameserver")) {
         continue;
       }

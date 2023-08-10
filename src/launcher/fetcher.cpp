@@ -483,7 +483,7 @@ static Try<Nothing> createCacheDirectory(const FetcherInfo& fetcherInfo)
     return Nothing();
   }
 
-  foreach (const FetcherInfo::Item& item, fetcherInfo.items()) {
+  for (const FetcherInfo::Item& item : fetcherInfo.items()) {
     if (item.action() != FetcherInfo::Item::BYPASS_CACHE) {
       // If this user has fetched anything into the cache before, their cache
       // directory will already exist. Set `recursive = true` when calling
@@ -551,7 +551,7 @@ int main(int argc, char* argv[])
   logging::initialize(argv[0], true, flags); // Catch signals.
 
   // Log any flag warnings (after logging is initialized).
-  foreach (const flags::Warning& warning, load->warnings) {
+  for (const flags::Warning& warning : load->warnings) {
     LOG(WARNING) << warning.message;
   }
 
@@ -608,7 +608,7 @@ int main(int argc, char* argv[])
       : Option<Duration>::none();
 
   // Fetch each URI to a local file and chmod if necessary.
-  foreach (const FetcherInfo::Item& item, fetcherInfo->items()) {
+  for (const FetcherInfo::Item& item : fetcherInfo->items()) {
     Try<string> fetched = fetch(
         item, cacheDirectory, sandboxDirectory, frameworksHome, stallTimeout);
     if (fetched.isError()) {

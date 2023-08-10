@@ -343,7 +343,7 @@ Option<Error> registerSlave(const RegisterSlaveMessage& message)
     }
   }
 
-  foreach (const Resource& resource, message.checkpointed_resources()) {
+  for (const Resource& resource : message.checkpointed_resources()) {
     error = Resources::validate(resource);
     if (error.isSome()) {
       return error.get();
@@ -365,14 +365,14 @@ Option<Error> reregisterSlave(const ReregisterSlaveMessage& message)
     return error.get();
   }
 
-  foreach (const Resource& resource, message.checkpointed_resources()) {
+  for (const Resource& resource : message.checkpointed_resources()) {
     Option<Error> error = Resources::validate(resource);
     if (error.isSome()) {
       return error.get();
     }
   }
 
-  foreach (const FrameworkInfo& framework, message.frameworks()) {
+  for (const FrameworkInfo& framework : message.frameworks()) {
     Option<Error> error = validation::framework::validate(framework);
     if (error.isSome()) {
       return error.get();
@@ -386,7 +386,7 @@ Option<Error> reregisterSlave(const ReregisterSlaveMessage& message)
     frameworkIDs.insert(framework.id());
   }
 
-  foreach (const ExecutorInfo& executor, message.executor_infos()) {
+  for (const ExecutorInfo& executor : message.executor_infos()) {
     Option<Error> error = validation::executor::validate(executor);
     if (error.isSome()) {
       return error.get();
@@ -421,7 +421,7 @@ Option<Error> reregisterSlave(const ReregisterSlaveMessage& message)
     }
   }
 
-  foreach (const Task& task, message.tasks()) {
+  for (const Task& task : message.tasks()) {
     Option<Error> error = common::validation::validateTaskID(task.task_id());
     if (error.isSome()) {
       return Error("Task has an invalid TaskID: " + error->message);
@@ -497,7 +497,7 @@ Option<Error> validateRoles(const FrameworkInfo& frameworkInfo)
       hashset<string> roles;
       hashset<string> duplicates;
 
-      foreach (const string& role, frameworkInfo.roles()) {
+      for (const string& role : frameworkInfo.roles()) {
         if (roles.contains(role)) {
           duplicates.insert(role);
         } else {
@@ -516,7 +516,7 @@ Option<Error> validateRoles(const FrameworkInfo& frameworkInfo)
 
   // Validate the role(s).
   if (multiRole) {
-    foreach (const string& role, frameworkInfo.roles()) {
+    for (const string& role : frameworkInfo.roles()) {
       Option<Error> error = roles::validate(role);
       if (error.isSome()) {
         return Error("'FrameworkInfo.roles' contains invalid role: " +
@@ -549,7 +549,7 @@ Option<Error> validateOfferFilters(const FrameworkInfo& frameworkInfo)
 {
   // Use `auto` in place of `protobuf::MapPair<string, Value::Scalar>`
   // below since `foreach` is a macro and cannot contain angle brackets.
-  foreach (auto&& filter, frameworkInfo.offer_filters()) {
+  for (auto&& filter : frameworkInfo.offer_filters()) {
     const OfferFilters& offerFilters = filter.second;
 
     Option<Error> error =
@@ -906,7 +906,7 @@ namespace resource {
 Option<Error> validateDynamicReservationInfo(
     const RepeatedPtrField<Resource>& resources)
 {
-  foreach (const Resource& resource, resources) {
+  for (const Resource& resource : resources) {
     if (!Resources::isDynamicallyReserved(resource)) {
       continue;
     }
@@ -927,7 +927,7 @@ Option<Error> validateDynamicReservationInfo(
 // unsupported.
 Option<Error> validateDiskInfo(const RepeatedPtrField<Resource>& resources)
 {
-  foreach (const Resource& resource, resources) {
+  for (const Resource& resource : resources) {
     if (!resource.has_disk()) {
       continue;
     }
@@ -976,7 +976,7 @@ Option<Error> validateUniquePersistenceID(
   // Check duplicated persistence ID within the given resources.
   Resources volumes = resources.persistentVolumes();
 
-  foreach (const Resource& volume, volumes) {
+  for (const Resource& volume : volumes) {
     const string& role = Resources::reservationRole(volume);
     const string& id = volume.disk().persistence().id();
 
@@ -999,7 +999,7 @@ Option<Error> validateUniquePersistenceID(
 Option<Error> validateRevocableAndNonRevocableResources(
     const Resources& _resources)
 {
-  foreach (const string& name, _resources.names()) {
+  for (const string& name : _resources.names()) {
     Resources resources = _resources.get(name);
     if (!resources.revocable().empty() && resources != resources.revocable()) {
       return Error("Cannot use both revocable and non-revocable '" + name +
@@ -1015,7 +1015,7 @@ Option<Error> validateRevocableAndNonRevocableResources(
 Option<Error> validatePersistentVolume(
     const RepeatedPtrField<Resource>& volumes)
 {
-  foreach (const Resource& volume, volumes) {
+  for (const Resource& volume : volumes) {
     if (!volume.has_disk()) {
       return Error("Resource " + stringify(volume) + " does not have DiskInfo");
     } else if (!volume.disk().has_persistence()) {
@@ -1036,7 +1036,7 @@ Option<Error> validateAllocatedToSingleRole(const Resources& resources)
 {
   Option<string> role;
 
-  foreach (const Resource& resource, resources) {
+  for (const Resource& resource : resources) {
     // Note that the master normalizes `Offer::Operation` resources
     // to have allocation info set, so we can validate it here.
     if (!resource.allocation_info().has_role()) {
@@ -1069,7 +1069,7 @@ bool detectOverlappingSetAndRangeResources(
   ResourceQuantities totalQuantities;
   Resources totalResources;
 
-  foreach (const Resources& resources_, resources) {
+  for (const Resources& resources_ : resources) {
     totalQuantities += ResourceQuantities::fromResources(resources_);
     totalResources += resources_;
   }
@@ -1087,7 +1087,7 @@ Option<Error> validateSingleResourceProvider(
 {
   hashset<Option<ResourceProviderID>> resourceProviderIds;
 
-  foreach (const Resource& resource, resources) {
+  for (const Resource& resource : resources) {
     resourceProviderIds.insert(resource.has_provider_id()
       ? resource.provider_id()
       : Option<ResourceProviderID>::none());
@@ -1362,7 +1362,7 @@ Option<Error> validate(
         internal::validateCompatibleExecutorInfo, executor, framework, slave),
   };
 
-  foreach (const auto& validator, executorValidators) {
+  for (const auto& validator : executorValidators) {
     error = validator();
     if (error.isSome()) {
       return error;
@@ -1385,7 +1385,7 @@ Option<Error> validate(const ExecutorInfo& executor)
     internal::validateContainerInfo
   };
 
-  foreach (const auto& validator, executorValidators) {
+  for (const auto& validator : executorValidators) {
     Option<Error> error = validator(executor);
     if (error.isSome()) {
       return error.get();
@@ -1697,7 +1697,7 @@ Option<Error> validateTask(
     lambda::bind(internal::validateResourceLimits, task, slave)
   };
 
-  foreach (const lambda::function<Option<Error>()>& validator, validators) {
+  for (const lambda::function<Option<Error> :)>& validator, validators) {
     Option<Error> error = validator();
     if (error.isSome()) {
       return error;
@@ -1844,7 +1844,7 @@ Option<Error> validate(
     lambda::bind(internal::validateShareCgroups, task)
   };
 
-  foreach (const lambda::function<Option<Error>()>& validator, validators) {
+  for (const lambda::function<Option<Error> :)>& validator, validators) {
     Option<Error> error = validator();
     if (error.isSome()) {
       return error;
@@ -1914,7 +1914,7 @@ Option<Error> validateTaskGroupAndExecutorResources(
   Resources total = executor.resources();
 
   vector<Resources> taskResources;
-  foreach (const TaskInfo& task, taskGroup.tasks()) {
+  for (const TaskInfo& task : taskGroup.tasks()) {
     taskResources.push_back(task.resources());
     total += task.resources();
   }
@@ -1980,7 +1980,7 @@ Option<Error> validateExecutor(
 
   // Validate the `ExecutorInfo` in all tasks are same.
 
-  foreach (const TaskInfo& task, taskGroup.tasks()) {
+  for (const TaskInfo& task : taskGroup.tasks()) {
     if (task.has_executor() && task.executor() != executor) {
       return Error(
           "The `ExecutorInfo` of "
@@ -2026,7 +2026,7 @@ Option<Error> validateExecutor(
   }
 
   Resources total;
-  foreach (const TaskInfo& task, taskGroup.tasks()) {
+  for (const TaskInfo& task : taskGroup.tasks()) {
     total += task.resources();
   }
 
@@ -2100,7 +2100,7 @@ Option<Error> validateShareCgroups(
     return None();
   };
 
-  foreach (const TaskInfo& task, taskGroup.tasks()) {
+  for (const TaskInfo& task : taskGroup.tasks()) {
     Option<Error> error = validateShareCgroupsForTask(
         shareCgroups,
         task.has_container() ?
@@ -2177,7 +2177,7 @@ Option<Error> validate(
   CHECK_NOTNULL(framework);
   CHECK_NOTNULL(slave);
 
-  foreach (const TaskInfo& task, taskGroup.tasks()) {
+  for (const TaskInfo& task : taskGroup.tasks()) {
     Option<Error> error = internal::validateTask(task, framework, slave);
     if (error.isSome()) {
       return Error("Task '" + stringify(task.task_id()) + "' is invalid: " +
@@ -2197,7 +2197,7 @@ Option<Error> validate(
         internal::validateShareCgroups, taskGroup, executor, framework, slave)
   };
 
-  foreach (const lambda::function<Option<Error>()>& validator, validators) {
+  for (const lambda::function<Option<Error> :)>& validator, validators) {
     Option<Error> error = validator();
     if (error.isSome()) {
       return error;
@@ -2273,7 +2273,7 @@ Option<Error> validateOfferIds(
     const RepeatedPtrField<OfferID>& offerIds,
     Master* master)
 {
-  foreach (const OfferID& offerId, offerIds) {
+  for (const OfferID& offerId : offerIds) {
     Offer* offer = getOffer(master, offerId);
     if (offer == nullptr) {
       return Error("Offer " + stringify(offerId) + " is no longer valid");
@@ -2288,7 +2288,7 @@ Option<Error> validateInverseOfferIds(
     const RepeatedPtrField<OfferID>& offerIds,
     Master* master)
 {
-  foreach (const OfferID& offerId, offerIds) {
+  for (const OfferID& offerId : offerIds) {
     InverseOffer* inverseOffer = getInverseOffer(master, offerId);
     if (inverseOffer == nullptr) {
       return Error(
@@ -2305,7 +2305,7 @@ Option<Error> validateUniqueOfferID(const RepeatedPtrField<OfferID>& offerIds)
 {
   hashset<OfferID> offers;
 
-  foreach (const OfferID& offerId, offerIds) {
+  for (const OfferID& offerId : offerIds) {
     if (offers.contains(offerId)) {
       return Error("Duplicate offer " + stringify(offerId) + " in offer list");
     }
@@ -2323,7 +2323,7 @@ Option<Error> validateFramework(
     Master* master,
     Framework* framework)
 {
-  foreach (const OfferID& offerId, offerIds) {
+  for (const OfferID& offerId : offerIds) {
     Try<FrameworkID> offerFrameworkId = getFrameworkId(master, offerId);
     if (offerFrameworkId.isError()) {
       return offerFrameworkId.error();
@@ -2348,7 +2348,7 @@ Option<Error> validateAllocationRole(
     Master* master)
 {
   Option<string> role;
-  foreach (const OfferID& offerId, offerIds) {
+  for (const OfferID& offerId : offerIds) {
     Offer* offer = getOffer(master, offerId);
     if (offer == nullptr) {
       return Error("Offer " + stringify(offerId) + " is no longer valid");
@@ -2381,7 +2381,7 @@ Option<Error> validateSlave(
 {
   Option<SlaveID> slaveId;
 
-  foreach (const OfferID& offerId, offerIds) {
+  for (const OfferID& offerId : offerIds) {
     Try<SlaveID> offerSlaveId = getSlaveId(master, offerId);
     if (offerSlaveId.isError()) {
       return offerSlaveId.error();
@@ -2433,7 +2433,7 @@ Option<Error> validate(
     lambda::bind(validateSlave, offerIds, master)
   };
 
-  foreach (const lambda::function<Option<Error>()>& validator, validators) {
+  for (const lambda::function<Option<Error> :)>& validator, validators) {
     Option<Error> error = validator();
     if (error.isSome()) {
       return error;
@@ -2459,7 +2459,7 @@ Option<Error> validateInverseOffers(
     lambda::bind(validateSlave, offerIds, master)
   };
 
-  foreach (const lambda::function<Option<Error>()>& validator, validators) {
+  for (const lambda::function<Option<Error> :)>& validator, validators) {
     Option<Error> error = validator();
     if (error.isSome()) {
       return error;
@@ -2557,7 +2557,7 @@ Option<Error> validate(
     frameworkRoles = protobuf::framework::getRoles(frameworkInfo.get());
   }
 
-  foreach (const Resource& resource, reserve.resources()) {
+  for (const Resource& resource : reserve.resources()) {
     if (!Resources::isDynamicallyReserved(resource)) {
       return Error(
           "Resource " + stringify(resource) + " is not dynamically reserved");
@@ -2693,7 +2693,7 @@ Option<Error> validate(
   // unreserve which 'principal's resources. In the absence of an ACL, we allow
   // any 'principal' to unreserve any other 'principal's resources.
 
-  foreach (const Resource& resource, unreserve.resources()) {
+  for (const Resource& resource : unreserve.resources()) {
     if (!Resources::isDynamicallyReserved(resource)) {
       return Error(
           "Resource " + stringify(resource) + " is not dynamically reserved");
@@ -2741,7 +2741,7 @@ Option<Error> validate(
     return error;
   }
 
-  foreach (const Resource& volume, create.volumes()) {
+  for (const Resource& volume : create.volumes()) {
     // If the volume being created is a shared persistent volume, we
     // allow it only if the framework has opted in for SHARED_RESOURCES.
     if (frameworkInfo.isSome() &&
@@ -2853,7 +2853,7 @@ Option<Error> validate(
     return Error("Not a persistent volume: " + error->message);
   }
 
-  foreach (const Resource& volume, volumes) {
+  for (const Resource& volume : volumes) {
     if (Resources::hasResourceProvider(volume)) {
       continue;
     }
@@ -2868,7 +2868,7 @@ Option<Error> validate(
   // it is not possible for a non-shared resource to appear in an offer
   // if it is already in use.
   foreachvalue (const Resources& resources, usedResources) {
-    foreach (const Resource& volume, volumes) {
+    for (const Resource& volume : volumes) {
       if (unallocated(resources).contains(volume)) {
         return Error("Persistent volumes in use");
       }

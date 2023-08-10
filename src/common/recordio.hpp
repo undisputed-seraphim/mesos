@@ -242,7 +242,7 @@ private:
       return;
     }
 
-    foreach (const std::string& record, decode.get()) {
+    for (const std::string& record : decode.get()) {
       Result<T> t = deserialize(record);
 
       if (!waiters.empty()) {

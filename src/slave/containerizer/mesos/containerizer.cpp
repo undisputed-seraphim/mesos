@@ -227,7 +227,7 @@ Try<MesosContainerizer*> MesosContainerizer::create(
 
       isolations->erase(name);
 
-      foreach (const string& isolator, replacements) {
+      for (const string& isolator : replacements) {
         isolations->insert(isolator);
       }
     }
@@ -541,7 +541,7 @@ Try<MesosContainerizer*> MesosContainerizer::create(
   bool cgroupsIsolatorCreated = false;
 
   // First, apply the built-in isolators, in dependency order.
-  foreach (const auto& creator, creators) {
+  for (const auto& creator : creators) {
     if (!isolations->contains(creator.first)) {
       continue;
     }
@@ -572,7 +572,7 @@ Try<MesosContainerizer*> MesosContainerizer::create(
   }
 
   // Next, apply any custom isolators in the order given by the flags.
-  foreach (const string& name, strings::tokenize(flags.isolation, ",")) {
+  for (const string& name : strings::tokenize(flags.isolation, ",")) {
     if (ModuleManager::contains<Isolator>(name)) {
       Try<Isolator*> _isolator = ModuleManager::create<Isolator>(name);
 
@@ -914,7 +914,7 @@ Future<Nothing> MesosContainerizerProcess::recover(
   }
 
   // Recover the containers from 'SlaveState'.
-  foreach (ContainerState& state, recoverable) {
+  for (ContainerState& state : recoverable) {
     const ContainerID& containerId = state.container_id();
 
     // Contruct the structure for containers from the 'SlaveState'
@@ -977,7 +977,7 @@ Future<Nothing> MesosContainerizerProcess::recover(
   // `recoverable`. Treat discovered orphans as "known orphans"
   // that we aggregate with any orphans that get returned from
   // calling `launcher->recover`.
-  foreach (const ContainerID& containerId, containerIds.get()) {
+  for (const ContainerID& containerId : containerIds.get()) {
     if (containers_.contains(containerId)) {
       continue;
     }
@@ -1133,7 +1133,7 @@ Future<Nothing> MesosContainerizerProcess::recover(
       // will be maintained at the end of 'recover' before orphans are
       // cleaned up.
       hashset<ContainerID> _orphans = orphans;
-      foreach (const ContainerID& containerId, launchedOrphans) {
+      for (const ContainerID& containerId : launchedOrphans) {
         if (orphans.contains(containerId)) {
           continue;
         }
@@ -1172,11 +1172,11 @@ Future<vector<Nothing>> MesosContainerizerProcess::recoverIsolators(
   vector<Future<Nothing>> futures;
 
   // Then recover the isolators.
-  foreach (const Owned<Isolator>& isolator, isolators) {
+  for (const Owned<Isolator>& isolator : isolators) {
     vector<ContainerState> _recoverable;
     hashset<ContainerID> _orphans;
 
-    foreach (const ContainerState& state, recoverable) {
+    for (const ContainerState& state : recoverable) {
       if (isSupportedByIsolator(
               state.container_id(),
               isolator->supportsNesting(),
@@ -1185,7 +1185,7 @@ Future<vector<Nothing>> MesosContainerizerProcess::recoverIsolators(
       }
     }
 
-    foreach (const ContainerID& orphan, orphans) {
+    for (const ContainerID& orphan : orphans) {
       if (isSupportedByIsolator(
               orphan,
               isolator->supportsNesting(),
@@ -1212,7 +1212,7 @@ Future<Nothing> MesosContainerizerProcess::recoverProvisioner(
   // once the launcher returns a full set of known containers.
   hashset<ContainerID> knownContainerIds = orphans;
 
-  foreach (const ContainerState& state, recoverable) {
+  for (const ContainerState& state : recoverable) {
     knownContainerIds.insert(state.container_id());
   }
 
@@ -1225,7 +1225,7 @@ Future<Nothing> MesosContainerizerProcess::__recover(
     const hashset<ContainerID>& orphans)
 {
   // Recover containers' launch information.
-  foreach (const ContainerState& run, recovered) {
+  for (const ContainerState& run : recovered) {
     const ContainerID& containerId = run.container_id();
 
     // Attempt to read container's launch information.
@@ -1244,10 +1244,10 @@ Future<Nothing> MesosContainerizerProcess::__recover(
     }
   }
 
-  foreach (const ContainerState& run, recovered) {
+  for (const ContainerState& run : recovered) {
     const ContainerID& containerId = run.container_id();
 
-    foreach (const Owned<Isolator>& isolator, isolators) {
+    for (const Owned<Isolator>& isolator : isolators) {
       if (!isSupportedByIsolator(
               containerId,
               isolator->supportsNesting(),
@@ -1277,7 +1277,7 @@ Future<Nothing> MesosContainerizerProcess::__recover(
   }
 
   // Destroy all the orphan containers.
-  foreach (const ContainerID& containerId, orphans) {
+  for (const ContainerID& containerId : orphans) {
     LOG(INFO) << "Cleaning up orphan container " << containerId;
     destroy(containerId, None());
   }
@@ -1542,7 +1542,7 @@ Future<Nothing> MesosContainerizerProcess::prepare(
     container->config->set_rootfs(provisionInfo->rootfs);
 
     if (provisionInfo->ephemeralVolumes.isSome()) {
-      foreach (const Path& path, provisionInfo->ephemeralVolumes.get()) {
+      for (const Path& path : provisionInfo->ephemeralVolumes.get()) {
         container->config->add_ephemeral_volumes(path);
       }
     }
@@ -1591,7 +1591,7 @@ Future<Nothing> MesosContainerizerProcess::prepare(
   Future<vector<Option<ContainerLaunchInfo>>> f =
     vector<Option<ContainerLaunchInfo>>();
 
-  foreach (const Owned<Isolator>& isolator, isolators) {
+  for (const Owned<Isolator>& isolator : isolators) {
     if (!isSupportedByIsolator(
             containerId,
             isolator->supportsNesting(),
@@ -1675,7 +1675,7 @@ Future<Containerizer::LaunchResult> MesosContainerizerProcess::_launch(
 
   ContainerLaunchInfo launchInfo;
 
-  foreach (const Option<ContainerLaunchInfo>& isolatorLaunchInfo,
+  for (const Option<ContainerLaunchInfo>& isolatorLaunchInfo :
            container->launchInfos.get()) {
     if (isolatorLaunchInfo.isNone()) {
       continue;
@@ -1736,11 +1736,11 @@ Future<Containerizer::LaunchResult> MesosContainerizerProcess::_launch(
   launchInfo.clear_enter_namespaces();
   launchInfo.clear_clone_namespaces();
 
-  foreach (int ns, enterNamespaces) {
+  for (int ns : enterNamespaces) {
     launchInfo.add_enter_namespaces(ns);
   }
 
-  foreach (int ns, cloneNamespaces) {
+  for (int ns : cloneNamespaces) {
     launchInfo.add_clone_namespaces(ns);
   }
 
@@ -1751,7 +1751,7 @@ Future<Containerizer::LaunchResult> MesosContainerizerProcess::_launch(
 
   launchInfo.clear_supplementary_groups();
 
-  foreach (uint32_t gid, supplementaryGroups) {
+  for (uint32_t gid : supplementaryGroups) {
     launchInfo.add_supplementary_groups(gid);
   }
 
@@ -1793,7 +1793,7 @@ Future<Containerizer::LaunchResult> MesosContainerizerProcess::_launch(
     if (launchInfo.has_task_environment()) {
       hashmap<string, string> commandTaskEnvironment;
 
-      foreach (const Environment::Variable& variable,
+      for (const Environment::Variable& variable :
                launchInfo.task_environment().variables()) {
         const string& name = variable.name();
         const string& value = variable.value();
@@ -1912,7 +1912,7 @@ Future<Containerizer::LaunchResult> MesosContainerizerProcess::_launch(
   // Skip over any secrets as they should have been resolved by the
   // environment_secret isolator.
   if (container->config->command_info().has_environment()) {
-    foreach (const Environment::Variable& variable,
+    for (const Environment::Variable& variable :
              container->config->command_info().environment().variables()) {
       if (variable.type() != Environment::Variable::SECRET) {
         containerEnvironment.add_variables()->CopyFrom(variable);
@@ -2063,7 +2063,7 @@ Future<Containerizer::LaunchResult> MesosContainerizerProcess::_launch(
   Try<std::array<int_fd, 2>> pipes_ = os::pipe(false, false);
   CHECK_SOME(pipes_);
 
-  foreach (const int_fd& fd, pipes_.get()) {
+  for (const int_fd& fd : pipes_.get()) {
     Try<Nothing> result = ::internal::windows::set_inherit(fd, true);
     if (result.isError()) {
       return Failure(
@@ -2113,13 +2113,13 @@ Future<Containerizer::LaunchResult> MesosContainerizerProcess::_launch(
   Option<int> _enterNamespaces;
   Option<int> _cloneNamespaces;
 
-  foreach (int ns, enterNamespaces) {
+  for (int ns : enterNamespaces) {
     _enterNamespaces = _enterNamespaces.isSome()
       ? _enterNamespaces.get() | ns
       : ns;
   }
 
-  foreach (int ns, cloneNamespaces) {
+  for (int ns : cloneNamespaces) {
     _cloneNamespaces = _cloneNamespaces.isSome()
       ? _cloneNamespaces.get() | ns
       : ns;
@@ -2292,7 +2292,7 @@ Future<Nothing> MesosContainerizerProcess::isolate(
   transition(containerId, ISOLATING);
 
   // Set up callbacks for isolator limitations.
-  foreach (const Owned<Isolator>& isolator, isolators) {
+  for (const Owned<Isolator>& isolator : isolators) {
     if (!isSupportedByIsolator(
             containerId,
             isolator->supportsNesting(),
@@ -2309,7 +2309,7 @@ Future<Nothing> MesosContainerizerProcess::isolate(
   // or destroy because we assume there are no dependencies in
   // isolation.
   vector<Future<Nothing>> futures;
-  foreach (const Owned<Isolator>& isolator, isolators) {
+  for (const Owned<Isolator>& isolator : isolators) {
     if (!isSupportedByIsolator(
             containerId,
             isolator->supportsNesting(),
@@ -2446,7 +2446,7 @@ Future<Nothing> MesosContainerizerProcess::update(
 
   // Update each isolator.
   vector<Future<Nothing>> futures;
-  foreach (const Owned<Isolator>& isolator, isolators) {
+  for (const Owned<Isolator>& isolator : isolators) {
     if (!isSupportedByIsolator(
             containerId,
             isolator->supportsNesting(),
@@ -2476,7 +2476,7 @@ Future<ResourceStatistics> _usage(
   // Set the timestamp now we have all statistics.
   result.set_timestamp(Clock::now().secs());
 
-  foreach (const Future<ResourceStatistics>& statistic, statistics) {
+  for (const Future<ResourceStatistics>& statistic : statistics) {
     if (statistic.isReady()) {
       result.MergeFrom(statistic.get());
     } else {
@@ -2496,7 +2496,7 @@ Future<ResourceStatistics> _usage(
   }
 
   if (resourceLimits.isSome()) {
-    foreach (auto&& limit, resourceLimits.get()) {
+    for (auto&& limit : resourceLimits.get()) {
       if (limit.first == "cpus") {
         cpuLimit = limit.second.value();
       } else if (limit.first == "mem") {
@@ -2571,7 +2571,7 @@ Future<ResourceStatistics> MesosContainerizerProcess::usage(
   }
 
   vector<Future<ResourceStatistics>> futures;
-  foreach (const Owned<Isolator>& isolator, isolators) {
+  for (const Owned<Isolator>& isolator : isolators) {
     if (!isSupportedByIsolator(
             containerId,
             isolator->supportsNesting(),
@@ -2627,7 +2627,7 @@ Future<ContainerStatus> MesosContainerizerProcess::status(
   }
 
   vector<Future<ContainerStatus>> futures;
-  foreach (const Owned<Isolator>& isolator, isolators) {
+  for (const Owned<Isolator>& isolator : isolators) {
     if (!isSupportedByIsolator(
             containerId,
             isolator->supportsNesting(),
@@ -2653,7 +2653,7 @@ Future<ContainerStatus> MesosContainerizerProcess::status(
             ContainerStatus result;
             result.mutable_container_id()->CopyFrom(containerId);
 
-            foreach (const Future<ContainerStatus>& status, statuses) {
+            for (const Future<ContainerStatus>& status : statuses) {
               if (status.isReady()) {
                 result.MergeFrom(status.get());
               } else {
@@ -2724,7 +2724,7 @@ Future<Option<ContainerTermination>> MesosContainerizerProcess::destroy(
   transition(containerId, DESTROYING);
 
   vector<Future<Option<ContainerTermination>>> destroys;
-  foreach (const ContainerID& child, container->children) {
+  for (const ContainerID& child : container->children) {
     destroys.push_back(destroy(child, termination));
   }
 
@@ -2757,7 +2757,7 @@ void MesosContainerizerProcess::_destroy(
   CHECK_EQ(container->state, DESTROYING);
 
   vector<string> errors;
-  foreach (const Future<Option<ContainerTermination>>& future, destroys) {
+  for (const Future<Option<ContainerTermination>>& future : destroys) {
     if (!future.isReady()) {
       errors.push_back(future.isFailed()
         ? future.failure()
@@ -2943,7 +2943,7 @@ void MesosContainerizerProcess::_____destroy(
   // Check cleanup succeeded for all isolators. If not, we'll fail the
   // container termination.
   vector<string> errors;
-  foreach (const Future<Nothing>& cleanup, cleanups.get()) {
+  for (const Future<Nothing>& cleanup : cleanups.get()) {
     if (!cleanup.isReady()) {
       errors.push_back(cleanup.isFailed()
         ? cleanup.failure()
@@ -3332,7 +3332,7 @@ Future<Nothing> MesosContainerizerProcess::pruneImages(
     }
   }
 
-  foreach (const Image& image, excludedImages) {
+  for (const Image& image : excludedImages) {
     _excludedImages.push_back(image);
   }
 
@@ -3371,7 +3371,7 @@ Future<vector<Future<Nothing>>> MesosContainerizerProcess::cleanupIsolators(
 
   // NOTE: We clean up each isolator in the reverse order they were
   // prepared (see comment in prepare()).
-  foreach (const Owned<Isolator>& isolator, adaptor::reverse(isolators)) {
+  for (const Owned<Isolator>& isolator : adaptor::reverse(isolators)) {
     if (!isSupportedByIsolator(
             containerId,
             isolator->supportsNesting(),

@@ -70,7 +70,7 @@ Try<ResourceStatistics> usage(pid_t pid, bool mem, bool cpus)
       }
     }
 
-    foreach (const os::ProcessTree& child, tree.children) {
+    for (const os::ProcessTree& child : tree.children) {
       trees.push_back(child);
     }
 

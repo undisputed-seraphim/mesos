@@ -217,7 +217,7 @@ PID<Master> launch(const Flags& flags, Allocator* _allocator)
     }
 
     // Log any flag warnings.
-    foreach (const flags::Warning& warning, load->warnings) {
+    for (const flags::Warning& warning : load->warnings) {
       LOG(WARNING) << warning.message;
     }
 
@@ -339,7 +339,7 @@ PID<Master> launch(const Flags& flags, Allocator* _allocator)
     }
 
     // Create anonymous modules.
-    foreach (const string& name, ModuleManager::find<Anonymous>()) {
+    for (const string& name : ModuleManager::find<Anonymous>()) {
       Try<Anonymous*> create = ModuleManager::create<Anonymous>(name);
       if (create.isError()) {
         EXIT(EXIT_FAILURE)
@@ -409,7 +409,7 @@ PID<Master> launch(const Flags& flags, Allocator* _allocator)
     }
 
     // Log any flag warnings (after logging is initialized).
-    foreach (const flags::Warning& warning, load->warnings) {
+    for (const flags::Warning& warning : load->warnings) {
       LOG(WARNING) << warning.message;
     }
 
@@ -565,7 +565,7 @@ void shutdown()
     // isolator, we can't delete the isolator until we have stopped
     // the slave.
 
-    foreachpair (Containerizer* containerizer, Slave* slave, slaves) {
+    for (auto [containerizer, slave] : slaves) {
       process::terminate(slave->self());
       process::wait(slave->self());
       delete containerizer;
@@ -588,15 +588,15 @@ void shutdown()
     delete files;
     files = nullptr;
 
-    foreach (GarbageCollector* gc, *garbageCollectors) {
+    for (GarbageCollector* gc : *garbageCollectors) {
       delete gc;
     }
 
     delete garbageCollectors;
     garbageCollectors = nullptr;
 
-    foreach (
-        TaskStatusUpdateManager* taskStatusUpdateManager,
+    for (
+        TaskStatusUpdateManager* taskStatusUpdateManager :
         *taskStatusUpdateManagers) {
       delete taskStatusUpdateManager;
     }
@@ -604,32 +604,32 @@ void shutdown()
     delete taskStatusUpdateManagers;
     taskStatusUpdateManagers = nullptr;
 
-    foreach (Fetcher* fetcher, *fetchers) {
+    for (Fetcher* fetcher : *fetchers) {
       delete fetcher;
     }
 
     delete fetchers;
     fetchers = nullptr;
 
-    foreach (SecretResolver* secretResolver, *secretResolvers) {
+    for (SecretResolver* secretResolver : *secretResolvers) {
       delete secretResolver;
     }
 
-    foreach (SecretGenerator* secretGenerator, *secretGenerators) {
+    for (SecretGenerator* secretGenerator : *secretGenerators) {
       delete secretGenerator;
     }
 
     delete secretGenerators;
     secretGenerators = nullptr;
 
-    foreach (ResourceEstimator* estimator, *resourceEstimators) {
+    for (ResourceEstimator* estimator : *resourceEstimators) {
       delete estimator;
     }
 
     delete resourceEstimators;
     resourceEstimators = nullptr;
 
-    foreach (QoSController* controller, *qosControllers) {
+    for (QoSController* controller : *qosControllers) {
       delete controller;
     }
 

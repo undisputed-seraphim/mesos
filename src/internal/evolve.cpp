@@ -686,7 +686,7 @@ v1::agent::Response evolve<v1::agent::Response::GET_CONTAINERS>(
   v1::agent::Response response;
   response.set_type(v1::agent::Response::GET_CONTAINERS);
 
-  foreach (const JSON::Value& value, array.values) {
+  for (const JSON::Value& value : array.values) {
     v1::agent::Response::GetContainers::Container* container =
       response.mutable_get_containers()->add_containers();
 

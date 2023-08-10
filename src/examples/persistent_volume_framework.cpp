@@ -117,7 +117,7 @@ static Offer::Operation LAUNCH(const vector<TaskInfo>& tasks)
   Offer::Operation operation;
   operation.set_type(Offer::Operation::LAUNCH);
 
-  foreach (const TaskInfo& task, tasks) {
+  for (const TaskInfo& task : tasks) {
     operation.mutable_launch()->add_task_infos()->CopyFrom(task);
   }
 
@@ -191,7 +191,7 @@ public:
       SchedulerDriver* driver,
       const vector<Offer>& offers) override
   {
-    foreach (const Offer& offer, offers) {
+    for (const Offer& offer : offers) {
       LOG(INFO) << "Received offer " << offer.id() << " from agent "
                 << offer.slave_id() << " (" << offer.hostname() << ") "
                 << "with " << offer.resources();
@@ -201,7 +201,7 @@ public:
       // The operation we will perform on the offer.
       vector<Offer::Operation> operations;
 
-      foreach (Shard& shard, shards) {
+      for (Shard& shard : shards) {
         switch (shard.state) {
           case Shard::INIT:
             CHECK_EQ(0u, shard.launched);
@@ -328,7 +328,7 @@ public:
 
       // Check the terminal condition.
       bool terminal = true;
-      foreach (const Shard& shard, shards) {
+      for (const Shard& shard : shards) {
         if (shard.state != Shard::DONE) {
           terminal = false;
           break;
@@ -353,7 +353,7 @@ public:
     LOG(INFO) << "Task '" << status.task_id() << "' is in state "
               << status.state();
 
-    foreach (Shard& shard, shards) {
+    for (Shard& shard : shards) {
       if (shard.taskIds.contains(status.task_id())) {
         switch (status.state()) {
           case TASK_RUNNING:
@@ -533,7 +533,7 @@ int main(int argc, char** argv)
   logging::initialize(argv[0], true, flags); // Catch signals.
 
   // Log any flag warnings (after logging is initialized).
-  foreach (const flags::Warning& warning, load->warnings) {
+  for (const flags::Warning& warning : load->warnings) {
     LOG(WARNING) << warning.message;
   }
 

@@ -79,7 +79,7 @@ int main(int argc, char** argv)
   }
 
   // Log any flag warnings.
-  foreach (const flags::Warning& warning, load->warnings) {
+  for (const flags::Warning& warning : load->warnings) {
     cerr << warning.message << endl;
   }
 

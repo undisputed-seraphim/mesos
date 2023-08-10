@@ -30,7 +30,6 @@
 
 #include <stout/bytes.hpp>
 #include <stout/error.hpp>
-#include <stout/foreach.hpp>
 #include <stout/os.hpp>
 #include <stout/stopwatch.hpp>
 #include <stout/strings.hpp>
@@ -126,7 +125,7 @@ Try<Nothing> Benchmark::execute(int argc, char** argv)
     logging::initialize(argv[0], false, flags);
 
     // Log any flag warnings (after logging is initialized).
-    foreach (const flags::Warning& warning, load->warnings) {
+    for (const flags::Warning& warning : load->warnings) {
       LOG(WARNING) << warning.message;
     }
   }

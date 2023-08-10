@@ -223,7 +223,7 @@ protected:
 private:
   void resourceOffers(const vector<Offer>& offers)
   {
-    foreach (const Offer& offer, offers) {
+    for (const Offer& offer : offers) {
       cout << "Received offer " << offer.id() << " with "
            << Resources(offer.resources()) << endl;
 
@@ -280,7 +280,7 @@ private:
 
       Offer::Operation* operation = accept->add_operations();
       operation->set_type(Offer::Operation::LAUNCH);
-      foreach (const TaskInfo& taskInfo, tasks) {
+      for (const TaskInfo& taskInfo : tasks) {
         operation->mutable_launch()->add_task_infos()->CopyFrom(taskInfo);
       }
 
@@ -422,7 +422,7 @@ int main(int argc, char** argv)
   mesos::internal::logging::initialize(argv[0], true, flags); // Catch signals.
 
   // Log any flag warnings.
-  foreach (const flags::Warning& warning, load->warnings) {
+  for (const flags::Warning& warning : load->warnings) {
     LOG(WARNING) << warning.message;
   }
 

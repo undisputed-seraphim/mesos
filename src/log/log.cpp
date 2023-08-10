@@ -31,7 +31,6 @@
 #include <process/metrics/metrics.hpp>
 
 #include <stout/check.hpp>
-#include <stout/foreach.hpp>
 #include <stout/lambda.hpp>
 #include <stout/nothing.hpp>
 #include <stout/set.hpp>
@@ -135,7 +134,7 @@ void LogProcess::finalize()
 
   // If there exist operations that are gated by the recovery, we fail
   // all of them because the log is being deleted.
-  foreach (process::Promise<Shared<Replica>>* promise, promises) {
+  for (process::Promise<Shared<Replica>>* promise : promises) {
     promise->fail("Log is being deleted");
     delete promise;
   }
@@ -219,7 +218,7 @@ void LogProcess::_recover()
     // Mark the failure of the recovery.
     recovered.fail(failure);
 
-    foreach (process::Promise<Shared<Replica>>* promise, promises) {
+    for (process::Promise<Shared<Replica>>* promise : promises) {
       promise->fail(failure);
       delete promise;
     }
@@ -234,7 +233,7 @@ void LogProcess::_recover()
     // Mark the success of the recovery.
     recovered.set(Nothing());
 
-    foreach (process::Promise<Shared<Replica>>* promise, promises) {
+    for (process::Promise<Shared<Replica>>* promise : promises) {
       promise->set(replica);
       delete promise;
     }
@@ -301,7 +300,7 @@ void LogReaderProcess::initialize()
 
 void LogReaderProcess::finalize()
 {
-  foreach (process::Promise<Nothing>* promise, promises) {
+  for (process::Promise<Nothing>* promise : promises) {
     promise->fail("Log reader is being deleted");
     delete promise;
   }
@@ -337,7 +336,7 @@ Future<Nothing> LogReaderProcess::recover()
 void LogReaderProcess::_recover()
 {
   if (!recovering.isReady()) {
-    foreach (process::Promise<Nothing>* promise, promises) {
+    for (process::Promise<Nothing>* promise : promises) {
       promise->fail(
           recovering.isFailed() ?
           recovering.failure() :
@@ -346,7 +345,7 @@ void LogReaderProcess::_recover()
     }
     promises.clear();
   } else {
-    foreach (process::Promise<Nothing>* promise, promises) {
+    for (process::Promise<Nothing>* promise : promises) {
       promise->set(Nothing());
       delete promise;
     }
@@ -413,7 +412,7 @@ Future<list<Log::Entry>> LogReaderProcess::__read(
 
   uint64_t position = from.value;
 
-  foreach (const Action& action, actions) {
+  for (const Action& action : actions) {
     // Ensure read range is valid.
     if (!action.has_performed() ||
         !action.has_learned() ||
@@ -477,7 +476,7 @@ void LogWriterProcess::initialize()
 
 void LogWriterProcess::finalize()
 {
-  foreach (process::Promise<Nothing>* promise, promises) {
+  for (process::Promise<Nothing>* promise : promises) {
     promise->fail("Log writer is being deleted");
     delete promise;
   }
@@ -515,7 +514,7 @@ Future<Nothing> LogWriterProcess::recover()
 void LogWriterProcess::_recover()
 {
   if (!recovering.isReady()) {
-    foreach (process::Promise<Nothing>* promise, promises) {
+    for (process::Promise<Nothing>* promise : promises) {
       promise->fail(
           recovering.isFailed() ?
           recovering.failure() :
@@ -524,7 +523,7 @@ void LogWriterProcess::_recover()
     }
     promises.clear();
   } else {
-    foreach (process::Promise<Nothing>* promise, promises) {
+    for (process::Promise<Nothing>* promise : promises) {
       promise->set(Nothing());
       delete promise;
     }

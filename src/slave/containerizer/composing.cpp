@@ -272,7 +272,7 @@ Future<Nothing> ComposingContainerizer::pruneImages(
 
 ComposingContainerizerProcess::~ComposingContainerizerProcess()
 {
-  foreach (Containerizer* containerizer, containerizers_) {
+  for (Containerizer* containerizer : containerizers_) {
     delete containerizer;
   }
 
@@ -290,7 +290,7 @@ Future<Nothing> ComposingContainerizerProcess::recover(
 {
   // Recover each containerizer in parallel.
   vector<Future<Nothing>> futures;
-  foreach (Containerizer* containerizer, containerizers_) {
+  for (Containerizer* containerizer : containerizers_) {
     futures.push_back(containerizer->recover(state));
   }
 
@@ -303,7 +303,7 @@ Future<Nothing> ComposingContainerizerProcess::_recover()
 {
   // Now collect all the running containers in order to multiplex.
   vector<Future<Nothing>> futures;
-  foreach (Containerizer* containerizer, containerizers_) {
+  for (Containerizer* containerizer : containerizers_) {
     Future<Nothing> future = containerizer->containers()
       .then(defer(self(), &Self::__recover, containerizer, lambda::_1));
     futures.push_back(future);
@@ -318,7 +318,7 @@ Future<Nothing> ComposingContainerizerProcess::__recover(
     Containerizer* containerizer,
     const hashset<ContainerID>& containers)
 {
-  foreach (const ContainerID& containerId, containers) {
+  for (const ContainerID& containerId : containers) {
     Container* container = new Container();
     container->state = LAUNCHED;
     container->containerizer = containerizer;
@@ -683,7 +683,7 @@ Future<Nothing> ComposingContainerizerProcess::pruneImages(
 {
   vector<Future<Nothing>> futures;
 
-  foreach (Containerizer* containerizer, containerizers_) {
+  for (Containerizer* containerizer : containerizers_) {
     futures.push_back(containerizer->pruneImages(excludedImages));
   }
 

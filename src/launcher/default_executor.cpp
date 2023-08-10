@@ -444,7 +444,7 @@ protected:
     vector<ContainerID> containerIds;
     vector<Future<Response>> responses;
 
-    foreach (const TaskInfo& task, taskGroup.tasks()) {
+    for (const TaskInfo& task : taskGroup.tasks()) {
       ContainerID containerId;
       containerId.set_value(id::UUID::random().toString());
       containerId.mutable_parent()->CopyFrom(executorContainerId.get());
@@ -496,7 +496,7 @@ protected:
       //
       // TODO(qianzhang): Mount the disk resources on the task containers
       // directly and then remove this workaround.
-      foreach (const Resource& resource, task.resources()) {
+      for (const Resource& resource : task.resources()) {
         // Ignore if there are no disk resources or if the
         // disk resources did not specify a volume mapping.
         if (!resource.has_disk() || !resource.disk().has_volume()) {
@@ -580,7 +580,7 @@ protected:
 
     int index = 0;
     auto responseIterator = responses->begin();
-    foreach (const ContainerID& containerId, containerIds) {
+    for (const ContainerID& containerId : containerIds) {
       const TaskInfo& task = taskGroup.tasks().Get(index++);
       const TaskID& taskId = task.task_id();
       const Response& response = *(responseIterator++);
@@ -681,7 +681,7 @@ protected:
 
     auto taskIds = [&taskGroup]() {
       vector<TaskID> taskIds_;
-      foreach (const TaskInfo& task, taskGroup.tasks()) {
+      for (const TaskInfo& task : taskGroup.tasks()) {
         taskIds_.push_back(task.task_id());
       }
       return taskIds_;
@@ -750,7 +750,7 @@ protected:
     deque<Connection> connections(_connections->begin(), _connections->end());
 
     CHECK_EQ(taskIds.size(), connections.size());
-    foreach (const TaskID& taskId, taskIds) {
+    for (const TaskID& taskId : taskIds) {
       __wait(connectionId.get(), connections.front(), taskId);
       connections.pop_front();
     }
@@ -992,7 +992,7 @@ protected:
       // Needed for logging.
       auto taskIds = [container]() {
         vector<TaskID> taskIds_;
-        foreach (const TaskInfo& task, container->taskGroup.tasks()) {
+        for (const TaskInfo& task : container->taskGroup.tasks()) {
           taskIds_.push_back(task.task_id());
         }
         return taskIds_;
@@ -1004,7 +1004,7 @@ protected:
                 << stringify(taskIds());
 
       container->killingTaskGroup = true;
-      foreach (const TaskInfo& task, container->taskGroup.tasks()) {
+      for (const TaskInfo& task : container->taskGroup.tasks()) {
         const TaskID& taskId_ = task.task_id();
 
         // Ignore if it's the same task that triggered this callback or
@@ -1626,7 +1626,7 @@ private:
         ? TASK_DROPPED
         : TASK_LOST;
 
-    foreach (const TaskInfo& task, taskGroup.tasks()) {
+    for (const TaskInfo& task : taskGroup.tasks()) {
       forward(createTaskStatus(task.task_id(), taskState));
     }
   }
@@ -1708,7 +1708,7 @@ int main(int argc, char** argv)
   mesos::internal::logging::initialize(argv[0], true, flags); // Catch signals.
 
   // Log any flag warnings (after logging is initialized).
-  foreach (const flags::Warning& warning, load->warnings) {
+  for (const flags::Warning& warning : load->warnings) {
     LOG(WARNING) << warning.message;
   }
 

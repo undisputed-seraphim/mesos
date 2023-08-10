@@ -282,7 +282,7 @@ Future<hashset<ContainerID>> LinuxLauncherProcess::recover(
         ": "+ freezerCgroups.error());
   }
 
-  foreach (const string& cgroup, freezerCgroups.get()) {
+  for (const string& cgroup : freezerCgroups.get()) {
     cgroups.insert(cgroup);
   }
 
@@ -297,12 +297,12 @@ Future<hashset<ContainerID>> LinuxLauncherProcess::recover(
           ": " + systemdCgroups.error());
     }
 
-    foreach (const string& cgroup, systemdCgroups.get()) {
+    for (const string& cgroup : systemdCgroups.get()) {
       cgroups.insert(cgroup);
     }
   }
 
-  foreach (const string& cgroup, cgroups) {
+  for (const string& cgroup : cgroups) {
     // Need to parse the cgroup to see if it's one we created (i.e.,
     // matches our separator structure) or one that someone else
     // created (e.g., in the future we might have nested containers
@@ -332,7 +332,7 @@ Future<hashset<ContainerID>> LinuxLauncherProcess::recover(
   // destroy as well as be able to determine orphans below.
   hashset<ContainerID> expected = {};
 
-  foreach (const ContainerState& state, states) {
+  for (const ContainerState& state : states) {
     expected.insert(state.container_id());
 
     if (!containers.contains(state.container_id())) {

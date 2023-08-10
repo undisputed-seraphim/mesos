@@ -153,7 +153,7 @@ public:
 
     // Send authentication mechanisms.
     AuthenticationMechanismsMessage message;
-    foreach (const string& mechanism, mechanisms) {
+    for (const string& mechanism : mechanisms) {
       message.add_mechanisms(mechanism);
     }
 
@@ -462,7 +462,7 @@ void load(const std::map<string, string>& secrets)
 void load(const Credentials& credentials)
 {
   std::map<string, string> secrets;
-  foreach (const Credential& credential, credentials.credentials()) {
+  for (const Credential& credential : credentials.credentials()) {
     secrets[credential.principal()] = credential.secret();
   }
   load(secrets);

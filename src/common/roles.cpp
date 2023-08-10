@@ -111,7 +111,7 @@ Option<Error> validate(const string& role)
   static const string* dot = new string(".");
   static const string* dotdot = new string("..");
 
-  foreach (const string& component, components) {
+  for (const string& component : components) {
     CHECK(!component.empty()); // `tokenize` does not return empty tokens.
 
     if (component == *dot) {
@@ -143,7 +143,7 @@ Option<Error> validate(const string& role)
 
 Option<Error> validate(const vector<string>& roles)
 {
-  foreach (const string& role, roles) {
+  for (const string& role : roles) {
     Option<Error> error = validate(role);
     if (error.isSome()) {
       return error.get();

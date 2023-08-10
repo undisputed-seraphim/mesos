@@ -221,7 +221,7 @@ void json(JSON::ObjectWriter* writer, const asV1Protobuf& protobuf)
     }
   }
 
-  foreach (const FieldDescriptor* field, fields) {
+  for (const FieldDescriptor* field : fields) {
     if (field->is_repeated() && !field->is_map()) {
       writer->field(
           lowerSlaveToAgent(field->name()),
@@ -493,7 +493,7 @@ JSON::Object model(const Attributes& attributes)
 {
   JSON::Object object;
 
-  foreach (const Attribute& attribute, attributes) {
+  for (const Attribute& attribute : attributes) {
     switch (attribute.type()) {
       case Value::SCALAR:
         object.values[attribute.name()] = attribute.scalar().value();
@@ -530,7 +530,7 @@ JSON::Object model(const NetworkInfo& info)
   if (info.groups().size() > 0) {
     JSON::Array array;
     array.values.reserve(info.groups().size()); // MESOS-2353.
-    foreach (const string& group, info.groups()) {
+    for (const string& group : info.groups()) {
       array.values.push_back(group);
     }
     object.values["groups"] = std::move(array);
@@ -543,7 +543,7 @@ JSON::Object model(const NetworkInfo& info)
   if (info.ip_addresses().size() > 0) {
     JSON::Array array;
     array.values.reserve(info.ip_addresses().size()); // MESOS-2353.
-    foreach (const NetworkInfo::IPAddress& ipAddress, info.ip_addresses()) {
+    for (const NetworkInfo::IPAddress& ipAddress : info.ip_addresses()) {
       array.values.push_back(JSON::protobuf(ipAddress));
     }
     object.values["ip_addresses"] = std::move(array);
@@ -556,7 +556,7 @@ JSON::Object model(const NetworkInfo& info)
   if (info.port_mappings().size() > 0) {
     JSON::Array array;
     array.values.reserve(info.port_mappings().size()); // MESOS-2353
-    foreach (const NetworkInfo::PortMapping& portMapping,
+    for (const NetworkInfo::PortMapping& portMapping :
              info.port_mappings()) {
       array.values.push_back(JSON::protobuf(portMapping));
     }
@@ -578,7 +578,7 @@ JSON::Object model(const ContainerStatus& status)
   if (status.network_infos().size() > 0) {
     JSON::Array array;
     array.values.reserve(status.network_infos().size()); // MESOS-2353.
-    foreach (const NetworkInfo& info, status.network_infos()) {
+    for (const NetworkInfo& info : status.network_infos()) {
       array.values.push_back(model(info));
     }
     object.values["network_infos"] = std::move(array);
@@ -645,7 +645,7 @@ JSON::Object model(const Task& task)
     JSON::Array array;
     array.values.reserve(task.statuses().size()); // MESOS-2353.
 
-    foreach (const TaskStatus& status, task.statuses()) {
+    for (const TaskStatus& status : task.statuses()) {
       array.values.push_back(model(status));
     }
     object.values["statuses"] = std::move(array);
@@ -680,7 +680,7 @@ JSON::Object model(const CommandInfo& command)
   }
 
   JSON::Array argv;
-  foreach (const string& arg, command.arguments()) {
+  for (const string& arg : command.arguments()) {
     argv.values.push_back(arg);
   }
   object.values["argv"] = argv;
@@ -688,7 +688,7 @@ JSON::Object model(const CommandInfo& command)
   if (command.has_environment()) {
     JSON::Object environment;
     JSON::Array variables;
-    foreach (const Environment_Variable& variable,
+    for (const Environment_Variable& variable :
              command.environment().variables()) {
       JSON::Object variableObject;
       variableObject.values["name"] = variable.name();
@@ -700,7 +700,7 @@ JSON::Object model(const CommandInfo& command)
   }
 
   JSON::Array uris;
-  foreach (const CommandInfo_URI& uri, command.uris()) {
+  for (const CommandInfo_URI& uri : command.uris()) {
     JSON::Object uriObject;
     uriObject.values["value"] = uri.value();
     uriObject.values["executable"] = uri.executable();
@@ -794,7 +794,7 @@ JSON::Object model(const google::protobuf::Map<string, Value_Scalar>& map)
 {
   JSON::Object result, scalar;
 
-  foreach (auto item, map) {
+  for (auto item : map) {
     result.values[item.first] = item.second.value();
   }
 
@@ -806,7 +806,7 @@ JSON::Object model(const google::protobuf::Map<string, Value_Scalar>& map)
 
 void json(JSON::ObjectWriter* writer, const Attributes& attributes)
 {
-  foreach (const Attribute& attribute, attributes) {
+  for (const Attribute& attribute : attributes) {
     switch (attribute.type()) {
       case Value::SCALAR:
         writer->field(attribute.name(), attribute.scalar());
@@ -844,7 +844,7 @@ void json(JSON::ObjectWriter* writer, const CommandInfo& command)
   }
 
   writer->field("uris", [&command](JSON::ArrayWriter* writer) {
-    foreach (const CommandInfo::URI& uri, command.uris()) {
+    for (const CommandInfo::URI& uri : command.uris()) {
       writer->element([&uri](JSON::ObjectWriter* writer) {
         writer->field("value", uri.value());
         writer->field("executable", uri.executable());
@@ -940,7 +940,7 @@ void json(
 
 void json(JSON::ArrayWriter* writer, const Labels& labels)
 {
-  foreach (const Label& label, labels.labels()) {
+  for (const Label& label : labels.labels()) {
     writer->element(JSON::Protobuf(label));
   }
 }
@@ -979,7 +979,7 @@ static void json(JSON::ObjectWriter* writer, const NetworkInfo& info)
 
   if (info.ip_addresses().size() > 0) {
     writer->field("ip_addresses", [&info](JSON::ArrayWriter* writer) {
-      foreach (const NetworkInfo::IPAddress& ipAddress, info.ip_addresses()) {
+      for (const NetworkInfo::IPAddress& ipAddress : info.ip_addresses()) {
         writer->element(JSON::Protobuf(ipAddress));
       }
     });
@@ -1103,7 +1103,7 @@ void json(
     JSON::ObjectWriter* writer,
     const google::protobuf::Map<string, Value_Scalar>& map)
 {
-  foreach (auto item, map) {
+  for (auto item : map) {
     writer->field(item.first, item.second.value());
   }
 }
@@ -1217,7 +1217,7 @@ Future<Owned<ObjectApprovers>> ObjectApprovers::create(
   if (authorizer.isNone()) {
     hashmap<authorization::Action, shared_ptr<const ObjectApprover>> approvers;
 
-    foreach (authorization::Action action, _actions) {
+    for (authorization::Action action : _actions) {
       approvers.put(action, std::make_shared<AcceptingObjectApprover>());
     }
 
@@ -1388,7 +1388,7 @@ Try<Nothing> initializeHttpAuthenticators(
     // There are multiple authenticators loaded for this realm,
     // so construct a `CombinedAuthenticator` to handle them.
     vector<Owned<process::http::authentication::Authenticator>> authenticators;
-    foreach (const string& name, authenticatorNames) {
+    for (const string& name : authenticatorNames) {
       Result<process::http::authentication::Authenticator*> authenticator_ =
         None();
 

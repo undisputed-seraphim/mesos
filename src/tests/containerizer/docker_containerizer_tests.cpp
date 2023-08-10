@@ -183,7 +183,7 @@ public:
     const vector<string>& lines,
     const string& expectedLine)
   {
-    foreach (const string& line, lines) {
+    for (const string& line : lines) {
       if (line == expectedLine) {
         return true;
       }
@@ -228,7 +228,7 @@ public:
     AWAIT_READY(containers);
 
     // Cleanup all mesos launched containers.
-    foreach (const Docker::Container& container, containers.get()) {
+    for (const Docker::Container& container : containers.get()) {
       AWAIT_READY_FOR(docker.get()->rm(container.id, true), Seconds(30));
     }
 
@@ -1638,7 +1638,7 @@ TEST_F(DockerContainerizerTest, ROOT_DOCKER_LaunchWithPersistentVolumes)
   EXPECT_SOME(table);
 
   // Verify that the persistent volume is unmounted.
-  foreach (const fs::MountInfoTable::Entry& entry, table->entries) {
+  for (const fs::MountInfoTable::Entry& entry : table->entries) {
     EXPECT_FALSE(strings::contains(
         entry.target,
         path::join(containerConfig->directory(), "path1")));
@@ -1786,7 +1786,7 @@ TEST_F(DockerContainerizerTest, ROOT_DOCKER_RecoverPersistentVolumes)
 
   // Verify that the recovered container's persistent volume is
   // unmounted.
-  foreach (const fs::MountInfoTable::Entry& entry, table->entries) {
+  for (const fs::MountInfoTable::Entry& entry : table->entries) {
     EXPECT_FALSE(strings::contains(
         entry.target,
         path::join(containerConfig->directory(), "path1")));
@@ -1941,7 +1941,7 @@ TEST_F(DockerContainerizerTest, ROOT_DOCKER_RecoverOrphanedPersistentVolumes)
 
   // Verify that the orphaned container's persistent volume is
   // unmounted.
-  foreach (const fs::MountInfoTable::Entry& entry, table->entries) {
+  for (const fs::MountInfoTable::Entry& entry : table->entries) {
     EXPECT_FALSE(strings::contains(
         entry.target,
         path::join(containerConfig->directory(), "path1")));
@@ -5101,7 +5101,7 @@ TEST_F_TEMP_DISABLED_ON_WINDOWS(
   Option<string> containerIPv4 = None();
   Option<string> containerIPv6 = None();
 
-  foreach(const NetworkInfo::IPAddress& ipAddress,
+  for (const NetworkInfo::IPAddress& ipAddress :
           statusRunning->container_status().network_infos(0).ip_addresses()) {
     if (ipAddress.protocol() == NetworkInfo::IPv4) {
       containerIPv4 = ipAddress.ip_address();
@@ -5259,7 +5259,7 @@ TEST_F_TEMP_DISABLED_ON_WINDOWS(
   Option<string> containerIPv4 = None();
   Option<string> containerIPv6 = None();
 
-  foreach(const NetworkInfo::IPAddress& ipAddress,
+  for (const NetworkInfo::IPAddress& ipAddress :
           statusRunning->container_status().network_infos(0).ip_addresses()) {
     if (ipAddress.protocol() == NetworkInfo::IPv4) {
       containerIPv4 = ipAddress.ip_address();
@@ -5376,7 +5376,7 @@ public:
 #endif // __WINDOWS__
 
     commandsEnv += "DELAYED_COMMANDS=( ";
-    foreach (const string& command, commands) {
+    for (const string& command : commands) {
       commandsEnv += (command + " ");
     }
     commandsEnv += ")";

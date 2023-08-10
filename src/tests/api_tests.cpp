@@ -511,7 +511,7 @@ TEST_P(MasterAPITest, GetMetrics)
 
   hashmap<string, double> metrics;
 
-  foreach (const v1::Metric& metric,
+  for (const v1::Metric& metric :
            v1Response->get_metrics().metrics()) {
     ASSERT_TRUE(metric.has_value());
     metrics[metric.name()] = metric.value();
@@ -1259,7 +1259,7 @@ TEST_P(MasterAPITest, GetOperations)
 
   Option<Resource> rawDisk;
 
-  foreach (const Resource& resource, offer.resources()) {
+  for (const Resource& resource : offer.resources()) {
     if (resource.has_provider_id() &&
         resource.has_disk() &&
         resource.disk().has_source() &&
@@ -2250,7 +2250,7 @@ TEST_P(MasterAPITest, GetAgentsFiltering)
 
     // AgentInfo.resources is not passed through `convertResourceFormat()` so
     // its format is different.
-    foreach (const v1::Resource& resource,
+    for (const v1::Resource& resource :
              v1Response->get_agents().agents(0).agent_info().resources()) {
       EXPECT_FALSE(resource.has_role());
       EXPECT_FALSE(resource.has_allocation_info());
@@ -2265,8 +2265,8 @@ TEST_P(MasterAPITest, GetAgentsFiltering)
     };
 
     bool hasReservedResources = false;
-    foreach (const RepeatedPtrField<v1::Resource>& resources, resourceFields) {
-      foreach (const v1::Resource& resource, resources) {
+    for (const RepeatedPtrField<v1::Resource>& resources : resourceFields) {
+      for (const v1::Resource& resource : resources) {
         EXPECT_TRUE(resource.has_role());
         EXPECT_TRUE(roleSuperhero == resource.role() || "*" == resource.role());
 
@@ -2279,7 +2279,7 @@ TEST_P(MasterAPITest, GetAgentsFiltering)
           EXPECT_FALSE(resource.reservation().has_role());
 
           EXPECT_FALSE(resource.reservations().empty());
-          foreach (const v1::Resource::ReservationInfo& reservation,
+          for (const v1::Resource::ReservationInfo& reservation :
                    resource.reservations()) {
             EXPECT_EQ(roleSuperhero, reservation.role());
           }
@@ -2316,13 +2316,13 @@ TEST_P(MasterAPITest, GetAgentsFiltering)
 
     // AgentInfo.resources is not passed through `convertResourceFormat()` so
     // its format is different.
-    foreach (const v1::Resource& resource,
+    for (const v1::Resource& resource :
              v1Response->get_agents().agents(0).agent_info().resources()) {
       EXPECT_FALSE(resource.has_role());
       EXPECT_FALSE(resource.has_allocation_info());
       EXPECT_FALSE(resource.has_reservation());
       if (resource.reservations_size() > 0) {
-        foreach (const v1::Resource::ReservationInfo& reservation,
+        for (const v1::Resource::ReservationInfo& reservation :
                  resource.reservations()) {
           EXPECT_EQ(roleMuggle, reservation.role());
         }
@@ -2336,8 +2336,8 @@ TEST_P(MasterAPITest, GetAgentsFiltering)
     };
 
     bool hasReservedResources = false;
-    foreach (const RepeatedPtrField<v1::Resource>& resources, resourceFields) {
-      foreach (const v1::Resource& resource, resources) {
+    for (const RepeatedPtrField<v1::Resource>& resources : resourceFields) {
+      for (const v1::Resource& resource : resources) {
         EXPECT_TRUE(resource.has_role());
         EXPECT_TRUE(roleMuggle == resource.role() || "*" == resource.role());
 
@@ -2348,7 +2348,7 @@ TEST_P(MasterAPITest, GetAgentsFiltering)
           EXPECT_FALSE(resource.has_reservation());
 
           EXPECT_FALSE(resource.reservations().empty());
-          foreach (const v1::Resource::ReservationInfo& reservation,
+          for (const v1::Resource::ReservationInfo& reservation :
                    resource.reservations()) {
             EXPECT_EQ(roleMuggle, reservation.role());
           }
@@ -5612,7 +5612,7 @@ TEST_P(AgentAPITest, GetMetrics)
 
   hashmap<string, double> metrics;
 
-  foreach (const v1::Metric& metric,
+  for (const v1::Metric& metric :
            v1Response->get_metrics().metrics()) {
     ASSERT_TRUE(metric.has_value());
     metrics[metric.name()] = metric.value();
@@ -7574,7 +7574,7 @@ TEST_P_TEMP_DISABLED_ON_WINDOWS(
     outputs.emplace_back(std::move(output));
   }
 
-  foreach (Option<http::Pipe::Reader>& output, outputs) {
+  for (Option<http::Pipe::Reader>& output : outputs) {
     // Read the output from the LAUNCH_NESTED_CONTAINER_SESSION.
     ASSERT_SOME(output);
 
@@ -8939,7 +8939,7 @@ TEST_P(AgentAPITest, GetOperations)
 
   Option<Resource> rawDisk;
 
-  foreach (const Resource& resource, offer.resources()) {
+  for (const Resource& resource : offer.resources()) {
     if (resource.has_provider_id() &&
         resource.has_disk() &&
         resource.disk().has_source() &&

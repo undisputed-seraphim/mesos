@@ -297,7 +297,7 @@ Future<Image> ImageTarPullerProcess::_pull(
     .then([reference, layerIds]() -> Image {
       Image image;
       image.mutable_reference()->CopyFrom(reference);
-      foreach (const string& layerId, layerIds) {
+      for (const string& layerId : layerIds) {
         image.add_layer_ids(layerId);
       }
 
@@ -353,7 +353,7 @@ Future<Nothing> ImageTarPullerProcess::extractLayers(
     const string& backend)
 {
   vector<Future<Nothing>> futures;
-  foreach (const string& layerId, layerIds) {
+  for (const string& layerId : layerIds) {
     // Check if the layer is already in the store. If yes, skip the
     // unnecessary extracting.
     if (os::exists(paths::getImageLayerRootfsPath(

@@ -225,7 +225,7 @@ protected:
 
     bool multiRole = false;
 
-    foreach (const FrameworkInfo::Capability::Type& capability, capabilities) {
+    for (const FrameworkInfo::Capability::Type& capability : capabilities) {
       frameworkInfo.add_capabilities()->set_type(capability);
       if (capability == FrameworkInfo::Capability::MULTI_ROLE) {
         multiRole = true;
@@ -242,7 +242,7 @@ protected:
           FrameworkInfo::Capability::MULTI_ROLE);
     }
 
-    foreach(const string& role, roles) {
+    for (const string& role : roles) {
       frameworkInfo.add_roles(role);
     }
 
@@ -3281,7 +3281,7 @@ TEST_F(HierarchicalAllocatorTest, FrameworkLoopMESOS_9554)
       .pushReservation(createDynamicReservationInfo("parent"))
       .pushReservation(createDynamicReservationInfo("parent/child"));
 
-  foreach (const Resource& r, resources) {
+  for (const Resource& r : resources) {
     ASSERT_TRUE(Resources::hasRefinedReservations(r));
   }
 
@@ -5480,7 +5480,7 @@ TEST_F_TEMP_DISABLED_ON_WINDOWS(
   EXPECT_EQ(0u, values.count("allocator/mesos/allocation_run_ms"));
 
   // No allocation timing statistics should appear.
-  foreach (const string& statistic, statistics) {
+  for (const string& statistic : statistics) {
     EXPECT_EQ(0u, values.count(statistic))
       << "Expected " << statistic << " to be absent";
   }
@@ -5531,7 +5531,7 @@ TEST_F_TEMP_DISABLED_ON_WINDOWS(
   EXPECT_GT(timing.as<double>(), 0.0);
 
   // The statistics should be generated.
-  foreach (const string& statistic, statistics) {
+  for (const string& statistic : statistics) {
     EXPECT_EQ(1u, values.count(statistic))
       << "Expected " << statistic << " to be present";
   }
@@ -5569,7 +5569,7 @@ TEST_F_TEMP_DISABLED_ON_WINDOWS(
   EXPECT_EQ(0u, values.count("allocator/mesos/allocation_run_latency_ms"));
 
   // No allocation latency statistics should appear.
-  foreach (const string& statistic, statistics) {
+  for (const string& statistic : statistics) {
     EXPECT_EQ(0u, values.count(statistic))
       << "Expected " << statistic << " to be absent";
   }
@@ -5613,7 +5613,7 @@ TEST_F_TEMP_DISABLED_ON_WINDOWS(
   EXPECT_GE(timing.as<double>(), 0.0);
 
   // The statistics should be generated.
-  foreach (const string& statistic, statistics) {
+  for (const string& statistic : statistics) {
     EXPECT_EQ(1u, values.count(statistic))
       << "Expected " << statistic << " to be present";
   }
@@ -7310,7 +7310,7 @@ TEST_P(HierarchicalAllocations_BENCHMARK_Test, PersistentVolumes)
   Stopwatch watch;
   watch.start();
 
-  foreach (const FrameworkInfo& framework, frameworks) {
+  for (const FrameworkInfo& framework : frameworks) {
     allocator->addFramework(framework.id(), framework, {}, true, {});
   }
 
@@ -7371,7 +7371,7 @@ TEST_P(HierarchicalAllocations_BENCHMARK_Test, PersistentVolumes)
   // Now perform the allocations. Loop enough times for all the frameworks
   // to get offered all the resources.
   for (size_t count = 0; count < allocationsCount; count++) {
-    foreach (const OfferedResources& offer, offers) {
+    for (const OfferedResources& offer : offers) {
       allocator->recoverResources(
           offer.frameworkId, offer.slaveId, offer.resources, None(), false);
     }
@@ -7459,7 +7459,7 @@ TEST_P(HierarchicalAllocator_BENCHMARK_Test, AddAndUpdateSlave)
   Stopwatch watch;
   watch.start();
 
-  foreach (const FrameworkInfo& framework, frameworks) {
+  for (const FrameworkInfo& framework : frameworks) {
     allocator->addFramework(framework.id(), framework, {}, true, {});
   }
 
@@ -7515,7 +7515,7 @@ TEST_P(HierarchicalAllocator_BENCHMARK_Test, AddAndUpdateSlave)
 
   watch.start(); // Reset.
 
-  foreach (const SlaveInfo& slave, slaves) {
+  for (const SlaveInfo& slave : slaves) {
     allocator->updateSlave(
         slave.id(), slave, slave.resources() + oversubscribed);
   }
@@ -7638,7 +7638,7 @@ TEST_P(HierarchicalAllocator_BENCHMARK_Test, DeclineOffers)
   // Loop enough times for all the frameworks to get offered all the resources.
   for (size_t i = 0; i < frameworkCount * 2; i++) {
     // Permanently decline any offered resources.
-    foreach (const OfferedResources& offer, offers) {
+    for (const OfferedResources& offer : offers) {
       Filters filters;
 
       filters.set_refuse_seconds(INT_MAX);
@@ -7835,7 +7835,7 @@ TEST_P(HierarchicalAllocator_BENCHMARK_Test, ResourceLabels)
   // Loop enough times for all the frameworks to get offered all the resources.
   for (size_t i = 0; i < frameworkCount * 2; i++) {
     // Permanently decline any offered resources.
-    foreach (const OfferedResources& offer, offers) {
+    for (const OfferedResources& offer : offers) {
       Filters filters;
 
       filters.set_refuse_seconds(INT_MAX);
@@ -7980,7 +7980,7 @@ TEST_P(HierarchicalAllocator_BENCHMARK_Test, SuppressOffers)
   for (size_t i = 0; i < allocationsCount; i++) {
     // Recover resources with no filters because we want to test the
     // effect of suppression alone.
-    foreach (const OfferedResources& offer, offers) {
+    for (const OfferedResources& offer : offers) {
       allocator->recoverResources(
           offer.frameworkId, offer.slaveId, offer.resources, None(), false);
     }
@@ -8141,7 +8141,7 @@ TEST_P(HierarchicalAllocator_BENCHMARK_Test, ExtremeSuppressOffers)
   for (size_t i = 0; i < allocationsCount; i++) {
     // Recover resources with no filters because we want to test the
     // effect of suppression alone.
-    foreach (const OfferedResources& offer, offers) {
+    for (const OfferedResources& offer : offers) {
       allocator->recoverResources(
           offer.frameworkId, offer.slaveId, offer.resources, None(), false);
     }
@@ -8517,7 +8517,7 @@ TEST_P(HierarchicalAllocator__BENCHMARK_WithResourceParam, UpdateAllocation)
   Resources agentResources;
   hashmap<FrameworkID, Resources> usedResources;
 
-  foreach (const string& role, roles) {
+  for (const string& role : roles) {
     // Each slice of reservations is used by a framework.
     // We first add that framework to the allocator.
     FrameworkInfo framework = createFrameworkInfo({role});
@@ -8526,7 +8526,7 @@ TEST_P(HierarchicalAllocator__BENCHMARK_WithResourceParam, UpdateAllocation)
 
     // Create reservations.
     for (size_t i = 0; i < param.reservationCount; ++i) {
-      foreach (const string& name, RESOURCE_NAMES) {
+      for (const string& name : RESOURCE_NAMES) {
         Resource resource = [&name, &param]() {
           if (name != "port") {
             return CHECK_NOTERROR(Resources::parse(name, "100", "*"));

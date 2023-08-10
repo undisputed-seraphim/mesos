@@ -1149,7 +1149,7 @@ Java_org_apache_mesos_state_AbstractState__1_1names_1get(
 
   jmethodID add = env->GetMethodID(clazz, "add", "(Ljava/lang/Object;)Z");
 
-  foreach (const string& name, future->get()) {
+  for (const string& name : future->get()) {
     jobject jname = convert<string>(env, name);
     env->CallBooleanMethod(jnames, add, jname);
   }
@@ -1206,7 +1206,7 @@ Java_org_apache_mesos_state_AbstractState__1_1names_1get_1timeout(
 
     jmethodID add = env->GetMethodID(clazz, "add", "(Ljava/lang/Object;)Z");
 
-    foreach (const string& name, future->get()) {
+    for (const string& name : future->get()) {
       jobject jname = convert<string>(env, name);
       env->CallBooleanMethod(jnames, add, jname);
     }

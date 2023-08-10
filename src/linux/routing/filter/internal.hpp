@@ -163,7 +163,7 @@ inline Try<Nothing> attach(
 {
   const std::string kind = rtnl_tc_get_kind(TC_CAST(cls.get()));
 
-  foreach (const std::string& _link, mirror.links) {
+  for (const std::string& _link : mirror.links) {
     Result<Netlink<struct rtnl_link>> link = link::internal::get(_link);
     if (link.isError()) {
       return Error(link.error());
@@ -380,7 +380,7 @@ Try<Netlink<struct rtnl_cls>> encodeFilter(
   }
 
   // Attach actions to the libnl filter.
-  foreach (const process::Shared<action::Action>& action, filter.actions) {
+  for (const process::Shared<action::Action>& action : filter.actions) {
     Try<Nothing> attaching = attach(cls, action);
     if (attaching.isError()) {
       return Error("Failed to attach an action " + attaching.error());
@@ -542,7 +542,7 @@ Result<Netlink<struct rtnl_cls>> getCls(
     return Error(clses.error());
   }
 
-  foreach (const Netlink<struct rtnl_cls>& cls, clses.get()) {
+  for (const Netlink<struct rtnl_cls>& cls : clses.get()) {
     // The decode function will return None if 'cls' does not match
     // the classifier type. In that case, we just move on to the next
     // libnl filter.
@@ -786,7 +786,7 @@ Result<std::vector<Filter<Classifier>>> filters(
 
   std::vector<Filter<Classifier>> results;
 
-  foreach (const Netlink<struct rtnl_cls>& cls, clses.get()) {
+  for (const Netlink<struct rtnl_cls>& cls : clses.get()) {
     // The decode function will return None if 'cls' does not match
     // the classifier type. In that case, we just move on to the next
     // libnl filter.
@@ -821,7 +821,7 @@ Result<std::vector<Classifier>> classifiers(
 
   std::vector<Classifier> results;
 
-  foreach (const Filter<Classifier>& filter, _filters.get()) {
+  for (const Filter<Classifier>& filter : _filters.get()) {
     results.push_back(filter.classifier);
   }
 

@@ -231,7 +231,7 @@ TEST_F(CgroupsIsolatorTest,
 
   ContainerID containerId = *(containers->begin());
 
-  foreach (const string& subsystem, subsystems) {
+  for (const string& subsystem : subsystems) {
     Result<string> hierarchy = cgroups::hierarchy(subsystem);
     ASSERT_SOME(hierarchy);
 
@@ -2175,7 +2175,7 @@ TEST_F(CgroupsIsolatorTest, ROOT_CGROUPS_PERF_PerfForward)
   EXPECT_TRUE(containers->contains(containerId1));
 
   ContainerID containerId2;
-  foreach (const ContainerID& containerId, containers.get()) {
+  for (const ContainerID& containerId : containers.get()) {
     if (containerId != containerId1) {
       containerId2 = containerId;
     }
@@ -2343,7 +2343,7 @@ TEST_F(CgroupsIsolatorTest, ROOT_CGROUPS_MemoryForward)
   EXPECT_TRUE(containers->contains(containerId1));
 
   ContainerID containerId2;
-  foreach (const ContainerID& containerId, containers.get()) {
+  for (const ContainerID& containerId : containers.get()) {
     if (containerId != containerId1) {
       containerId2 = containerId;
     }
@@ -2509,7 +2509,7 @@ TEST_F(CgroupsIsolatorTest, ROOT_CGROUPS_MemoryBackward)
   EXPECT_TRUE(containers->contains(containerId1));
 
   ContainerID containerId2;
-  foreach (const ContainerID& containerId, containers.get()) {
+  for (const ContainerID& containerId : containers.get()) {
     if (containerId != containerId1) {
       containerId2 = containerId;
     }
@@ -2658,7 +2658,7 @@ TEST_F(CgroupsIsolatorTest, ROOT_CGROUPS_BlkioUsage)
 
   // We only check the total throttling statistics.
   Option<CgroupInfo::Blkio::Throttling::Statistics> totalThrottling;
-  foreach (const CgroupInfo::Blkio::Throttling::Statistics& statistics,
+  for (const CgroupInfo::Blkio::Throttling::Statistics& statistics :
            usage->blkio_statistics().throttling()) {
     if (!statistics.has_device()) {
       totalThrottling = statistics;
@@ -2780,7 +2780,7 @@ TEST_F(CgroupsIsolatorTest, ROOT_CGROUPS_AutoLoadSubsystems)
 
   // Check cgroups for all the local enabled subsystems
   // have been created for the container.
-  foreach (const string& subsystem, enabledSubsystems.get()) {
+  for (const string& subsystem : enabledSubsystems.get()) {
     if (supportedSubsystems.count(subsystem) == 0) {
       continue;
     }

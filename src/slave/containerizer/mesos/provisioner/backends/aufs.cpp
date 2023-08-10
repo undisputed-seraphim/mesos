@@ -168,7 +168,7 @@ Future<Option<vector<Path>>> AufsBackendProcess::provision(
   // We create symlinks with file name 0, 1, ..., N-1 in tempDir which
   // points to the corresponding layers in the same order.
   size_t idx = 0;
-  foreach (const string& layer, layers) {
+  for (const string& layer : layers) {
     const string link = path::join(tempDir, std::to_string(idx++));
 
     Try<Nothing> symlink = ::fs::symlink(layer, link);
@@ -190,7 +190,7 @@ Future<Option<vector<Path>>> AufsBackendProcess::provision(
   // in the vector to be the bottom most layer. And for each layer, we
   // need to mount it with the option 'ro+wh' so that it will be read-only
   // and its whiteout files (if any) will be well handled.
-  foreach (const string& layer, adaptor::reverse(links)) {
+  for (const string& layer : adaptor::reverse(links)) {
     options += ":" + layer + "=ro+wh";
   }
 
@@ -249,7 +249,7 @@ Future<bool> AufsBackendProcess::destroy(
     return Failure("Failed to read mount table: " + mountTable.error());
   }
 
-  foreach (const fs::MountInfoTable::Entry& entry, mountTable->entries) {
+  for (const fs::MountInfoTable::Entry& entry : mountTable->entries) {
     if (entry.target == rootfs) {
       // NOTE: Use MNT_DETACH here so that if there are still
       // processes holding files or directories in the rootfs, the

@@ -210,7 +210,7 @@ public:
     Resources executorResources = Resources(executor.resources());
     executorResources.allocate(role);
 
-    foreach (const Offer& offer, offers) {
+    for (const Offer& offer : offers) {
       Resources resources(offer.resources());
 
       // If there is an active task, or if the offer is not
@@ -513,7 +513,7 @@ int main(int argc, char** argv)
   logging::initialize(argv[0], false);
 
   // Log any flag warnings.
-  foreach (const flags::Warning& warning, load->warnings) {
+  for (const flags::Warning& warning : load->warnings) {
     LOG(WARNING) << warning.message;
   }
 

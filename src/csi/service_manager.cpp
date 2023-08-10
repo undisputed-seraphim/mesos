@@ -228,10 +228,10 @@ ServiceManagerProcess::ServiceManagerProcess(
     headers["Authorization"] = "Bearer " + authToken.get();
   }
 
-  foreach (const Service& service, services) {
+  for (const Service& service : services) {
     // Each service is served by the first container providing the service. See
     // `CSIPluginInfo` in `mesos.proto` for details.
-    foreach (const CSIPluginContainerInfo& container, info.containers()) {
+    for (const CSIPluginContainerInfo& container : info.containers()) {
       if (container.services().end() != std::find(
               container.services().begin(),
               container.services().end(),
@@ -266,8 +266,8 @@ ServiceManagerProcess::ServiceManagerProcess(
     runtime(_runtime),
     metrics(_metrics)
 {
-  foreach (const Service& service, services) {
-    foreach (const CSIPluginEndpoint& serviceEndpoint, info.endpoints()) {
+  for (const Service& service : services) {
+    for (const CSIPluginEndpoint& serviceEndpoint : info.endpoints()) {
       if (serviceEndpoint.csi_service() == service) {
         serviceEndpoints[service] = serviceEndpoint.endpoint();
         break;
@@ -306,7 +306,7 @@ Future<Nothing> ServiceManagerProcess::recover()
 
       vector<Future<Nothing>> futures;
 
-      foreach (const string& path, containerPaths.get()) {
+      for (const string& path : containerPaths.get()) {
         Try<paths::ContainerPath> containerPath =
           paths::parseContainerPath(rootDir, path);
 
@@ -450,7 +450,7 @@ Future<string> ServiceManagerProcess::getApiVersion()
 Option<CSIPluginContainerInfo> ServiceManagerProcess::getContainerInfo(
     const ContainerID& containerId)
 {
-  foreach (const auto& container, info.containers()) {
+  for (const auto& container : info.containers()) {
     if (getContainerId(info, containerPrefix, container) == containerId) {
       return container;
     }

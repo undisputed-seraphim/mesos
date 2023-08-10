@@ -505,7 +505,7 @@ protected:
     }
 
     if (taskSupplementaryGroups.isSome()) {
-      foreach (gid_t gid, taskSupplementaryGroups.get()) {
+      for (gid_t gid : taskSupplementaryGroups.get()) {
         launchInfo.add_supplementary_groups(gid);
       }
     }
@@ -659,7 +659,7 @@ protected:
     }
 
     if (taskEnvironment.isSome()) {
-      foreach (const Environment::Variable& variable,
+      for (const Environment::Variable& variable :
                taskEnvironment->variables()) {
         // Skip overwriting if the variable is unresolved secret.
         if (variable.type() == Environment::Variable::SECRET) {
@@ -675,7 +675,7 @@ protected:
     }
 
     if (command.has_environment()) {
-      foreach (const Environment::Variable& variable,
+      for (const Environment::Variable& variable :
                command.environment().variables()) {
         // Skip overwriting if the variable is unresolved secret.
         if (variable.type() == Environment::Variable::SECRET) {
@@ -1386,7 +1386,7 @@ int main(int argc, char** argv)
   mesos::internal::logging::initialize(argv[0], true, flags); // Catch signals.
 
   // Log any flag warnings (after logging is initialized).
-  foreach (const flags::Warning& warning, load->warnings) {
+  for (const flags::Warning& warning : load->warnings) {
     LOG(WARNING) << warning.message;
   }
 

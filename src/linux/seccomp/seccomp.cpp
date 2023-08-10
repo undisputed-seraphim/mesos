@@ -139,7 +139,7 @@ Try<Owned<SeccompFilter>> SeccompFilter::create(
   }
 
   // Add architectures.
-  foreach (int arch, profile.architectures()) {
+  for (int arch : profile.architectures()) {
     const string& archName = ContainerSeccompProfile::Architecture_Name(
         static_cast<ContainerSeccompProfile::Architecture>(arch));
 
@@ -180,7 +180,7 @@ Try<Owned<SeccompFilter>> SeccompFilter::create(
       if (syscall.has_includes() &&
           syscall.includes().capabilities_size() > 0) {
         set<Capability> includesCaps;
-        foreach (int capability, syscall.includes().capabilities()) {
+        for (int capability : syscall.includes().capabilities()) {
           includesCaps.emplace(capabilities::convert(
               static_cast<CapabilityInfo::Capability>(capability)));
         }
@@ -196,7 +196,7 @@ Try<Owned<SeccompFilter>> SeccompFilter::create(
       if (syscall.has_excludes() &&
           syscall.excludes().capabilities_size() > 0) {
         set<Capability> excludesCaps;
-        foreach (int capability, syscall.excludes().capabilities()) {
+        for (int capability : syscall.excludes().capabilities()) {
           excludesCaps.emplace(capabilities::convert(
               static_cast<CapabilityInfo::Capability>(capability)));
         }
@@ -239,7 +239,7 @@ Try<Owned<SeccompFilter>> SeccompFilter::create(
       }
     }
 
-    foreach (const string& name, syscall.names()) {
+    for (const string& name : syscall.names()) {
       int syscallNumber = seccomp_syscall_resolve_name(name.c_str());
       if (syscallNumber == __NR_SCMP_ERROR) {
         return Error("Unrecognized syscall '" + name + "'");

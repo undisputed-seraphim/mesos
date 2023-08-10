@@ -27,7 +27,7 @@ template <typename T1, typename T2>
 RepeatedPtrField<T1> devolve(RepeatedPtrField<T2> from)
 {
   RepeatedPtrField<T1> to;
-  foreach (const T2& value, from) {
+  for (const T2& value : from) {
     *to.Add() = devolve(value);
   }
 
@@ -138,7 +138,7 @@ template <typename T1, typename T2>
 RepeatedPtrField<T1> evolve(RepeatedPtrField<T2> from)
 {
   RepeatedPtrField<T1> to;
-  foreach (const T2& value, from) {
+  for (const T2& value : from) {
     *to.Add() = evolve(value);
   }
 

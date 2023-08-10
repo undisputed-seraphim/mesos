@@ -51,7 +51,7 @@ Option<Error> validate(const Index& index)
         stringify(index.schemaversion()));
   }
 
-  foreach (const ManifestDescriptor& manifest, index.manifests()) {
+  for (const ManifestDescriptor& manifest : index.manifests()) {
     Option<Error> error = validateDigest(manifest.digest());
     if (error.isSome()) {
       return Error(
@@ -88,7 +88,7 @@ Option<Error> validate(const Manifest& manifest)
     return Error("'layers' field size must be at least one");
   }
 
-  foreach (const Descriptor& layer, manifest.layers()) {
+  for (const Descriptor& layer : manifest.layers()) {
     Option<Error> error = validateDigest(layer.digest());
     if (error.isSome()) {
       return Error(
@@ -165,7 +165,7 @@ Try<Index> parse(const string& s)
     return Error("Unable to find 'manifests'");
   }
 
-  foreach (const JSON::Value& value, manifests->values) {
+  for (const JSON::Value& value : manifests->values) {
     if (!value.is<JSON::Object>()) {
       return Error("Expecting 'manifest' to be JSON object type");
     }
@@ -219,7 +219,7 @@ Try<Index> parse(const string& s)
         const vector<JSON::Value>& values = osFeatures->values;
         if (values.size() != 0) {
           Platform* platform = _manifest->mutable_platform();
-          foreach (const JSON::Value& value, values) {
+          for (const JSON::Value& value : values) {
             if (!value.is<JSON::String>()) {
               return Error("Expecting OS feature to be string type");
             }

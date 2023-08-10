@@ -818,7 +818,7 @@ TEST_F_TEMP_DISABLED_ON_WINDOWS(
   AWAIT_READY(containers);
 
   // Cleanup all mesos launched containers.
-  foreach (const Docker::Container& container, containers.get()) {
+  for (const Docker::Container& container : containers.get()) {
     AWAIT_READY_FOR(docker->rm(container.id, true), Seconds(30));
   }
 }
@@ -1039,7 +1039,7 @@ TEST_F_TEMP_DISABLED_ON_WINDOWS(
   AWAIT_READY(containers);
 
   // Cleanup all mesos launched containers.
-  foreach (const Docker::Container& container, containers.get()) {
+  for (const Docker::Container& container : containers.get()) {
     AWAIT_READY_FOR(docker->rm(container.id, true), Seconds(30));
   }
 }
@@ -1152,7 +1152,7 @@ TEST_F_TEMP_DISABLED_ON_WINDOWS(HookTest, ROOT_DOCKER_VerifySlavePostFetchHook)
   AWAIT_READY(containers);
 
   // Cleanup all mesos launched containers.
-  foreach (const Docker::Container& container, containers.get()) {
+  for (const Docker::Container& container : containers.get()) {
     AWAIT_READY_FOR(docker->rm(container.id, true), Seconds(30));
   }
 }

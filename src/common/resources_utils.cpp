@@ -51,7 +51,7 @@ Try<Resources> applyCheckpointedResources(
 {
   Resources totalResources = resources;
 
-  foreach (const Resource& resource, checkpointedResources) {
+  for (const Resource& resource :checkpointedResources) {
     if (!needCheckpointing(resource)) {
       return Error("Unexpected checkpointed resources " + stringify(resource));
     }
@@ -137,7 +137,7 @@ Try<vector<TResourceConversion>> getResourceConversions(
     }
 
     case TOperation::UNRESERVE: {
-      foreach (const TResource& reserved, operation.unreserve().resources()) {
+      for (const TResource& reserved : operation.unreserve().resources()) {
         // Note that we only allow "popping" a single reservation at time.
         TResources converted = TResources(reserved).popReservation();
         conversions.emplace_back(reserved, converted);
@@ -146,7 +146,7 @@ Try<vector<TResourceConversion>> getResourceConversions(
     }
 
     case TOperation::CREATE: {
-      foreach (const TResource& volume, operation.create().volumes()) {
+      for (const TResource& volume : operation.create().volumes()) {
         // Strip persistence and volume from the disk info so that we
         // can subtract it from the original resources.
         // TODO(jieyu): Non-persistent volumes are not supported for
@@ -172,7 +172,7 @@ Try<vector<TResourceConversion>> getResourceConversions(
     }
 
     case TOperation::DESTROY: {
-      foreach (const TResource& volume, operation.destroy().volumes()) {
+      for (const TResource& volume : operation.destroy().volumes()) {
         // Strip persistence and volume from the disk info so that we
         // can subtract it from the original resources.
         TResource stripped = volume;
@@ -354,7 +354,7 @@ Result<ResourceProviderID> getResourceProviderId(const Resources& resources)
     resource.has_provider_id() ? resource.provider_id()
                                : Option<ResourceProviderID>::none();
 
-  foreach (const Resource& resource_, resources) {
+  for (const Resource& resource_ : resources) {
     const Option<ResourceProviderID> resourceProviderId_ =
       resource_.has_provider_id() ? resource_.provider_id()
                                   : Option<ResourceProviderID>::none();
@@ -457,7 +457,7 @@ void convertResourceFormat(
     RepeatedPtrField<Resource>* resources,
     ResourceFormat format)
 {
-  foreach (Resource& resource, *resources) {
+  for (Resource& resource :*resources) {
     convertResourceFormat(&resource, format);
   }
 }
@@ -467,7 +467,7 @@ void convertResourceFormat(
     std::vector<Resource>* resources,
     ResourceFormat format)
 {
-  foreach (Resource& resource, *resources) {
+  for (Resource& resource :*resources) {
     convertResourceFormat(&resource, format);
   }
 }
@@ -747,7 +747,7 @@ Option<Error> validateAndUpgradeResources(Offer::Operation* operation)
       }
 
       // Validate resources in LAUNCH.
-      foreach (const TaskInfo& task, operation->launch().task_infos()) {
+      for (const TaskInfo& task : operation->launch().task_infos()) {
         Option<Error> error = Resources::validate(task.resources());
         if (error.isSome()) {
           return error;
@@ -788,7 +788,7 @@ Option<Error> validateAndUpgradeResources(Offer::Operation* operation)
         }
       }
 
-      foreach (const TaskInfo& task, launchGroup->task_group().tasks()) {
+      for (const TaskInfo& task : launchGroup->task_group().tasks()) {
         Option<Error> error = Resources::validate(task.resources());
         if (error.isSome()) {
           return error;
@@ -876,7 +876,7 @@ Try<Nothing> downgradeResources(RepeatedPtrField<Resource>* resources)
 {
   CHECK_NOTNULL(resources);
 
-  foreach (Resource& resource, *resources) {
+  for (Resource& resource :*resources) {
     Try<Nothing> result = downgradeResource(&resource);
     if (result.isError()) {
       return result;
@@ -891,7 +891,7 @@ Try<Nothing> downgradeResources(vector<Resource>* resources)
 {
   CHECK_NOTNULL(resources);
 
-  foreach (Resource& resource, *resources) {
+  for (Resource& resource :*resources) {
     Try<Nothing> result = downgradeResource(&resource);
     if (result.isError()) {
       return result;
@@ -932,7 +932,7 @@ Resources shrinkResources(const Resources& resources, ResourceQuantities target)
   std::random_shuffle(resourceVector.begin(), resourceVector.end());
 
   Resources result;
-  foreach (Resource& resource, resourceVector) {
+  for (Resource& resource :resourceVector) {
     Value::Scalar scalar = target.get(resource.name());
 
     if (scalar == Value::Scalar()) {
@@ -965,7 +965,7 @@ Resources shrinkResources(const Resources& resources, ResourceLimits target)
   std::random_shuffle(resourceVector.begin(), resourceVector.end());
 
   Resources result;
-  foreach (Resource resource, resourceVector) {
+  for (Resource resource : resourceVector) {
     Option<Value::Scalar> limit = target.get(resource.name());
 
     if (limit.isNone()) {

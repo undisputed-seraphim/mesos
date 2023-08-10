@@ -41,7 +41,7 @@ Try<IntervalSet<T>> rangesToIntervalSet(const Value::Ranges& ranges)
       std::is_integral<T>::value,
       "IntervalSet<T> must use an integral type");
 
-  foreach (const Value::Range& range, ranges.range()) {
+  for (const Value::Range& range : ranges.range()) {
     if (range.begin() < std::numeric_limits<T>::min() ||
         range.end() > std::numeric_limits<T>::max()) {
       return Error("Range is out of bounds");
@@ -64,7 +64,7 @@ Try<std::vector<T>> rangesToVector(const Value::Ranges& ranges)
       std::is_integral<T>::value,
       "vector<T> must use an integral type");
 
-  foreach (const Value::Range& range, ranges.range()) {
+  for (const Value::Range& range : ranges.range()) {
     if (range.begin() < std::numeric_limits<T>::min() ||
         range.end() > std::numeric_limits<T>::max()) {
       return Error("Range is out of bounds");
@@ -89,7 +89,7 @@ Value::Ranges intervalSetToRanges(const IntervalSet<T>& set)
       std::is_integral<T>::value,
       "IntervalSet<T> must use an integral type");
 
-  foreach (const Interval<T>& interval, set) {
+  for (const Interval<T>& interval : set) {
     Value::Range* range = ranges.add_range();
     range->set_begin(interval.lower());
     range->set_end(interval.upper() - 1);

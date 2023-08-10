@@ -191,7 +191,7 @@ static Try<Nothing> mount(const string& hierarchy, const string& subsystems)
   }
 
   // Make sure all subsystems are enabled and not busy.
-  foreach (const string& subsystem, strings::tokenize(subsystems, ",")) {
+  for (const string& subsystem : strings::tokenize(subsystems, ",")) {
     Try<bool> result = enabled(subsystem);
     if (result.isError()) {
       return Error(result.error());
@@ -324,7 +324,7 @@ Future<Nothing> remove(const string& hierarchy, const vector<string>& cgroups)
 {
   Future<Nothing> f = Nothing();
 
-  foreach (const string& cgroup, cgroups) {
+  for (const string& cgroup : cgroups) {
     f = f.then([=] {
       return internal::remove(hierarchy, cgroup);
     });
@@ -452,7 +452,7 @@ Try<set<string>> hierarchies()
   }
 
   set<string> results;
-  foreach (const fs::MountTable::Entry& entry, table->entries) {
+  for (const fs::MountTable::Entry& entry : table->entries) {
     if (entry.type == "cgroup") {
       Result<string> realpath = os::realpath(entry.dir);
       if (!realpath.isSome()) {
@@ -478,7 +478,7 @@ Result<string> hierarchy(const string& subsystems)
     return Error(hierarchies.error());
   }
 
-  foreach (const string& candidate, hierarchies.get()) {
+  for (const string& candidate : hierarchies.get()) {
     if (subsystems.empty()) {
       hierarchy = candidate;
       break;
@@ -509,7 +509,7 @@ Try<bool> enabled(const string& subsystems)
   map<string, internal::SubsystemInfo> infos = infosResult.get();
   bool disabled = false;  // Whether some subsystems are not enabled.
 
-  foreach (const string& subsystem, strings::tokenize(subsystems, ",")) {
+  for (const string& subsystem : strings::tokenize(subsystems, ",")) {
     if (infos.find(subsystem) == infos.end()) {
       return Error("'" + subsystem + "' not found");
     }
@@ -535,7 +535,7 @@ Try<bool> busy(const string& subsystems)
   map<string, internal::SubsystemInfo> infos = infosResult.get();
   bool busy = false;
 
-  foreach (const string& subsystem, strings::tokenize(subsystems, ",")) {
+  for (const string& subsystem : strings::tokenize(subsystems, ",")) {
     if (infos.find(subsystem) == infos.end()) {
       return Error("'" + subsystem + "' not found");
     }
@@ -588,7 +588,7 @@ Try<set<string>> subsystems(const string& hierarchy)
 
   // Check if hierarchy is a mount point of type cgroup.
   Option<fs::MountTable::Entry> hierarchyEntry;
-  foreach (const fs::MountTable::Entry& entry, table->entries) {
+  for (const fs::MountTable::Entry& entry : table->entries) {
     if (entry.type == "cgroup") {
       Result<string> dirAbsPath = os::realpath(entry.dir);
       if (!dirAbsPath.isSome()) {
@@ -622,7 +622,7 @@ Try<set<string>> subsystems(const string& hierarchy)
   }
 
   set<string> result;
-  foreach (const string& name, names.get()) {
+  for (const string& name : names.get()) {
     if (hierarchyEntry->hasOption(name)) {
       result.insert(name);
     }
@@ -701,7 +701,7 @@ Try<bool> mounted(const string& hierarchy, const string& subsystems)
         hierarchy + "': " + attached.error());
   }
 
-  foreach (const string& subsystem, strings::tokenize(subsystems, ",")) {
+  for (const string& subsystem : strings::tokenize(subsystems, ",")) {
     if (attached->count(subsystem) == 0) {
       return false;
     }
@@ -743,7 +743,7 @@ Try<Nothing> create(
         "Failed to determine if hierarchy '" + hierarchy +
         "' has the 'cpuset' subsystem attached: " + attached.error());
   } else if (attached->count("cpuset") > 0) {
-    foreach (const string& cgroup, missingCgroups) {
+    for (const string& cgroup : missingCgroups) {
       string parent = Path(cgroup).dirname();
 
       Try<Nothing> clone =
@@ -835,7 +835,7 @@ Try<Nothing> kill(
     return Error("Failed to get processes of cgroup: " + pids.error());
   }
 
-  foreach (pid_t pid, pids.get()) {
+  for (pid_t pid : pids.get()) {
     if (::kill(pid, signal) == -1) {
       // If errno is set to ESRCH, it means that either a) this process already
       // terminated, or b) it's in a 'zombie' state and we can't signal it
@@ -1472,7 +1472,7 @@ private:
 
     // Reaping the frozen pids before we kill (and thaw) ensures we reap the
     // correct pids.
-    foreach (const pid_t pid, processes.get()) {
+    for (const pid_t pid : processes.get()) {
       statuses.push_back(process::reap(pid));
     }
 
@@ -1564,7 +1564,7 @@ protected:
 
     // Kill tasks in the given cgroups in parallel. Use collect mechanism to
     // wait until all kill processes finish.
-    foreach (const string& cgroup, cgroups) {
+    for (const string& cgroup : cgroups) {
       internal::TasksKiller* killer =
         new internal::TasksKiller(hierarchy, cgroup);
       killers.push_back(killer->future());
@@ -1758,7 +1758,7 @@ Try<hashmap<string, uint64_t>> stat(
 
   hashmap<string, uint64_t> result;
 
-  foreach (const string& line, strings::split(contents.get(), "\n")) {
+  for (const string& line : strings::split(contents.get(), "\n")) {
     // Skip empty lines.
     if (strings::trim(line).empty()) {
       continue;
@@ -1804,7 +1804,7 @@ Result<string> cgroup(pid_t pid, const string& subsystem)
   // path.
   Option<string> cgroup = None();
 
-  foreach (const string& line, strings::tokenize(read.get(), "\n")) {
+  for (const string& line : strings::tokenize(read.get(), "\n")) {
     vector<string> tokens = strings::tokenize(line, ":");
 
     // The second field is empty for cgroups v2 hierarchy.
@@ -1814,7 +1814,7 @@ Result<string> cgroup(pid_t pid, const string& subsystem)
       return Error("Unexpected format in " + path);
     }
 
-    foreach (const string& token, strings::tokenize(tokens[1], ",")) {
+    for (const string& token : strings::tokenize(tokens[1], ",")) {
       if (subsystem == token) {
         cgroup = tokens[2];
       }
@@ -1966,7 +1966,7 @@ static Try<vector<Value>> readEntries(
 
   vector<Value> entries;
 
-  foreach (const string& s, strings::tokenize(read.get(), "\n")) {
+  for (const string& s : strings::tokenize(read.get(), "\n")) {
     Try<Value> value = Value::parse(s);
     if (value.isError()) {
       return Error("Failed to parse blkio value '" + s + "' from '" +
@@ -2831,7 +2831,7 @@ Try<Entry> Entry::parse(const string& s)
   entry.access.write = false;
   entry.access.mknod = false;
 
-  foreach (char permission, permissions) {
+  for (char permission : permissions) {
     if (permission == 'r') {
       entry.access.read = true;
     } else if (permission == 'w') {
@@ -2859,7 +2859,7 @@ Try<vector<Entry>> list(
 
   vector<Entry> entries;
 
-  foreach (const string& s, strings::tokenize(read.get(), "\n")) {
+  for (const string& s : strings::tokenize(read.get(), "\n")) {
     Try<Entry> entry = Entry::parse(s);
 
     if (entry.isError()) {

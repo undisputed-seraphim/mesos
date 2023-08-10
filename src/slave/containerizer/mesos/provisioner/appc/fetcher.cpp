@@ -52,7 +52,7 @@ static Try<string> getSimpleDiscoveryImagePath(const Image::Appc& appc)
   CHECK(!appc.name().empty());
 
   hashmap<string, string> labels;
-  foreach (const mesos::Label& label, appc.labels().labels()) {
+  for (const mesos::Label& label : appc.labels().labels()) {
     labels[label.key()] = label.value();
   }
 

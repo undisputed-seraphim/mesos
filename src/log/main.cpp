@@ -21,7 +21,6 @@
 
 #include <process/owned.hpp>
 
-#include <stout/foreach.hpp>
 #include <stout/hashmap.hpp>
 
 #include "log/tool.hpp"
@@ -58,7 +57,7 @@ static void usage(const char* argv0)
        << "    help" << endl;
 
   // Get a list of available tools.
-  foreachkey (const string& name, tools) {
+  for (const auto& [name, _] : tools) {
     cerr << "    " << name << endl;
   }
 }

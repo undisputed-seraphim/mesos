@@ -29,7 +29,6 @@
 #include <stout/lambda.hpp>
 #include <stout/os.hpp>
 #include <stout/nothing.hpp>
-#include <stout/foreach.hpp>
 
 #include "log/consensus.hpp"
 #include "log/replica.hpp"
@@ -144,7 +143,7 @@ private:
     }
 
     responses = future.get();
-    foreach (const Future<PromiseResponse>& response, responses) {
+    for (const Future<PromiseResponse>& response : responses) {
       response.onReady(defer(self(), &Self::received, lambda::_1));
     }
   }
@@ -347,7 +346,7 @@ private:
     }
 
     responses = future.get();
-    foreach (const Future<PromiseResponse>& response, responses) {
+    for (const Future<PromiseResponse>& response : responses) {
       response.onReady(defer(self(), &Self::received, lambda::_1));
     }
   }
@@ -530,7 +529,7 @@ private:
     }
 
     responses = future.get();
-    foreach (const Future<WriteResponse>& response, responses) {
+    for (const Future<WriteResponse>& response : responses) {
       response.onReady(defer(self(), &Self::received, lambda::_1));
     }
   }

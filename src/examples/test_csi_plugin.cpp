@@ -228,7 +228,7 @@ public:
     //
     // TODO(jieyu): Consider not using CHECKs here.
     Try<list<string>> paths = fs::list(path::join(workDir, "*-*"));
-    foreach (const string& path, CHECK_NOTERROR(paths)) {
+    for (const string& path : CHECK_NOTERROR(paths)) {
       Try<VolumeInfo> createdVolume = CHECK_NOTERROR(parseVolumePath(path));
       volumes.put(createdVolume->id, createdVolume.get());
       usedCapacity += createdVolume->capacity;
@@ -726,7 +726,7 @@ Status TestCSIPlugin::ListVolumes(
     return result.error().status;
   }
 
-  foreach (const VolumeInfo& volumeInfo, result.get()) {
+  for (const VolumeInfo& volumeInfo : result.get()) {
     csi::v0::Volume* volume = response->add_entries()->mutable_volume();
     volume->set_id(volumeInfo.id);
     volume->set_capacity_bytes(volumeInfo.capacity.bytes());
@@ -1087,7 +1087,7 @@ Status TestCSIPlugin::ListVolumes(
     return result.error().status;
   }
 
-  foreach (const VolumeInfo& volumeInfo, result.get()) {
+  for (const VolumeInfo& volumeInfo : result.get()) {
     csi::v1::Volume* volume = response->add_entries()->mutable_volume();
     volume->set_volume_id(volumeInfo.id);
     volume->set_capacity_bytes(volumeInfo.capacity.bytes());
@@ -1373,7 +1373,7 @@ Try<VolumeInfo, StatusError> TestCSIPlugin::createVolume(
   // The volume ID is determined by `name`, with reserved characters escaped.
   const string volumeId = http::encode(name);
 
-  foreach (const VolumeCapability& capability, capabilities) {
+  for (const VolumeCapability& capability : capabilities) {
     if (capability != defaultVolumeCapability) {
       return StatusError(Status(
           grpc::INVALID_ARGUMENT, "Unsupported volume capabilities"));
@@ -1529,7 +1529,7 @@ Try<Option<Error>, StatusError> TestCSIPlugin::validateVolumeCapabilities(
         grpc::INVALID_ARGUMENT, "Invalid volume context"));
   }
 
-  foreach (const VolumeCapability& capability, capabilities) {
+  for (const VolumeCapability& capability : capabilities) {
     if (capability != defaultVolumeCapability) {
       return Some(Error("Unsupported volume capabilities"));
     }
@@ -1569,7 +1569,7 @@ Try<Bytes, StatusError> TestCSIPlugin::getCapacity(
   // We report zero capacity if any capability other than the default mount
   // volume capability is given. If no capacity is given, the total available
   // capacity  will be returned.
-  foreach (const VolumeCapability& capability, capabilities) {
+  for (const VolumeCapability& capability : capabilities) {
     if (capability != defaultVolumeCapability) {
       return Bytes(0);
     }
@@ -2041,7 +2041,7 @@ int main(int argc, char** argv)
   mesos::internal::logging::initialize(argv[0], true, flags);
 
   // Log any flag warnings.
-  foreach (const flags::Warning& warning, load->warnings) {
+  for (const flags::Warning& warning : load->warnings) {
     LOG(WARNING) << warning.message;
   }
 

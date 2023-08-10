@@ -232,7 +232,7 @@ Future<ImageInfo> StoreProcess::get(const Image& image)
       // in the list. The semantics is weird when there are duplicated
       // image ids in the list. Appc spec does not discuss this
       // situation.
-      foreach (const string& imageId, imageIds) {
+      for (const string& imageId : imageIds) {
         rootfses.emplace_back(paths::getImageRootfsPath(rootDir, imageId));
       }
 
@@ -355,7 +355,7 @@ Future<vector<string>> StoreProcess::fetchDependencies(
   }
 
   vector<Image::Appc> dependencies;
-  foreach (const spec::ImageManifest::Dependency& dependency,
+  for (const spec::ImageManifest::Dependency& dependency :
            manifest->dependencies()) {
     Image::Appc appc;
     appc.set_name(dependency.imagename());
@@ -365,7 +365,7 @@ Future<vector<string>> StoreProcess::fetchDependencies(
 
     // TODO(jojy): Make Image::Appc use appc::spec::Label instead of
     // mesos::Label so that we can avoid this loop here.
-    foreach (const spec::ImageManifest::Label& label, dependency.labels()) {
+    for (const spec::ImageManifest::Label& label : dependency.labels()) {
       mesos::Label appcLabel;
       appcLabel.set_key(label.name());
       appcLabel.set_value(label.value());
@@ -383,14 +383,14 @@ Future<vector<string>> StoreProcess::fetchDependencies(
   // Do a depth first search.
   vector<Future<vector<string>>> futures;
   futures.reserve(dependencies.size());
-  foreach (const Image::Appc& appc, dependencies) {
+  for (const Image::Appc& appc : dependencies) {
     futures.emplace_back(fetchImage(appc, cached));
   }
 
   return collect(futures)
     .then(defer(self(), [=](const vector<vector<string>>& imageIdsList) {
       vector<string> result;
-      foreach (const vector<string>& imageIds, imageIdsList) {
+      for (const vector<string>& imageIds : imageIdsList) {
         result.insert(result.end(), imageIds.begin(), imageIds.end());
       }
 

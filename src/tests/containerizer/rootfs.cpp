@@ -142,7 +142,7 @@ Try<process::Owned<Rootfs>> LinuxRootfs::create(const string& root)
     "/etc/passwd"
   };
 
-  foreach (const string& program, programs) {
+  for (const string& program : programs) {
     Try<hashset<string>> dependencies = ldd(program, cache.get());
     if (dependencies.isError()) {
       return Error(
@@ -154,7 +154,7 @@ Try<process::Owned<Rootfs>> LinuxRootfs::create(const string& root)
     files.insert(program);
   }
 
-  foreach (const string& file, files) {
+  for (const string& file : files) {
     Try<Nothing> result = rootfs->add(file);
     if (result.isError()) {
       return Error(result.error());
@@ -168,7 +168,7 @@ Try<process::Owned<Rootfs>> LinuxRootfs::create(const string& root)
     "/tmp"
   };
 
-  foreach (const string& directory, directories) {
+  for (const string& directory : directories) {
     Try<Nothing> mkdir = os::mkdir(path::join(root, directory));
     if (mkdir.isError()) {
       return Error(

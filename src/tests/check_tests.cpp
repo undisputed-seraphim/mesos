@@ -201,7 +201,7 @@ public:
 
     call.mutable_reconcile();
 
-    foreach (const auto& task, tasks) {
+    for (const auto& task : tasks) {
       Call::Reconcile::Task* reconcile =
         call.mutable_reconcile()->add_tasks();
       reconcile->mutable_task_id()->CopyFrom(task.first);
@@ -1552,7 +1552,7 @@ TEST_F_TEMP_DISABLED_ON_WINDOWS(
 
   teardown(&mesos, frameworkId);
 
-  foreach (const ContainerID& containerId, containerIds.get()) {
+  for (const ContainerID& containerId : containerIds.get()) {
     AWAIT_READY(containerizer->wait(containerId));
   }
 }
@@ -1725,7 +1725,7 @@ TEST_F_TEMP_DISABLED_ON_WINDOWS(
 
   teardown(&mesos, frameworkId);
 
-  foreach (const ContainerID& containerId, containerIds.get()) {
+  for (const ContainerID& containerId : containerIds.get()) {
     AWAIT_READY(containerizer->wait(containerId));
   }
 }
@@ -1881,7 +1881,7 @@ TEST_F_TEMP_DISABLED_ON_WINDOWS(
 
   teardown(&mesos, frameworkId);
 
-  foreach (const ContainerID& containerId, containerIds.get()) {
+  for (const ContainerID& containerId : containerIds.get()) {
     AWAIT_READY(containerizer->wait(containerId));
   }
 }
@@ -2033,7 +2033,7 @@ TEST_F_TEMP_DISABLED_ON_WINDOWS(
 
   teardown(&mesos, frameworkId);
 
-  foreach (const ContainerID& containerId, containerIds.get()) {
+  for (const ContainerID& containerId : containerIds.get()) {
     AWAIT_READY(containerizer->wait(containerId));
   }
 }
@@ -2188,7 +2188,7 @@ TEST_F_TEMP_DISABLED_ON_WINDOWS(DefaultExecutorCheckTest, CommandCheckTimeout)
 
   teardown(&mesos, frameworkId);
 
-  foreach (const ContainerID& containerId, containerIds.get()) {
+  for (const ContainerID& containerId : containerIds.get()) {
     AWAIT_READY(containerizer->wait(containerId));
   }
 }
@@ -2380,7 +2380,7 @@ TEST_F(DefaultExecutorCheckTest, CommandCheckAndHealthCheckNoShadowing)
 
   teardown(&mesos, frameworkId);
 
-  foreach (const ContainerID& containerId, containerIds.get()) {
+  for (const ContainerID& containerId : containerIds.get()) {
     AWAIT_READY(containerizer->wait(containerId));
   }
 }
