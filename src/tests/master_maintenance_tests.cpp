@@ -519,7 +519,7 @@ TEST_F(MasterMaintenanceTest, PreV1SchedulerSupport)
   EXPECT_FALSE(normalOffers->empty());
 
   // Check that unavailability is not set.
-  foreach (const Offer& offer, normalOffers.get()) {
+  for (const Offer& offer : normalOffers.get()) {
     EXPECT_FALSE(offer.has_unavailability());
   }
 
@@ -554,7 +554,7 @@ TEST_F(MasterMaintenanceTest, PreV1SchedulerSupport)
   EXPECT_FALSE(unavailabilityOffers->empty());
 
   // Check that each offer has an unavailability.
-  foreach (const Offer& offer, unavailabilityOffers.get()) {
+  for (const Offer& offer : unavailabilityOffers.get()) {
     EXPECT_TRUE(offer.has_unavailability());
     EXPECT_EQ(unavailability.start(), offer.unavailability().start());
     EXPECT_EQ(unavailability.duration(), offer.unavailability().duration());
@@ -1224,7 +1224,7 @@ TEST_F(MasterMaintenanceTest, InverseOffers)
   ASSERT_FALSE(offers->offers().empty());
 
   // All the offers should have unavailability.
-  foreach (const v1::Offer& offer, offers->offers()) {
+  for (const v1::Offer& offer : offers->offers()) {
     EXPECT_TRUE(offer.has_unavailability());
   }
 
@@ -1562,7 +1562,7 @@ TEST_F(MasterMaintenanceTest, InverseOffersFilters)
   EXPECT_EQ(2, offers->offers().size());
 
   // All the offers should have unavailability.
-  foreach (const v1::Offer& offer, offers->offers()) {
+  for (const v1::Offer& offer : offers->offers()) {
     EXPECT_TRUE(offer.has_unavailability());
   }
 

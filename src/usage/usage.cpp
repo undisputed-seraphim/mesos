@@ -22,7 +22,6 @@
 
 #include <process/clock.hpp>
 
-#include <stout/foreach.hpp>
 #include <stout/os.hpp>
 
 #include <stout/os/pstree.hpp>

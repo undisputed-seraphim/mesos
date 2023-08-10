@@ -22,7 +22,6 @@
 #include <process/delay.hpp>
 #include <process/id.hpp>
 
-#include <stout/foreach.hpp>
 #include <stout/os.hpp>
 #include <stout/path.hpp>
 #include <stout/strings.hpp>

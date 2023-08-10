@@ -23,7 +23,6 @@
 
 #include <mesos/csi/v1.hpp>
 
-#include <stout/foreach.hpp>
 #include <stout/unreachable.hpp>
 
 namespace mesos {

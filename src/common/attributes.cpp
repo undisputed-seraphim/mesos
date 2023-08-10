@@ -22,7 +22,6 @@
 #include <mesos/attributes.hpp>
 #include <mesos/values.hpp>
 
-#include <stout/foreach.hpp>
 #include <stout/strings.hpp>
 
 using std::ostream;

@@ -110,7 +110,7 @@ public:
     CHECK(!components.empty());
 
     Node* current = root.get();
-    foreach (const string& component, components) {
+    for (const string& component : components) {
       if (!current->children.contains(component)) {
         current->children[component] = unique_ptr<Node>(new Node(component));
       }
@@ -218,7 +218,7 @@ Option<Error> Master::QuotaHandler::overcommitCheck(
   // Determine whether quota overcommits the cluster.
   ResourceQuantities capacity;
 
-  foreach (const Resources& agent, agents) {
+  for (const Resources& agent : agents) {
     capacity += ResourceQuantities::fromScalarResources(
         agent.nonRevocable().scalars());
   }
@@ -302,7 +302,7 @@ void Master::QuotaHandler::rescindOffers(const QuotaInfo& request) const
 
     // Rescind all outstanding offers from the given agent.
     bool agentVisited = false;
-    foreach (Offer* offer, utils::copy(slave->offers)) {
+    for (Offer* offer : utils::copy(slave->offers)) {
       auto unallocated = [](const Resources& resources) {
         Resources result = resources;
         result.unallocate();
@@ -397,7 +397,7 @@ Future<QuotaStatus> Master::QuotaHandler::_status(
           *status.add_infos() = [&quotaIt]() {
             QuotaInfo info;
             info.set_role(quotaIt->first);
-            foreach (auto& quantity, quotaIt->second.guarantees) {
+            for (auto& quantity : quotaIt->second.guarantees) {
               Resource resource;
               resource.set_type(Value::SCALAR);
               *resource.mutable_name() = quantity.first;
@@ -412,11 +412,11 @@ Future<QuotaStatus> Master::QuotaHandler::_status(
             QuotaConfig config;
             config.set_role(quotaIt->first);
 
-            foreach (auto& quantity, quotaIt->second.guarantees) {
+            for (auto& quantity : quotaIt->second.guarantees) {
               (*config.mutable_guarantees())[quantity.first] = quantity.second;
             }
 
-            foreach (auto& limit, quotaIt->second.limits) {
+            for (auto& limit : quotaIt->second.limits) {
               (*config.mutable_limits())[limit.first] = limit.second;
             }
 
@@ -440,7 +440,7 @@ Future<http::Response> Master::QuotaHandler::update(
     call.update_quota().quota_configs();
 
   // Validate `QuotaConfig`.
-  foreach (const auto& config, configs) {
+  for (const auto& config : configs) {
     // Check that the role is on the role whitelist, if it exists.
     if (!master->isWhitelistedRole(config.role())) {
       return BadRequest(
@@ -468,7 +468,7 @@ Future<http::Response> Master::QuotaHandler::update(
 
   // Validate a role's requested limit is below its current consumption
   // (otherwise a `force` flag is needed).
-  foreach (const auto& config, configs) {
+  for (const auto& config : configs) {
     ResourceLimits limits{config.limits()};
     ResourceQuantities consumedQuota =
       RoleResourceBreakdown(master, config.role()).consumedQuota();
@@ -502,7 +502,7 @@ Future<http::Response> Master::QuotaHandler::update(
     quotaTree.update(role, quota);
   }
 
-  foreach (const auto& config, configs) {
+  for (const auto& config : configs) {
     quotaTree.update(config.role(), Quota{config});
   }
 
@@ -548,7 +548,7 @@ Future<http::Response> Master::QuotaHandler::update(
   // for each quota configuration update.
   vector<Future<bool>> authorizedUpdates;
   authorizedUpdates.reserve(configs.size());
-  foreach (const QuotaConfig& config, configs) {
+  for (const QuotaConfig& config : configs) {
     authorizedUpdates.push_back(authorizeUpdateQuotaConfig(principal, config));
   }
 
@@ -577,7 +577,7 @@ Future<http::Response> Master::QuotaHandler::_update(
           << "An invalid quota config was supplied to the registry "
           << JSON::protobuf(configs);
 
-      foreach (const QuotaConfig& config, configs) {
+      for (const QuotaConfig& config : configs) {
         master->quotas[config.role()] = Quota(config);
         master->allocator->updateQuota(config.role(), Quota{config});
       }
@@ -598,7 +598,7 @@ Future<http::Response> Master::QuotaHandler::_update(
       // As a result, we cut some corners here to only make best effort
       // rescinding (more on this below).
 
-      foreach (const auto& config, configs) {
+      for (const auto& config : configs) {
         RoleResourceBreakdown resourceBreakdown{master, config.role()};
 
         // NOTE: Since consumed and offered may overlap (unallocated
@@ -632,7 +632,7 @@ Future<http::Response> Master::QuotaHandler::_update(
             break; // Done rescinding.
           }
 
-          foreach (Offer* offer, utils::copy(framework->offers)) {
+          for (Offer* offer : utils::copy(framework->offers)) {
             if (limits.contains(consumedAndOffered)) {
               break; // Done rescinding.
             }
@@ -670,7 +670,7 @@ Future<http::Response> Master::QuotaHandler::_update(
             break;
           }
 
-          foreach (Offer* offer, utils::copy(slave->offers)) {
+          for (Offer* offer : utils::copy(slave->offers)) {
             if ((rescinded + consumedAndOffered).contains(guarantees)) {
               break;
             }
@@ -884,7 +884,7 @@ Future<http::Response> Master::QuotaHandler::__set(
     *config.mutable_role() = quotaInfo.role();
 
     google::protobuf::Map<string, Value::Scalar> quota;
-    foreach (const Resource& r, quotaInfo.guarantee()) {
+    for (const Resource& r : quotaInfo.guarantee()) {
       quota[r.name()] = r.scalar();
     }
 
@@ -1006,7 +1006,7 @@ Future<http::Response> Master::QuotaHandler::_remove(
   // when we remove the old APIs.
   QuotaInfo info;
   info.set_role(role);
-  foreach (const auto& quantity, master->quotas.at(role).guarantees) {
+  for (const auto& quantity : master->quotas.at(role).guarantees) {
     Resource resource;
     resource.set_type(Value::SCALAR);
     *resource.mutable_name() = quantity.first;

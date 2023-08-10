@@ -119,7 +119,7 @@ Metrics::Metrics(const HierarchicalAllocatorProcess& _allocator)
   // resources the slave exposes.
   string resources[] = {"cpus", "mem", "disk"};
 
-  foreach (const string& resource, resources) {
+  for (const string& resource : resources) {
     PullGauge total(
         "allocator/mesos/resources/" + resource + "/total",
         defer(allocator,
@@ -149,11 +149,11 @@ Metrics::~Metrics()
   process::metrics::remove(allocation_run);
   process::metrics::remove(allocation_run_latency);
 
-  foreach (const PullGauge& gauge, resources_total) {
+  for (const PullGauge& gauge : resources_total) {
     process::metrics::remove(gauge);
   }
 
-  foreach (const PullGauge& gauge, resources_offered_or_allocated) {
+  for (const PullGauge& gauge : resources_offered_or_allocated) {
     process::metrics::remove(gauge);
   }
 
@@ -194,14 +194,14 @@ void Metrics::updateQuota(const string& role, const Quota& quota)
 
   hashset<string> names;
 
-  foreach (auto& quantity, quota.guarantees) {
+  for (auto& quantity : quota.guarantees) {
     names.insert(quantity.first);
   }
-  foreach (auto& quantity, quota.limits) {
+  for (auto& quantity : quota.limits) {
     names.insert(quantity.first);
   }
 
-  foreach (const string& name, names) {
+  for (const string& name : names) {
     PullGauge offered_or_allocated(
         "allocator/mesos/quota"
         "/roles/" + role +
@@ -273,7 +273,7 @@ FrameworkMetrics::FrameworkMetrics(
 
 FrameworkMetrics::~FrameworkMetrics()
 {
-  foreach (const string& role, suppressed.keys()) {
+  for (const string& role : suppressed.keys()) {
     removeSubscribedRole(role);
   }
 

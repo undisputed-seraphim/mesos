@@ -21,7 +21,6 @@
 
 #include <stout/check.hpp>
 #include <stout/error.hpp>
-#include <stout/foreach.hpp>
 #include <stout/option.hpp>
 #include <stout/strings.hpp>
 #include <stout/try.hpp>

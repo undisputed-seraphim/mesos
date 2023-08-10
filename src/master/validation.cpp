@@ -1697,7 +1697,7 @@ Option<Error> validateTask(
     lambda::bind(internal::validateResourceLimits, task, slave)
   };
 
-  for (const lambda::function<Option<Error> :)>& validator, validators) {
+  for (const auto& validator : validators) {
     Option<Error> error = validator();
     if (error.isSome()) {
       return error;
@@ -1844,7 +1844,7 @@ Option<Error> validate(
     lambda::bind(internal::validateShareCgroups, task)
   };
 
-  for (const lambda::function<Option<Error> :)>& validator, validators) {
+  for (const auto& validator : validators) {
     Option<Error> error = validator();
     if (error.isSome()) {
       return error;
@@ -2197,7 +2197,7 @@ Option<Error> validate(
         internal::validateShareCgroups, taskGroup, executor, framework, slave)
   };
 
-  for (const lambda::function<Option<Error> :)>& validator, validators) {
+  for (const auto& validator : validators) {
     Option<Error> error = validator();
     if (error.isSome()) {
       return error;
@@ -2433,7 +2433,7 @@ Option<Error> validate(
     lambda::bind(validateSlave, offerIds, master)
   };
 
-  for (const lambda::function<Option<Error> :)>& validator, validators) {
+  for (const auto& validator : validators) {
     Option<Error> error = validator();
     if (error.isSome()) {
       return error;
@@ -2459,7 +2459,7 @@ Option<Error> validateInverseOffers(
     lambda::bind(validateSlave, offerIds, master)
   };
 
-  for (const lambda::function<Option<Error> :)>& validator, validators) {
+  for (const auto& validator : validators) {
     Option<Error> error = validator();
     if (error.isSome()) {
       return error;

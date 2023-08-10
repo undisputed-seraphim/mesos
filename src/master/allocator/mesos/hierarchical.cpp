@@ -184,7 +184,7 @@ static hashmap<string, vector<ResourceQuantities>> unpackFrameworkOfferFilters(
 
   // Use `auto` in place of `protobuf::MapPair<string, AllocatableResources>`
   // below since `foreach` is a macro and cannot contain angle brackets.
-  foreach (auto&& offerFilters, roleOfferFilters) {
+  for (auto&& offerFilters : roleOfferFilters) {
     const string& role = offerFilters.first;
     const OfferFilters& allocatableResources = offerFilters.second;
 
@@ -314,7 +314,7 @@ Role& RoleTree::operator[](const std::string& rolePath)
   // We go through the path from top to bottom and create any missing
   // node along the way.
   Role* current = root_;
-  foreach (const string& token, strings::split(rolePath, "/")) {
+  for (const string& token : strings::split(rolePath, "/")) {
     Option<Role*> child = current->children_.get(token);
 
     if (child.isSome()) {
@@ -402,7 +402,7 @@ void RoleTree::updateQuotaConsumedMetric(const Role* role)
 
 void RoleTree::trackReservations(const Resources& resources)
 {
-  foreach (const Resource& r, resources.scalars()) {
+  for (const Resource& r : resources.scalars()) {
     CHECK(Resources::isReserved(r));
 
     const string& reservationRole = Resources::reservationRole(r);
@@ -419,7 +419,7 @@ void RoleTree::trackReservations(const Resources& resources)
 
 void RoleTree::untrackReservations(const Resources& resources)
 {
-  foreach (const Resource& r, resources.scalars()) {
+  for (const Resource& r : resources.scalars()) {
     CHECK(Resources::isReserved(r));
 
     const string& reservationRole = Resources::reservationRole(r);
@@ -578,7 +578,7 @@ std::string RoleTree::toJSON() const
           role->offeredOrAllocatedUnreservedNonRevocable.quantities());
 
       writer->field("frameworks", [&](JSON::ArrayWriter* writer) {
-        foreach (const FrameworkID& id, role->frameworks_) {
+        for (const FrameworkID& id : role->frameworks_) {
           writer->element(id.value());
         }
       });
@@ -756,7 +756,7 @@ void HierarchicalAllocatorProcess::addFramework(
 
   const Framework& framework = *CHECK_NOTNONE(getFramework(frameworkId));
 
-  foreach (const string& role, framework.roles) {
+  for (const string& role : framework.roles) {
     trackFrameworkUnderRole(framework, role);
 
     Sorter* frameworkSorter = CHECK_NOTNONE(getFrameworkSorter(role));
@@ -830,7 +830,7 @@ void HierarchicalAllocatorProcess::removeFramework(
   Framework& framework = *CHECK_NOTNONE(getFramework(frameworkId));
 
   // Untack framework from roles.
-  foreach (const string& role, framework.roles) {
+  for (const string& role : framework.roles) {
     CHECK(tryUntrackFrameworkUnderRole(framework, role))
       << " Framework: " << frameworkId << " role: " << role;
   }
@@ -861,7 +861,7 @@ void HierarchicalAllocatorProcess::activateFramework(
   // Note: A subset of framework roles can be deactivated if the
   // role is specified in `suppressed_roles` during framework
   // (re)registration, or via a subsequent `SUPPRESS` call.
-  foreach (const string& role, framework.roles) {
+  for (const string& role : framework.roles) {
     Sorter* frameworkSorter = CHECK_NOTNONE(getFrameworkSorter(role));
 
     if (!framework.suppressedRoles.count(role)) {
@@ -882,7 +882,7 @@ void HierarchicalAllocatorProcess::deactivateFramework(
 
   Framework& framework = *CHECK_NOTNONE(getFramework(frameworkId));
 
-  foreach (const string& role, framework.roles) {
+  for (const string& role : framework.roles) {
     Sorter* frameworkSorter = CHECK_NOTNONE(getFrameworkSorter(role));
 
     frameworkSorter->deactivate(frameworkId.value());
@@ -916,7 +916,7 @@ void HierarchicalAllocatorProcess::updateFramework(
   const set<string> newRoles = protobuf::framework::getRoles(frameworkInfo);
   const set<string> oldSuppressedRoles = framework.suppressedRoles;
 
-  foreach (const string& role, newRoles - oldRoles) {
+  for (const string& role : newRoles - oldRoles) {
     framework.metrics->addSubscribedRole(role);
 
     // NOTE: It's possible that we're already tracking this framework
@@ -930,7 +930,7 @@ void HierarchicalAllocatorProcess::updateFramework(
     frameworkSorters.at(role)->activate(frameworkId.value());
   }
 
-  foreach (const string& role, oldRoles - newRoles) {
+  for (const string& role : oldRoles - newRoles) {
     Sorter* frameworkSorter = CHECK_NOTNONE(getFrameworkSorter(role));
 
     frameworkSorter->deactivate(frameworkId.value());
@@ -1323,7 +1323,7 @@ void HierarchicalAllocatorProcess::updateAllocation(
   // conversions have AllocationInfo set. The master should enforce
   // this. E.g.
   //
-  //  foreach (const ResourceConversion& conversion, conversions) {
+  //  for (const ResourceConversion& conversion : conversions) {
   //    CHECK_NONE(validateConversionOnAllocatedResources(conversion));
   //  }
   Resources updatedOfferedResources =
@@ -1360,7 +1360,7 @@ void HierarchicalAllocatorProcess::updateAllocation(
   // successfully, since agent's total is stored as unallocated resources.
   vector<ResourceConversion> strippedConversions;
   Resources removedResources;
-  foreach (const ResourceConversion& conversion, conversions) {
+  for (const ResourceConversion& conversion : conversions) {
     // TODO(jieyu): Ideally, we should make sure agent's total
     // resources are consistent with agent's allocation in terms of
     // shared resources. In other words, we should increase agent's
@@ -1768,7 +1768,7 @@ void HierarchicalAllocatorProcess::suppressRoles(
   // SUPPRESS is not parameterized. When parameterization is added,
   // we have to differentiate between the cases here.
 
-  foreach (const string& role, roles) {
+  for (const string& role : roles) {
     Sorter* frameworkSorter = CHECK_NOTNONE(getFrameworkSorter(role));
 
     frameworkSorter->deactivate(framework.frameworkId.value());
@@ -1801,14 +1801,14 @@ void HierarchicalAllocatorProcess::reviveRoles(
 
   framework.inverseOfferFilters.clear();
 
-  foreach (const string& role, roles) {
+  for (const string& role : roles) {
     framework.offerFilters.erase(role);
   }
 
   // Activating the framework in the sorter is fine as long as
   // SUPPRESS is not parameterized. When parameterization is added,
   // we may need to differentiate between the cases here.
-  foreach (const string& role, roles) {
+  for (const string& role : roles) {
     Sorter* frameworkSorter = CHECK_NOTNONE(getFrameworkSorter(role));
 
     frameworkSorter->activate(framework.frameworkId.value());
@@ -1856,7 +1856,7 @@ void HierarchicalAllocatorProcess::updateWeights(
 {
   CHECK(initialized);
 
-  foreach (const WeightInfo& weightInfo, weightInfos) {
+  for (const WeightInfo& weightInfo : weightInfos) {
     CHECK(weightInfo.has_role());
     roleTree.updateWeight(weightInfo.role(), weightInfo.weight());
     roleSorter->updateWeight(weightInfo.role(), weightInfo.weight());
@@ -1979,7 +1979,7 @@ void HierarchicalAllocatorProcess::__generateOffers()
 
   // Filter out non-whitelisted, removed, and deactivated slaves
   // in order not to send offers for them.
-  foreach (const SlaveID& slaveId, allocationCandidates) {
+  for (const SlaveID& slaveId : allocationCandidates) {
     Option<Slave*> slave = getSlave(slaveId);
 
     if (isWhitelisted(slaveId) && slave.isSome() && (*slave)->activated) {
@@ -2034,7 +2034,7 @@ void HierarchicalAllocatorProcess::__generateOffers()
   //
   // Currently, only top level roles can have quota set and thus
   // we only track consumed quota for top level roles.
-  foreach (const Role* r, roleTree.root()->children()) {
+  for (const Role* r : roleTree.root()->children()) {
     // TODO(mzhu): Track all role consumed quota. We may want to expose
     // these as metrics.
     if (r->quota() != DEFAULT_QUOTA) {
@@ -2054,7 +2054,7 @@ void HierarchicalAllocatorProcess::__generateOffers()
   // consumed quota) than quota guarantee, we don't need to hold back any
   // unreserved headroom for it.
   ResourceQuantities requiredHeadroom;
-  foreach (const Role* r, roleTree.root()->children()) {
+  for (const Role* r : roleTree.root()->children()) {
     requiredHeadroom +=
       r->quota().guarantees -
       rolesConsumedQuota.get(r->role).getOrElse(ResourceQuantities());
@@ -2121,10 +2121,10 @@ void HierarchicalAllocatorProcess::__generateOffers()
   // Thus we try to satisfy the quota guarantees in this first stage so that
   // those roles with unsatisfied guarantees can have more choices and higher
   // probability in getting their guarantees satisfied.
-  foreach (const SlaveID& slaveId, slaveIds) {
+  for (const SlaveID& slaveId : slaveIds) {
     Slave& slave = *CHECK_NOTNONE(getSlave(slaveId));
 
-    foreach (const string& role, roleSorter->sort()) {
+    for (const string& role : roleSorter->sort()) {
       const Quota& quota = getQuota(role);
 
       const ResourceQuantities& quotaGuarantees = quota.guarantees;
@@ -2168,7 +2168,7 @@ void HierarchicalAllocatorProcess::__generateOffers()
       // NOTE: Suppressed frameworks are not included in the sort.
       Sorter* frameworkSorter = CHECK_NOTNONE(getFrameworkSorter(role));
 
-      foreach (const string& frameworkId_, frameworkSorter->sort()) {
+      for (const string& frameworkId_ : frameworkSorter->sort()) {
         if (unsatisfiedQuotaGuarantees.empty()) {
           break;
         }
@@ -2392,10 +2392,10 @@ void HierarchicalAllocatorProcess::__generateOffers()
   // so than the back.
   std::random_shuffle(slaveIds.begin(), slaveIds.end());
 
-  foreach (const SlaveID& slaveId, slaveIds) {
+  for (const SlaveID& slaveId : slaveIds) {
     Slave& slave = *CHECK_NOTNONE(getSlave(slaveId));
 
-    foreach (const string& role, roleSorter->sort()) {
+    for (const string& role : roleSorter->sort()) {
       // TODO(bmahler): Handle shared volumes, which are always available but
       // should be excluded here based on `offeredSharedResources`.
       if (slave.getAvailable().empty()) {
@@ -2407,7 +2407,7 @@ void HierarchicalAllocatorProcess::__generateOffers()
       // NOTE: Suppressed frameworks are not included in the sort.
       Sorter* frameworkSorter = CHECK_NOTNONE(getFrameworkSorter(role));
 
-      foreach (const string& frameworkId_, frameworkSorter->sort()) {
+      for (const string& frameworkId_ : frameworkSorter->sort()) {
         FrameworkID frameworkId;
         frameworkId.set_value(frameworkId_);
 
@@ -2557,7 +2557,7 @@ void HierarchicalAllocatorProcess::generateInverseOffers()
   // inverse offers even though the framework had not responded yet.
   //
   // TODO(mzhu): Need to consider reservations as well.
-  foreach (const SlaveID& slaveId, allocationCandidates) {
+  for (const SlaveID& slaveId : allocationCandidates) {
     Slave& slave = *CHECK_NOTNONE(getSlave(slaveId));
 
     if (slave.maintenance.isSome()) {
@@ -2775,7 +2775,7 @@ bool HierarchicalAllocatorProcess::isFiltered(
     return false;
   }
 
-  foreach (const shared_ptr<OfferFilter>& offerFilter, agentFilters->second) {
+  for (const shared_ptr<OfferFilter>& offerFilter : agentFilters->second) {
     if (offerFilter->filter(resources)) {
       VLOG(1) << "Filtered offer with " << resources
               << " on agent " << slave.info.id()
@@ -2794,7 +2794,7 @@ bool HierarchicalAllocatorProcess::isFiltered(
     const Framework& framework, const Slave& slave) const
 {
   if (framework.inverseOfferFilters.contains(slave.info.id())) {
-    foreach (const shared_ptr<InverseOfferFilter>& inverseOfferFilter,
+    for (const shared_ptr<InverseOfferFilter>& inverseOfferFilter :
              framework.inverseOfferFilters.at(slave.info.id())) {
       if (inverseOfferFilter->filter()) {
         VLOG(1) << "Filtered unavailability on agent " << slave.info.id()

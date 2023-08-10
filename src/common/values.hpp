@@ -23,7 +23,6 @@
 
 #include <mesos/mesos.hpp>
 
-#include <stout/foreach.hpp>
 #include <stout/interval.hpp>
 #include <stout/try.hpp>
 

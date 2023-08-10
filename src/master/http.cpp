@@ -1281,21 +1281,21 @@ mesos::master::Response::GetFrameworks::Framework model(
     _framework.mutable_reregistered_time()->set_nanoseconds(time);
   }
 
-  foreach (const Offer* offer, framework.offers) {
+  for (const Offer* offer : framework.offers) {
     _framework.mutable_offers()->Add()->CopyFrom(*offer);
   }
 
-  foreach (const InverseOffer* offer, framework.inverseOffers) {
+  for (const InverseOffer* offer : framework.inverseOffers) {
     _framework.mutable_inverse_offers()->Add()->CopyFrom(*offer);
   }
 
-  foreach (Resource resource, framework.totalUsedResources) {
+  for (Resource resource : framework.totalUsedResources) {
     convertResourceFormat(&resource, ENDPOINT);
 
     _framework.mutable_allocated_resources()->Add()->CopyFrom(resource);
   }
 
-  foreach (Resource resource, framework.totalOfferedResources) {
+  for (Resource resource : framework.totalOfferedResources) {
     convertResourceFormat(&resource, ENDPOINT);
 
     _framework.mutable_offered_resources()->Add()->CopyFrom(resource);
@@ -2410,7 +2410,7 @@ void Master::Http::processRequestsBatch() const
   //
   // TODO(alexr): Consider moving `BatchedStateRequest`'s fields into
   // `process::async` once it supports moving.
-  foreach (BatchedRequest& request, batchedRequests) {
+  for (BatchedRequest& request : batchedRequests) {
     Future<pair<Response, Option<ReadOnlyHandler::PostProcessing>>>
       f = process::async(
           [this](ReadOnlyRequestHandler handler,
@@ -2672,7 +2672,7 @@ Future<Response> Master::Http::listFiles(
       mesos::master::Response::ListFiles* listFiles =
         response.mutable_list_files();
 
-      foreach (const FileInfo& fileInfo, result.get()) {
+      for (const FileInfo& fileInfo : result.get()) {
         listFiles->add_file_infos()->CopyFrom(fileInfo);
       }
 
@@ -3063,7 +3063,7 @@ mesos::maintenance::Schedule Master::Http::_getMaintenanceSchedule(
            master->maintenance.schedules.front().windows()) {
     mesos::maintenance::Window window_;
 
-    foreach (const MachineID& machine_id, window.machine_ids()) {
+    for (const MachineID& machine_id : window.machine_ids()) {
       if (!approvers->approved<GET_MAINTENANCE_SCHEDULE>(machine_id)) {
         continue;
       }
@@ -3113,7 +3113,7 @@ Future<Response> Master::Http::__updateMaintenanceSchedule(
     const Owned<ObjectApprovers>& approvers) const
 {
   foreach (const mesos::maintenance::Window& window, schedule.windows()) {
-    foreach (const MachineID& machine, window.machine_ids()) {
+    for (const MachineID& machine : window.machine_ids()) {
       if (!approvers->approved<UPDATE_MAINTENANCE_SCHEDULE>(machine)) {
         return Forbidden();
       }
@@ -3156,7 +3156,7 @@ Future<Response> Master::Http::___updateMaintenanceSchedule(
   // Save the unavailability, to help with updating some machines.
   hashmap<MachineID, Unavailability> unavailabilities;
   foreach (const mesos::maintenance::Window& window, schedule.windows()) {
-    foreach (const MachineID& id, window.machine_ids()) {
+    for (const MachineID& id : window.machine_ids()) {
       unavailabilities[id] = window.unavailability();
     }
   }
@@ -3189,7 +3189,7 @@ Future<Response> Master::Http::___updateMaintenanceSchedule(
   // Save each new machine, with the unavailability
   // and starting in `DRAINING` mode.
   foreach (const mesos::maintenance::Window& window, schedule.windows()) {
-    foreach (const MachineID& id, window.machine_ids()) {
+    for (const MachineID& id : window.machine_ids()) {
       if (master->machines.contains(id) &&
           master->machines[id].info.mode() != MachineInfo::UP) {
         continue;
@@ -3330,7 +3330,7 @@ Future<Response> Master::Http::_startMaintenance(
 
   // Check that all machines are part of a maintenance schedule.
   // TODO(josephw): Allow a transition from `UP` to `DOWN`.
-  foreach (const MachineID& id, machineIds) {
+  for (const MachineID& id : machineIds) {
     if (!master->machines.contains(id)) {
       return BadRequest(
           "Machine '" + stringify(JSON::protobuf(id)) +
@@ -3361,7 +3361,7 @@ Future<Response> Master::Http::_startMaintenance(
       // for all the tasks that were running on the slave and `LostSlaveMessage`
       // messages to the framework. This guards against the slave having dropped
       // the `ShutdownMessage`.
-      foreach (const MachineID& machineId, machineIds) {
+      for (const MachineID& machineId : machineIds) {
         // The machine may not be in machines. This means no slaves are
         // currently registered on that machine so this is a no-op.
         if (master->machines.contains(machineId)) {
@@ -3387,7 +3387,7 @@ Future<Response> Master::Http::_startMaintenance(
       }
 
       // Update the master's local state with the downed machines.
-      foreach (const MachineID& id, machineIds) {
+      for (const MachineID& id : machineIds) {
         master->machines[id].info.set_mode(MachineInfo::DOWN);
       }
 
@@ -3492,7 +3492,7 @@ Future<Response> Master::Http::_stopMaintenance(
   }
 
   // Check that all machines are part of a maintenance schedule.
-  foreach (const MachineID& id, machineIds) {
+  for (const MachineID& id : machineIds) {
     if (!master->machines.contains(id)) {
       return BadRequest(
           "Machine '" + stringify(JSON::protobuf(id)) +
@@ -3519,7 +3519,7 @@ Future<Response> Master::Http::_stopMaintenance(
 
       // Update the master's local state with the reactivated machines.
       hashset<MachineID> updated;
-      foreach (const MachineID& id, machineIds) {
+      for (const MachineID& id : machineIds) {
         master->machines[id].info.set_mode(MachineInfo::UP);
         master->machines[id].info.clear_unavailability();
         updated.insert(id);
@@ -3670,7 +3670,7 @@ Future<mesos::maintenance::ClusterStatus> Master::Http::_getMaintenanceStatus(
           drainingMachine->mutable_id()->CopyFrom(id);
 
           // Unwrap inverse offer status information from the allocator.
-          foreach (const SlaveID& slave, machine.slaves) {
+          for (const SlaveID& slave : machine.slaves) {
             if (result.contains(slave)) {
               foreachvalue (
                   const mesos::allocator::InverseOfferStatus& status,
@@ -3847,7 +3847,7 @@ Future<Response> Master::Http::drainAgent(
       foreach (
           const mesos::maintenance::Window& window,
           master->maintenance.schedules.front().windows()) {
-        foreach (const MachineID& machineId, window.machine_ids()) {
+        for (const MachineID& machineId : window.machine_ids()) {
           if (machineId == slave->machineId) {
             return BadRequest(
                 "Agent " + stringify(slaveId) + " is part of a maintenance"
@@ -4192,7 +4192,7 @@ Future<Response> Master::Http::_operation(
   // itself vs master's request to schedule 'updateAvailable'.
   // We greedily rescind one offer at time until we've rescinded
   // enough offers to cover 'operation'.
-  foreach (Offer* offer, utils::copy(slave->offers)) {
+  for (Offer* offer : utils::copy(slave->offers)) {
     // If rescinding the offer would not contribute to satisfying
     // the required resources, skip it.
     Resources recovered = offer->resources();

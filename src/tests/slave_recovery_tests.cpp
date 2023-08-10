@@ -2294,7 +2294,7 @@ TYPED_TEST(SlaveRecoveryTest, RemoveNonCheckpointingFramework)
   Future<hashset<ContainerID>> containers = containerizer->containers();
   AWAIT_READY(containers);
 
-  foreach (const ContainerID& containerId, containers.get()) {
+  for (const ContainerID& containerId : containers.get()) {
     Future<Option<ContainerTermination>> termination =
       containerizer->destroy(containerId);
 
@@ -3767,7 +3767,7 @@ TYPED_TEST(SlaveRecoveryTest, RegisterDisconnectedSlave)
   Future<hashset<ContainerID>> containers = containerizer->containers();
   AWAIT_READY(containers);
 
-  foreach (const ContainerID& containerId, containers.get()) {
+  for (const ContainerID& containerId : containers.get()) {
     Future<Option<ContainerTermination>> termination =
       containerizer->destroy(containerId);
 

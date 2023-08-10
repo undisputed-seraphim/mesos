@@ -181,7 +181,7 @@ vector<ActionObject> ActionObject::reserve(
       // authorization (see MESOS-10056).
       hashset<string> roles;
 
-      foreach (const Resource& resource, resources) {
+      for (const Resource& resource : resources) {
         const string role = getReservationRole(resource);
 
         if (!roles.contains(role)) {
@@ -254,7 +254,7 @@ vector<ActionObject> ActionObject::createVolume(
   // Add an object for each unique role in the volumes.
   hashset<string> roles;
 
-  foreach (const Resource& volume, create.volumes()) {
+  for (const Resource& volume : create.volumes()) {
     string role = getReservationRole(volume);
 
     if (!roles.contains(role)) {
@@ -281,7 +281,7 @@ vector<ActionObject> ActionObject::destroyVolume(
   // action-object pairs only for resources that are persistent volumes and
   // skip all the others, relying on the caller to perform validation after
   // authorization (see MESOS-10083).
-  foreach (const Resource& volume, destroy.volumes()) {
+  for (const Resource& volume : destroy.volumes()) {
     // TODO(asekretenko): Replace with CHECK after MESOS-10083 is fixed.
     if (volume.has_disk() && volume.disk().has_persistence()) {
       result.push_back(fromResourceWithLegacyValue(

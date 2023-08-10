@@ -432,7 +432,7 @@ std::set<Capability> convert(const CapabilityInfo& capabilityInfo)
 {
   std::set<Capability> result;
 
-  foreach (int value, capabilityInfo.capabilities()) {
+  for (int value : capabilityInfo.capabilities()) {
     result.insert(convert(static_cast<CapabilityInfo::Capability>(value)));
   }
 
@@ -444,7 +444,7 @@ CapabilityInfo convert(const std::set<Capability>& capabilities)
 {
   CapabilityInfo capabilityInfo;
 
-  foreach (const Capability& capability, capabilities) {
+  for (const Capability& capability : capabilities) {
     capabilityInfo.add_capabilities(static_cast<CapabilityInfo::Capability>(
         capability + CAPABIILITY_PROTOBUF_OFFSET));
   }

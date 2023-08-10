@@ -368,7 +368,7 @@ TYPED_TEST(SlaveAuthorizerTest, FilterStateEndpoint)
     JSON::Array frameworks = state.values["frameworks"].as<JSON::Array>();
     EXPECT_EQ(2u, frameworks.values.size());
 
-    foreach (const JSON::Value& value, frameworks.values) {
+    for (const JSON::Value& value : frameworks.values) {
       JSON::Object framework = value.as<JSON::Object>();
       EXPECT_FALSE(framework.values.empty());
       ASSERT_TRUE(framework.values["executors"].is<JSON::Array>());
@@ -428,7 +428,7 @@ TYPED_TEST(SlaveAuthorizerTest, FilterStateEndpoint)
     JSON::Array frameworks = state.values["frameworks"].as<JSON::Array>();
     EXPECT_EQ(2u, frameworks.values.size());
 
-    foreach (const JSON::Value& value, frameworks.values) {
+    for (const JSON::Value& value : frameworks.values) {
       JSON::Object framework = value.as<JSON::Object>();
       EXPECT_FALSE(framework.values.empty());
       EXPECT_TRUE(

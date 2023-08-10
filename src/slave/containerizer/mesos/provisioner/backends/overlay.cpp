@@ -194,7 +194,7 @@ Future<Option<vector<Path>>> OverlayBackendProcess::provision(
   // We create symlinks with file name 0, 1, ..., N-1 in tempDir which
   // points to the corresponding layers in the same order.
   size_t idx = 0;
-  foreach (const string& layer, layers) {
+  for (const string& layer : layers) {
     const string link = path::join(tempDir, std::to_string(idx++));
 
     Try<Nothing> symlink = ::fs::symlink(layer, link);
@@ -272,7 +272,7 @@ Future<bool> OverlayBackendProcess::destroy(
     return Failure("Failed to read mount table: " + mountTable.error());
   }
 
-  foreach (const fs::MountInfoTable::Entry& entry, mountTable->entries) {
+  for (const fs::MountInfoTable::Entry& entry : mountTable->entries) {
     if (entry.target == rootfs) {
       // NOTE: Use MNT_DETACH here so that if there are still
       // processes holding files or directories in the rootfs, the

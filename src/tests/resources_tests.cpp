@@ -380,7 +380,7 @@ TEST(ResourcesTest, ParsingFromJSONWithRoles)
   EXPECT_TRUE(resources.contains(Resources(cpus)));
   EXPECT_EQ(145.54, resources.cpus().get());
 
-  foreach (const Resource& resource, resources) {
+  for (const Resource& resource : resources) {
     if (Resources::reservationRole(resource) == "role1") {
       EXPECT_EQ(91.1, resource.scalar().value());
     } else {
@@ -435,7 +435,7 @@ TEST(ResourcesTest, ParsingFromJSONWithRoles)
 
   resources = resourcesTry.get();
 
-  foreach (const Resource& resource, resources) {
+  for (const Resource& resource : resources) {
     if (Resources::reservationRole(resource) == "role1") {
       EXPECT_EQ(Value::RANGES, resource.type());
       EXPECT_EQ(2, resource.ranges().range_size());
@@ -811,7 +811,7 @@ TEST(ResourcesTest, MoveConstruction)
 
   // Move constructor for `vector<Resource>`.
   vector<Resource> r2;
-  foreach (const Resource& resource, r) {
+  for (const Resource& resource : r) {
     r2.push_back(resource);
   }
   Resources rr2{std::move(r2)};
@@ -819,7 +819,7 @@ TEST(ResourcesTest, MoveConstruction)
 
   // Move constructor for `google::protobuf::RepeatedPtrField<Resource>`.
   google::protobuf::RepeatedPtrField<Resource> r3;
-  foreach (const Resource& resource, r) {
+  for (const Resource& resource : r) {
     *r3.Add() = resource;
   }
   Resources rr3{std::move(r3)};
@@ -2285,8 +2285,8 @@ TEST(ReservedResourcesTest, Equals)
         createDynamicReservationInfo("role1", "principal2", labels2))};
 
   // Test that all resources in 'unique' are considered different.
-  foreach (const Resources& left, unique) {
-    foreach (const Resources& right, unique) {
+  for (const Resources& left : unique) {
+    for (const Resources& right : unique) {
       if (&left == &right) {
         continue;
       }
@@ -2965,7 +2965,7 @@ TEST(ResourcesOperationTest, StrippedResourcesAllocated)
 
   // Allocation info should be stripped when
   // converting to a quantity.
-  foreach (const Resource& resource, stripped) {
+  for (const Resource& resource : stripped) {
     EXPECT_FALSE(resource.has_allocation_info());
   }
 }
@@ -2981,7 +2981,7 @@ TEST(ResourcesOperationTest, StrippedResourcesReserved)
 
   EXPECT_TRUE(stripped.reserved("role").empty());
 
-  foreach (const Resource& resource, stripped) {
+  for (const Resource& resource : stripped) {
     EXPECT_FALSE(Resources::isDynamicallyReserved(resource));
     EXPECT_TRUE(Resources::isUnreserved(resource));
   }

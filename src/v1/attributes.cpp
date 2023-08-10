@@ -61,13 +61,13 @@ bool Attributes::operator==(const Attributes& that) const
   // number of duplicate attributes. This will be changed when we
   // enforce attribute name uniqueness after adding SET type support
   // for attributes (MESOS-1215).
-  foreach (const Attribute& attribute, attributes) {
+  for (const Attribute& attribute : attributes) {
     if (!that.contains(attribute)) {
       return false;
     }
   }
 
-  foreach (const Attribute& attribute, that) {
+  for (const Attribute& attribute : that) {
     if (!contains(attribute)) {
       return false;
     }
@@ -79,7 +79,7 @@ bool Attributes::operator==(const Attributes& that) const
 
 const Option<Attribute> Attributes::get(const Attribute& thatAttribute) const
 {
-  foreach (const Attribute& attribute, attributes) {
+  for (const Attribute& attribute : attributes) {
     if (attribute.name() == thatAttribute.name() &&
         attribute.type() == thatAttribute.type()) {
       return attribute;
@@ -92,7 +92,7 @@ const Option<Attribute> Attributes::get(const Attribute& thatAttribute) const
 
 bool Attributes::contains(const Attribute& attribute) const
 {
-  foreach (const Attribute& attr, attributes) {
+  for (const Attribute& attr : attributes) {
     if (attr.name() == attribute.name() && attr.type() == attribute.type()) {
       switch (attr.type()) {
         case Value::SCALAR:
@@ -205,7 +205,7 @@ Value::Scalar Attributes::get(
     const string& name,
     const Value::Scalar& scalar) const
 {
-  foreach (const Attribute& attribute, attributes) {
+  for (const Attribute& attribute : attributes) {
     if (attribute.name() == name &&
         attribute.type() == Value::SCALAR) {
       return attribute.scalar();
@@ -221,7 +221,7 @@ Value::Ranges Attributes::get(
     const string& name,
     const Value::Ranges& ranges) const
 {
-  foreach (const Attribute& attribute, attributes) {
+  for (const Attribute& attribute : attributes) {
     if (attribute.name() == name &&
         attribute.type() == Value::RANGES) {
       return attribute.ranges();
@@ -237,7 +237,7 @@ Value::Text Attributes::get(
     const string& name,
     const Value::Text& text) const
 {
-  foreach (const Attribute& attribute, attributes) {
+  for (const Attribute& attribute : attributes) {
     if (attribute.name() == name &&
         attribute.type() == Value::TEXT) {
       return attribute.text();

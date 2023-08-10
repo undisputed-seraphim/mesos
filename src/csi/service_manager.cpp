@@ -38,7 +38,6 @@
 
 #include <stout/check.hpp>
 #include <stout/duration.hpp>
-#include <stout/foreach.hpp>
 #include <stout/hashmap.hpp>
 #include <stout/os.hpp>
 #include <stout/result.hpp>

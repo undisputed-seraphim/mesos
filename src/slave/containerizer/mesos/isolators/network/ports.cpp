@@ -92,7 +92,7 @@ collectContainerListeners(
     return listeners;
   }
 
-  foreach (const ContainerID& containerId, containerIds) {
+  for (const ContainerID& containerId : containerIds) {
     // Reconstruct the cgroup path from the container ID.
     string cgroup =
       containerizer::paths::getCgroupPath(cgroupsRoot, containerId);
@@ -109,7 +109,7 @@ collectContainerListeners(
 
     // For each process in this container, check whether any of its open
     // sockets matches something in the listening set.
-    foreach (pid_t pid, pids.get()) {
+    for (pid_t pid : pids.get()) {
       Try<vector<uint32_t>> sockets =
         NetworkPortsIsolatorProcess::getProcessSockets(pid);
 
@@ -125,7 +125,7 @@ collectContainerListeners(
         continue;
       }
 
-      foreach (uint32_t inode, sockets.get()) {
+      for (uint32_t inode : sockets.get()) {
         if (!listenInfos->contains(inode)) {
           continue;
         }
@@ -176,7 +176,7 @@ NetworkPortsIsolatorProcess::getListeningSockets()
 
   hashmap<uint32_t, socket::Info> inodes;
 
-  foreach (const socket::Info& info, socketInfos.get()) {
+  for (const socket::Info& info : socketInfos.get()) {
     // The inode should never be 0. This would only happen if the kernel
     // didn't return the inode in the sockdiag response, which would imply
     // a very old kernel or a problem between the kernel and libnl.
@@ -422,7 +422,7 @@ bool NetworkPortsIsolatorProcess::supportsNesting()
 // is our signal that the container is (or will be) joined to a CNI network.
 static bool hasNamedNetwork(const ContainerInfo& container_info)
 {
-  foreach (const auto& networkInfo, container_info.network_infos()) {
+  for (const auto& networkInfo : container_info.network_infos()) {
     if (networkInfo.has_name()) {
       return true;
     }
@@ -445,7 +445,7 @@ Future<Nothing> NetworkPortsIsolatorProcess::recover(
     const hashset<ContainerID>& orphans)
 {
   // First, recover all the root level containers.
-  foreach (const auto& state, states) {
+  for (const auto& state : states) {
     if (state.container_id().has_parent()) {
       continue;
     }
@@ -472,7 +472,7 @@ Future<Nothing> NetworkPortsIsolatorProcess::recover(
 
   // Now that we know which root level containers we are isolating, we can
   // decide which child containers we also want.
-  foreach (const auto& state, states) {
+  for (const auto& state : states) {
     if (!state.container_id().has_parent()) {
       continue;
     }

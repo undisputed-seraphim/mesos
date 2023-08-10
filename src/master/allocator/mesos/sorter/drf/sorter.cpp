@@ -128,7 +128,7 @@ void DRFSorter::add(const string& clientPath)
     }
 
     Option<Node*> child = [&]() -> Option<Node*> {
-      foreach (Node* c, current->children) {
+      for (Node* c : current->children) {
         if (c->name == *token) return c;
       }
       return None();
@@ -503,7 +503,7 @@ vector<string> DRFSorter::sort()
                 childIter,
                 DRFSorter::Node::compareDRF);
 
-      foreach (Node* child, node->children) {
+      for (Node* child : node->children) {
         if (child->kind == Node::INTERNAL) {
           sortTree(child);
         } else if (child->kind == Node::INACTIVE_LEAF) {
@@ -528,7 +528,7 @@ vector<string> DRFSorter::sort()
 
   std::function<void (const Node*)> listClients =
       [&listClients, &result](const Node* node) {
-    foreach (const Node* child, node->children) {
+    for (const Node* child : node->children) {
       switch (child->kind) {
         case Node::ACTIVE_LEAF:
           result.push_back(child->clientPath());

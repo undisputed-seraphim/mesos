@@ -196,7 +196,7 @@ void coalesce(Value::Ranges* result, vector<Range> ranges)
   // In a single pass, we compute the size of the end result, as well as modify
   // in place the intermediate data structure to build up result as we
   // solve it.
-  foreach (const Range& range, ranges) {
+  for (const Range& range : ranges) {
     // Skip if this range is equivalent to the current range.
     if (range.start == current.start && range.end == current.end) {
       continue;
@@ -262,7 +262,7 @@ Value::Ranges subtract(const Value::Ranges& left_, const Value::Ranges& right_)
     vector<internal::Range> result;
     result.reserve(ranges.range_size());
 
-    foreach (const Value::Range& range, ranges.range()) {
+    for (const Value::Range& range : ranges.range()) {
       result.push_back({range.begin(), range.end()});
     }
 
@@ -356,7 +356,7 @@ void coalesce(
     std::initializer_list<Value::Ranges> addedRanges)
 {
   size_t rangesSum = result->range_size();
-  foreach (const Value::Ranges& range, addedRanges) {
+  for (const Value::Ranges& range : addedRanges) {
     rangesSum += range.range_size();
   }
 
@@ -365,14 +365,14 @@ void coalesce(
 
   // Merges ranges into a vector.
   auto fill = [&ranges](const Value::Ranges& inputs) {
-    foreach (const Value::Range& range, inputs.range()) {
+    for (const Value::Range& range : inputs.range()) {
       ranges.push_back({range.begin(), range.end()});
     }
   };
 
   // Merge both ranges into the vector;
   fill(*result);
-  foreach (const Value::Ranges& range, addedRanges) {
+  for (const Value::Ranges& range : addedRanges) {
     fill(range);
   }
 
@@ -402,7 +402,7 @@ IntervalSet<uint64_t> rangesToIntervalSet(const Value::Ranges& ranges)
 {
   IntervalSet<uint64_t> set;
 
-  foreach (const Value::Range& range, ranges.range()) {
+  for (const Value::Range& range : ranges.range()) {
     set += (Bound<uint64_t>::closed(range.begin()),
             Bound<uint64_t>::closed(range.end()));
   }

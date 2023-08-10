@@ -50,7 +50,6 @@
 
 #include <stout/duration.hpp>
 #include <stout/exit.hpp>
-#include <stout/foreach.hpp>
 #include <stout/os.hpp>
 #include <stout/path.hpp>
 #include <stout/try.hpp>

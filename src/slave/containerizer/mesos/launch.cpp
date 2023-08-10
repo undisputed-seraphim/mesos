@@ -331,7 +331,7 @@ static Try<Nothing> prepareMounts(const ContainerLaunchInfo& launchInfo)
     cerr << "Marked '/' as rslave" << endl;
   } else {
     hashset<string> sharedMountTargets;
-    foreach (const ContainerMountInfo& mount, launchInfo.mounts()) {
+    for (const ContainerMountInfo& mount : launchInfo.mounts()) {
       // Skip normal mounts.
       if ((mount.flags() & MS_SHARED) == 0) {
         continue;
@@ -345,7 +345,7 @@ static Try<Nothing> prepareMounts(const ContainerLaunchInfo& launchInfo)
       return Error("Failed to get mount table: " + table.error());
     }
 
-    foreach (const fs::MountInfoTable::Entry& entry,
+    for (const fs::MountInfoTable::Entry& entry :
              adaptor::reverse(table->entries)) {
       if (!sharedMountTargets.contains(entry.target)) {
         Try<Nothing> mnt = fs::mount(
@@ -364,7 +364,7 @@ static Try<Nothing> prepareMounts(const ContainerLaunchInfo& launchInfo)
     }
   }
 
-  foreach (const ContainerMountInfo& mount, launchInfo.mounts()) {
+  for (const ContainerMountInfo& mount : launchInfo.mounts()) {
     // Skip those mounts that are used for setting up propagation.
     if ((mount.flags() & MS_SHARED) != 0) {
       continue;
@@ -564,7 +564,7 @@ static Try<Nothing> installResourceLimits(const RLimitInfo& limits)
 #ifdef __WINDOWS__
   return Error("Rlimits are not supported on Windows");
 #else
-  foreach (const RLimitInfo::RLimit& limit, limits.rlimits()) {
+  for (const RLimitInfo::RLimit& limit : limits.rlimits()) {
     Try<Nothing> set = rlimits::set(limit);
     if (set.isError()) {
       return Error(
@@ -851,14 +851,14 @@ int MesosContainerizerLaunch::execute()
     exitWithStatus(EXIT_FAILURE);
   }
 
-  foreach (const string& target, launchInfo.masked_paths()) {
+  for (const string& target : launchInfo.masked_paths()) {
     mount = maskPath(target);
     if (mount.isError()) {
       cerr << "Failed to mask container paths: " << mount.error() << endl;
     }
   }
 
-  foreach (const ContainerFileOperation& op, launchInfo.file_operations()) {
+  for (const ContainerFileOperation& op : launchInfo.file_operations()) {
     Try<Nothing> result = executeFileOperation(op);
     if (result.isError()) {
       cerr << result.error() << endl;
@@ -868,7 +868,7 @@ int MesosContainerizerLaunch::execute()
 
   // Run additional preparation commands. These are run as the same
   // user and with the environment as the agent.
-  foreach (const CommandInfo& command, launchInfo.pre_exec_commands()) {
+  for (const CommandInfo& command : launchInfo.pre_exec_commands()) {
     if (!command.has_value()) {
       cerr << "The 'value' of a preparation command is not specified" << endl;
       exitWithStatus(EXIT_FAILURE);
@@ -886,7 +886,7 @@ int MesosContainerizerLaunch::execute()
       // Directly spawn all non-shell commands to prohibit users
       // from injecting arbitrary shell commands in the arguments.
       vector<string> args;
-      foreach (const string& arg, command.arguments()) {
+      for (const string& arg : command.arguments()) {
         args.push_back(arg);
       }
 
@@ -946,7 +946,7 @@ int MesosContainerizerLaunch::execute()
         exitWithStatus(EXIT_FAILURE);
       }
 
-      foreach (uint32_t supplementaryGroup, launchInfo.supplementary_groups()) {
+      for (uint32_t supplementaryGroup : launchInfo.supplementary_groups()) {
         _gids->push_back(supplementaryGroup);
       }
 
@@ -1207,7 +1207,7 @@ int MesosContainerizerLaunch::execute()
     // by MESOS-7299.
     hashmap<string, string> environment;
 
-    foreach (const Environment::Variable& variable,
+    for (const Environment::Variable& variable :
              launchInfo.environment().variables()) {
       const string& name = variable.name();
       const string& value = variable.value();
@@ -1309,7 +1309,7 @@ int MesosContainerizerLaunch::execute()
     }
 
     // Avoid leaking not required file descriptors into the forked process.
-    foreach (int_fd fd, fds.get()) {
+    for (int_fd fd : fds.get()) {
       if (fd != STDIN_FILENO && fd != STDOUT_FILENO && fd != STDERR_FILENO) {
         // NOTE: Set "FD_CLOEXEC" on the fd, instead of closing it
         // because exec below might exec a memfd.

@@ -337,7 +337,7 @@ Metrics::Metrics(const Master& master)
   // resources the slave exposes.
   const string resources[] = {"cpus", "gpus", "mem", "disk"};
 
-  foreach (const string& resource, resources) {
+  for (const string& resource : resources) {
     PullGauge total(
         "master/" + resource + "_total",
         defer(master, &Master::_resources_total, resource));
@@ -359,7 +359,7 @@ Metrics::Metrics(const Master& master)
     process::metrics::add(percent);
   }
 
-  foreach (const string& resource, resources) {
+  for (const string& resource : resources) {
     PullGauge total(
         "master/" + resource + "_revocable_total",
         defer(master, &Master::_resources_revocable_total, resource));
@@ -514,32 +514,32 @@ Metrics::~Metrics()
   process::metrics::remove(slave_unreachable_completed);
   process::metrics::remove(slave_unreachable_canceled);
 
-  foreach (const PullGauge& gauge, resources_total) {
+  for (const PullGauge& gauge : resources_total) {
     process::metrics::remove(gauge);
   }
   resources_total.clear();
 
-  foreach (const PullGauge& gauge, resources_used) {
+  for (const PullGauge& gauge : resources_used) {
     process::metrics::remove(gauge);
   }
   resources_used.clear();
 
-  foreach (const PullGauge& gauge, resources_percent) {
+  for (const PullGauge& gauge : resources_percent) {
     process::metrics::remove(gauge);
   }
   resources_percent.clear();
 
-  foreach (const PullGauge& gauge, resources_revocable_total) {
+  for (const PullGauge& gauge : resources_revocable_total) {
     process::metrics::remove(gauge);
   }
   resources_revocable_total.clear();
 
-  foreach (const PullGauge& gauge, resources_revocable_used) {
+  for (const PullGauge& gauge : resources_revocable_used) {
     process::metrics::remove(gauge);
   }
   resources_revocable_used.clear();
 
-  foreach (const PullGauge& gauge, resources_revocable_percent) {
+  for (const PullGauge& gauge : resources_revocable_percent) {
     process::metrics::remove(gauge);
   }
   resources_revocable_percent.clear();

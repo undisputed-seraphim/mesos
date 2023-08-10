@@ -257,7 +257,7 @@ Future<Nothing> NvidiaGpuIsolatorProcess::recover(
 {
   vector<Future<Nothing>> futures;
 
-  foreach (const ContainerState& state, states) {
+  for (const ContainerState& state : states) {
     const ContainerID& containerId = state.container_id();
 
     // If we are a nested container, we skip the recover because our
@@ -293,8 +293,8 @@ Future<Nothing> NvidiaGpuIsolatorProcess::recover(
     const set<Gpu>& available = allocator.total();
 
     set<Gpu> containerGpus;
-    foreach (const cgroups::devices::Entry& entry, entries.get()) {
-      foreach (const Gpu& gpu, available) {
+    for (const cgroups::devices::Entry& entry : entries.get()) {
+      for (const Gpu& gpu : available) {
         if (entry.selector.major == gpu.major &&
             entry.selector.minor == gpu.minor) {
           containerGpus.insert(gpu);
@@ -442,7 +442,7 @@ Future<Option<ContainerLaunchInfo>> NvidiaGpuIsolatorProcess::_prepare(
     return Failure("Failed to glob /dev/nvidia*: " + nvidia.error());
   }
 
-  foreach (const string& device, nvidia.get()) {
+  for (const string& device : nvidia.get()) {
     // The directory `/dev/nvidia-caps` was introduced in CUDA 11.0, just
     // ignore it since we only care about the Nvidia GPU device files.
     //
@@ -562,7 +562,7 @@ Future<Nothing> NvidiaGpuIsolatorProcess::_update(
 
   Info* info = CHECK_NOTNULL(infos.at(containerId));
 
-  foreach (const Gpu& gpu, allocation) {
+  for (const Gpu& gpu : allocation) {
     cgroups::devices::Entry entry;
     entry.selector.type = Entry::Selector::Type::CHARACTER;
     entry.selector.major = gpu.major;

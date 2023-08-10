@@ -122,7 +122,7 @@ Future<ResourceStatistics> BlkioSubsystemProcess::usage(
       return Failure(time.error());
     }
 
-    foreach (const cgroups::blkio::Value& value, time.get()) {
+    for (const cgroups::blkio::Value& value : time.get()) {
       if (value.device.isNone()) {
         totalCfq.set_time(value.value);
       } else {
@@ -136,7 +136,7 @@ Future<ResourceStatistics> BlkioSubsystemProcess::usage(
       return Failure(sectors.error());
     }
 
-    foreach (const cgroups::blkio::Value& value, sectors.get()) {
+    for (const cgroups::blkio::Value& value : sectors.get()) {
       if (value.device.isNone()) {
         totalCfq.set_sectors(value.value);
       } else {
@@ -151,7 +151,7 @@ Future<ResourceStatistics> BlkioSubsystemProcess::usage(
       return Failure(io_service_bytes.error());
     }
 
-    foreach (const cgroups::blkio::Value& statValue, io_service_bytes.get()) {
+    for (const cgroups::blkio::Value& statValue : io_service_bytes.get()) {
       CgroupInfo::Blkio::Value* value = statValue.device.isSome()
         ? cfq[statValue.device.get()].add_io_service_bytes()
         : totalCfq.add_io_service_bytes();
@@ -166,7 +166,7 @@ Future<ResourceStatistics> BlkioSubsystemProcess::usage(
       return Failure(io_serviced.error());
     }
 
-    foreach (const cgroups::blkio::Value& statValue, io_serviced.get()) {
+    for (const cgroups::blkio::Value& statValue : io_serviced.get()) {
       CgroupInfo::Blkio::Value* value = statValue.device.isSome()
         ? cfq[statValue.device.get()].add_io_serviced()
         : totalCfq.add_io_serviced();
@@ -181,7 +181,7 @@ Future<ResourceStatistics> BlkioSubsystemProcess::usage(
       return Failure(io_service_time.error());
     }
 
-    foreach (const cgroups::blkio::Value& statValue, io_service_time.get()) {
+    for (const cgroups::blkio::Value& statValue : io_service_time.get()) {
       CgroupInfo::Blkio::Value* value = statValue.device.isSome()
         ? cfq[statValue.device.get()].add_io_service_time()
         : totalCfq.add_io_service_time();
@@ -196,7 +196,7 @@ Future<ResourceStatistics> BlkioSubsystemProcess::usage(
       return Failure(io_wait_time.error());
     }
 
-    foreach (const cgroups::blkio::Value& statValue, io_wait_time.get()) {
+    for (const cgroups::blkio::Value& statValue : io_wait_time.get()) {
       CgroupInfo::Blkio::Value* value = statValue.device.isSome()
         ? cfq[statValue.device.get()].add_io_wait_time()
         : totalCfq.add_io_wait_time();
@@ -211,7 +211,7 @@ Future<ResourceStatistics> BlkioSubsystemProcess::usage(
       return Failure(io_merged.error());
     }
 
-    foreach (const cgroups::blkio::Value& statValue, io_merged.get()) {
+    for (const cgroups::blkio::Value& statValue : io_merged.get()) {
       CgroupInfo::Blkio::Value* value = statValue.device.isSome()
         ? cfq[statValue.device.get()].add_io_merged()
         : totalCfq.add_io_merged();
@@ -226,7 +226,7 @@ Future<ResourceStatistics> BlkioSubsystemProcess::usage(
       return Failure(io_queued.error());
     }
 
-    foreach (const cgroups::blkio::Value& statValue, io_queued.get()) {
+    for (const cgroups::blkio::Value& statValue : io_queued.get()) {
       CgroupInfo::Blkio::Value* value = statValue.device.isSome()
         ? cfq[statValue.device.get()].add_io_queued()
         : totalCfq.add_io_queued();
@@ -240,7 +240,7 @@ Future<ResourceStatistics> BlkioSubsystemProcess::usage(
       return Failure(time.error());
     }
 
-    foreach (const cgroups::blkio::Value& value, time.get()) {
+    for (const cgroups::blkio::Value& value : time.get()) {
       if (value.device.isNone()) {
         totalCfqRecursive.set_time(value.value);
       } else {
@@ -253,7 +253,7 @@ Future<ResourceStatistics> BlkioSubsystemProcess::usage(
       return Failure(sectors.error());
     }
 
-    foreach (const cgroups::blkio::Value& value, sectors.get()) {
+    for (const cgroups::blkio::Value& value : sectors.get()) {
       if (value.device.isNone()) {
         totalCfqRecursive.set_sectors(value.value);
       } else {
@@ -266,7 +266,7 @@ Future<ResourceStatistics> BlkioSubsystemProcess::usage(
       return Failure(io_service_bytes.error());
     }
 
-    foreach (const cgroups::blkio::Value& statValue, io_service_bytes.get()) {
+    for (const cgroups::blkio::Value& statValue : io_service_bytes.get()) {
       CgroupInfo::Blkio::Value* value = statValue.device.isSome()
         ? cfqRecursive[statValue.device.get()].add_io_service_bytes()
         : totalCfqRecursive.add_io_service_bytes();
@@ -279,7 +279,7 @@ Future<ResourceStatistics> BlkioSubsystemProcess::usage(
       return Failure(io_serviced.error());
     }
 
-    foreach (const cgroups::blkio::Value& statValue, io_serviced.get()) {
+    for (const cgroups::blkio::Value& statValue : io_serviced.get()) {
       CgroupInfo::Blkio::Value* value = statValue.device.isSome()
         ? cfqRecursive[statValue.device.get()].add_io_serviced()
         : totalCfqRecursive.add_io_serviced();
@@ -292,7 +292,7 @@ Future<ResourceStatistics> BlkioSubsystemProcess::usage(
       return Failure(io_service_time.error());
     }
 
-    foreach (const cgroups::blkio::Value& statValue, io_service_time.get()) {
+    for (const cgroups::blkio::Value& statValue : io_service_time.get()) {
       CgroupInfo::Blkio::Value* value = statValue.device.isSome()
         ? cfqRecursive[statValue.device.get()].add_io_service_time()
         : totalCfqRecursive.add_io_service_time();
@@ -305,7 +305,7 @@ Future<ResourceStatistics> BlkioSubsystemProcess::usage(
       return Failure(io_wait_time.error());
     }
 
-    foreach (const cgroups::blkio::Value& statValue, io_wait_time.get()) {
+    for (const cgroups::blkio::Value& statValue : io_wait_time.get()) {
       CgroupInfo::Blkio::Value* value = statValue.device.isSome()
         ? cfqRecursive[statValue.device.get()].add_io_wait_time()
         : totalCfqRecursive.add_io_wait_time();
@@ -318,7 +318,7 @@ Future<ResourceStatistics> BlkioSubsystemProcess::usage(
       return Failure(io_merged.error());
     }
 
-    foreach (const cgroups::blkio::Value& statValue, io_merged.get()) {
+    for (const cgroups::blkio::Value& statValue : io_merged.get()) {
       CgroupInfo::Blkio::Value* value = statValue.device.isSome()
         ? cfqRecursive[statValue.device.get()].add_io_merged()
         : totalCfqRecursive.add_io_merged();
@@ -331,7 +331,7 @@ Future<ResourceStatistics> BlkioSubsystemProcess::usage(
       return Failure(io_queued.error());
     }
 
-    foreach (const cgroups::blkio::Value& statValue, io_queued.get()) {
+    for (const cgroups::blkio::Value& statValue : io_queued.get()) {
       CgroupInfo::Blkio::Value* value = statValue.device.isSome()
         ? cfqRecursive[statValue.device.get()].add_io_queued()
         : totalCfqRecursive.add_io_queued();
@@ -347,7 +347,7 @@ Future<ResourceStatistics> BlkioSubsystemProcess::usage(
     return Failure(io_serviced.error());
   }
 
-  foreach (const cgroups::blkio::Value& statValue, io_serviced.get()) {
+  for (const cgroups::blkio::Value& statValue : io_serviced.get()) {
     CgroupInfo::Blkio::Value* value = statValue.device.isSome()
       ? throttling[statValue.device.get()].add_io_serviced()
       : totalThrottling.add_io_serviced();
@@ -361,7 +361,7 @@ Future<ResourceStatistics> BlkioSubsystemProcess::usage(
     return Failure(io_service_bytes.error());
   }
 
-  foreach (const cgroups::blkio::Value& statValue, io_service_bytes.get()) {
+  for (const cgroups::blkio::Value& statValue : io_service_bytes.get()) {
     CgroupInfo::Blkio::Value* value = statValue.device.isSome()
       ? throttling[statValue.device.get()].add_io_service_bytes()
       : totalThrottling.add_io_service_bytes();

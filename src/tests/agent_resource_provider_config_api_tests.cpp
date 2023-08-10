@@ -87,7 +87,7 @@ public:
 
   void TearDown() override
   {
-    foreach (const string& slaveWorkDir, slaveWorkDirs) {
+    for (const string& slaveWorkDir : slaveWorkDirs) {
       // Clean up CSI endpoint directories if there is any.
       const string csiRootDir = slave::paths::getCsiRootDir(slaveWorkDir);
 
@@ -95,7 +95,7 @@ public:
         csi::paths::getContainerPaths(csiRootDir, "*", "*");
       ASSERT_SOME(csiContainerPaths);
 
-      foreach (const string& path, csiContainerPaths.get()) {
+      for (const string& path : csiContainerPaths.get()) {
         Try<csi::paths::ContainerPath> containerPath =
           csi::paths::parseContainerPath(csiRootDir, path);
         ASSERT_SOME(containerPath);
@@ -252,7 +252,7 @@ public:
       Try<list<string>> configFiles = os::ls(resourceProviderConfigDir.get());
       ASSERT_SOME(configFiles);
 
-      foreach (const string& configFile, configFiles.get()) {
+      for (const string& configFile : configFiles.get()) {
         const string configPath =
           path::join(resourceProviderConfigDir.get(), configFile);
 

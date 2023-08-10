@@ -46,7 +46,7 @@ Try<Authenticator*> BasicAuthenticatorFactory::create(
 {
   hashmap<string, string> credentialMap;
 
-  foreach (const Credential& credential, credentials.credentials()) {
+  for (const Credential& credential : credentials.credentials()) {
     credentialMap.put(credential.principal(), credential.secret());
   }
 
@@ -60,7 +60,7 @@ Try<Authenticator*> BasicAuthenticatorFactory::create(
   Credentials credentials;
   Option<string> realm;
 
-  foreach (const Parameter& parameter, parameters.parameter()) {
+  for (const Parameter& parameter : parameters.parameter()) {
     if (parameter.key() == "credentials") {
       Try<JSON::Value> json = JSON::parse(parameter.value());
       if (json.isError()) {

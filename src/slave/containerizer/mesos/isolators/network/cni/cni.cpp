@@ -170,7 +170,7 @@ Try<Isolator*> NetworkCniIsolatorProcess::create(const Flags& flags)
   // traverse of the mount table to find the first entry whose target
   // is a prefix of the CNI network information root directory.
   Option<fs::MountInfoTable::Entry> rootDirMount;
-  foreach (const fs::MountInfoTable::Entry& entry,
+  for (const fs::MountInfoTable::Entry& entry :
            adaptor::reverse(table->entries)) {
     if (strings::startsWith(rootDir.get(), entry.target)) {
       rootDirMount = entry;
@@ -196,7 +196,7 @@ Try<Isolator*> NetworkCniIsolatorProcess::create(const Flags& flags)
   if (rootDirMount->shared().isNone()) {
     bindMountNeeded = true;
   } else {
-    foreach (const fs::MountInfoTable::Entry& entry, table->entries) {
+    for (const fs::MountInfoTable::Entry& entry : table->entries) {
       // Skip 'rootDirMount' and any mount underneath it. Also, we
       // skip those mounts whose targets are not the parent of the CNI
       // network information root directory because even if they are
@@ -269,7 +269,7 @@ Try<Isolator*> NetworkCniIsolatorProcess::create(const Flags& flags)
   Option<ContainerDNSInfo::MesosInfo> defaultCniDNS;
 
   if (flags.default_container_dns.isSome()) {
-    foreach (const ContainerDNSInfo::MesosInfo& dnsInfo,
+    for (const ContainerDNSInfo::MesosInfo& dnsInfo :
              flags.default_container_dns->mesos()) {
       if (dnsInfo.network_mode() == ContainerDNSInfo::MesosInfo::CNI) {
         if (!dnsInfo.has_network_name()) {
@@ -308,7 +308,7 @@ Try<hashmap<string, string>> NetworkCniIsolatorProcess::loadNetworkConfigs(
         configDir + "': " + entries.error());
   }
 
-  foreach (const string& entry, entries.get()) {
+  for (const string& entry : entries.get()) {
     const string path = path::join(configDir, entry);
 
     // Ignore directory entries.
@@ -403,7 +403,7 @@ Future<Nothing> NetworkCniIsolatorProcess::recover(
   }
 
   hashmap<ContainerID, ContainerState> containerIdToState;
-  foreach (const ContainerState& state, states) {
+  for (const ContainerState& state : states) {
     containerIdToState.put(state.container_id(), state);
   }
 
@@ -417,7 +417,7 @@ Future<Nothing> NetworkCniIsolatorProcess::recover(
   vector<ContainerID> unknownOrphans;
   vector<Future<Nothing>> cleanups;
 
-  foreach (const string& entry, entries.get()) {
+  for (const string& entry : entries.get()) {
     ContainerID containerId =
       protobuf::parseContainerId(Path(entry).basename());
 
@@ -457,7 +457,7 @@ Future<Nothing> NetworkCniIsolatorProcess::recover(
       CHECK_EQ(cleanups.size(), unknownOrphans.size());
 
       int i = 0;
-      foreach (const Future<Nothing>& cleanup, cleanups) {
+      for (const Future<Nothing>& cleanup : cleanups) {
         if (!cleanup.isReady()) {
           LOG(ERROR) << "Failed to cleanup unknown orphaned container "
                      << unknownOrphans.at(i) << ": "
@@ -506,7 +506,7 @@ Try<Nothing> NetworkCniIsolatorProcess::_recover(
   }
 
   hashmap<string, ContainerNetwork> containerNetworks;
-  foreach (const string& networkName, networkNames.get()) {
+  for (const string& networkName : networkNames.get()) {
     Try<list<string>> interfaces = paths::getInterfaces(
         rootDir.get(),
         containerId,
@@ -541,7 +541,7 @@ Try<Nothing> NetworkCniIsolatorProcess::_recover(
     if (state.isSome()) {
       if (state->has_executor_info()) {
         // This is the case that executor container joins CNI network.
-        foreach (const mesos::NetworkInfo& networkInfo,
+        for (const mesos::NetworkInfo& networkInfo :
                  state->executor_info().container().network_infos()) {
           if (networkInfo.name() == networkName) {
             containerNetwork.networkInfo = networkInfo;
@@ -550,7 +550,7 @@ Try<Nothing> NetworkCniIsolatorProcess::_recover(
       } else if (state->has_container_info()) {
         // This is the case that nested container or standalone container
         // joins CNI network.
-        foreach (const mesos::NetworkInfo& networkInfo,
+        for (const mesos::NetworkInfo& networkInfo :
                  state->container_info().network_infos()) {
           if (networkInfo.name() == networkName) {
             containerNetwork.networkInfo = networkInfo;
@@ -668,7 +668,7 @@ Future<Option<ContainerLaunchInfo>> NetworkCniIsolatorProcess::prepare(
       }
 
       int ifIndex = 0;
-      foreach (const mesos::NetworkInfo& networkInfo,
+      for (const mesos::NetworkInfo& networkInfo :
                containerInfo.network_infos()) {
         if (!networkInfo.has_name()) {
           continue;
@@ -1000,7 +1000,7 @@ Future<Nothing> NetworkCniIsolatorProcess::_isolate(
     const vector<Future<Nothing>>& attaches)
 {
   vector<string> messages;
-  foreach (const Future<Nothing>& attach, attaches) {
+  for (const Future<Nothing>& attach : attaches) {
     if (!attach.isReady()) {
       messages.push_back(
           attach.isFailed() ? attach.failure() : "discarded");
@@ -1697,7 +1697,7 @@ Future<Nothing> NetworkCniIsolatorProcess::_cleanup(
   CHECK(infos.contains(containerId));
 
   vector<string> messages;
-  foreach (const Future<Nothing>& detach, detaches) {
+  for (const Future<Nothing>& detach : detaches) {
     if (!detach.isReady()) {
       messages.push_back(
           detach.isFailed() ? detach.failure() : "discarded");

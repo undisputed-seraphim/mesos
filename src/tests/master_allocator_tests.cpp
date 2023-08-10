@@ -103,8 +103,8 @@ public:
     double totalCpus = 0;
     double totalMem = 0;
 
-    foreach (const Offer& offer, offers) {
-      foreach (const Resource& resource, offer.resources()) {
+    for (const Offer& offer : offers) {
+      for (const Resource& resource : offer.resources()) {
         if (resource.name() == "cpus") {
           totalCpus += resource.scalar().value();
         } else if (resource.name() == "mem") {
@@ -1264,7 +1264,7 @@ TYPED_TEST(MasterAllocatorTest, MinAllocatableResources)
     "cpus:0.5;mem:200;disk:10;ports:[11-15]",
     "cpus:0.5;mem:10;disk:50;ports:[16-20]"};
 
-  foreach (const string& resourcesString, nonAllocatableAgentResources) {
+  for (const string& resourcesString : nonAllocatableAgentResources) {
     Future<SlaveRegisteredMessage> slaveRegisteredMessage =
       FUTURE_PROTOBUF(SlaveRegisteredMessage(), _, _);
 
@@ -1292,7 +1292,7 @@ TYPED_TEST(MasterAllocatorTest, MinAllocatableResources)
   };
 
   hashset<SlaveID> allocatableAgents;
-  foreach (const string& resourcesString, allocatableAgentResources) {
+  for (const string& resourcesString : allocatableAgentResources) {
     Future<SlaveRegisteredMessage> slaveRegisteredMessage =
       FUTURE_PROTOBUF(SlaveRegisteredMessage(), _, _);
 
@@ -1332,7 +1332,7 @@ TYPED_TEST(MasterAllocatorTest, MinAllocatableResources)
   // agents should be offered.
   EXPECT_EQ(offers->size(), allocatableAgents.size());
 
-  foreach (const Offer& offer, offers.get()) {
+  for (const Offer& offer : offers.get()) {
     EXPECT_TRUE(allocatableAgents.count(offer.slave_id()) != 0);
   }
 

@@ -178,7 +178,7 @@ Future<Nothing> IOSwitchboard::recover(
   // NOTE: If a new agent is started with io switchboard server mode
   // disabled, we will still recover the io switchboard info for
   // containers previously launched by an agent with server mode enabled.
-  foreach (const ContainerState& state, states) {
+  for (const ContainerState& state : states) {
     const ContainerID& containerId = state.container_id();
 
     const string path = getContainerIOSwitchboardPath(
@@ -216,7 +216,7 @@ Future<Nothing> IOSwitchboard::recover(
   }
 
   // Recover the io switchboards from any orphaned containers.
-  foreach (const ContainerID& orphan, orphans) {
+  for (const ContainerID& orphan : orphans) {
     const string path = getContainerIOSwitchboardPath(
         flags.runtime_dir, orphan);
 
@@ -370,7 +370,7 @@ Future<Option<ContainerLaunchInfo>> IOSwitchboard::_prepare(
 
   // Helper for closing a set of file descriptors.
   auto close = [](const hashset<int>& fds) {
-    foreach (int fd, fds) {
+    for (int fd : fds) {
       os::close(fd);
     }
   };
@@ -494,7 +494,7 @@ Future<Option<ContainerLaunchInfo>> IOSwitchboard::_prepare(
   }
 
   // Make sure all file descriptors opened have CLOEXEC set.
-  foreach (int fd, openedFds) {
+  for (int fd : openedFds) {
     Try<Nothing> cloexec = os::cloexec(fd);
     if (cloexec.isError()) {
       close(openedFds);
@@ -615,7 +615,7 @@ Future<Option<ContainerLaunchInfo>> IOSwitchboard::_prepare(
 
   // We remove the already closed file descriptors from 'openedFds' so
   // that we don't close multiple times if failures happen below.
-  foreach (int fd, ioSwitchboardFds) {
+  for (int fd : ioSwitchboardFds) {
     openedFds.erase(fd);
   }
 
@@ -1326,7 +1326,7 @@ void IOSwitchboardServerProcess::finalize()
   // maintain a reference to the socket, which would cause a leak.
   accept.discard();
 
-  foreach (HttpConnection& connection, outputConnections) {
+  for (HttpConnection& connection : outputConnections) {
     connection.close();
 
     // It is possible that the read end of the pipe has not yet
@@ -1356,7 +1356,7 @@ void IOSwitchboardServerProcess::heartbeatLoop()
     ->mutable_interval()
     ->set_nanoseconds(heartbeatInterval->ns());
 
-  foreach (HttpConnection& connection, outputConnections) {
+  for (HttpConnection& connection : outputConnections) {
     connection.send(message);
   }
 
@@ -1872,7 +1872,7 @@ void IOSwitchboardServerProcess::outputHook(
   // the `HttpConnection::closed()` call above. We might do a few
   // unnecessary writes if we have a bunch of messages queued up,
   // but that shouldn't be a problem.
-  foreach (HttpConnection& connection, outputConnections) {
+  for (HttpConnection& connection : outputConnections) {
     connection.send(message);
   }
 }
