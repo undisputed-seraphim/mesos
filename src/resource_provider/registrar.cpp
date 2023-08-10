@@ -267,7 +267,7 @@ void GenericRegistrarProcess::update()
 
   Registry updatedRegistry = variable->get();
 
-  foreach (Owned<Registrar::Operation>& operation, operations) {
+  for (Owned<Registrar::Operation>& operation : operations) {
     Try<bool> operationResult = (*operation)(&updatedRegistry);
 
     if (operationResult.isError()) {

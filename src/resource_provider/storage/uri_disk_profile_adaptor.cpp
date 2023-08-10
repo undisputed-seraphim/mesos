@@ -221,7 +221,7 @@ void UriDiskProfileAdaptorProcess::notify(
 {
   bool hasErrors = false;
 
-  foreach (const auto& entry, parsed.profile_matrix()) {
+  for (const auto& entry : parsed.profile_matrix()) {
     if (!profileMatrix.contains(entry.first)) {
       continue;
     }
@@ -268,14 +268,14 @@ void UriDiskProfileAdaptorProcess::notify(
   }
 
   // Save the fetched profile mapping.
-  foreach (const auto& entry, parsed.profile_matrix()) {
+  for (const auto& entry : parsed.profile_matrix()) {
     profileMatrix.put(entry.first, {entry.second, true});
   }
 
   // Notify a watcher if its current set of profiles differs from its known set.
   //
   // TODO(josephw): Delay this based on the `--max_random_wait` option.
-  foreach (WatcherData& watcher, watchers) {
+  for (WatcherData& watcher : watchers) {
     hashset<string> current;
     foreachpair (
         const string& profile, const ProfileRecord& record, profileMatrix) {
@@ -323,7 +323,7 @@ org_apache_mesos_UriDiskProfileAdaptor(
     [](const Parameters& parameters) -> DiskProfileAdaptor* {
       // Convert `parameters` into a map.
       map<string, string> values;
-      foreach (const Parameter& parameter, parameters.parameter()) {
+      for (const Parameter& parameter : parameters.parameter()) {
         values[parameter.key()] = parameter.value();
       }
 
@@ -337,7 +337,7 @@ org_apache_mesos_UriDiskProfileAdaptor(
       }
 
       // Log any flag warnings.
-      foreach (const flags::Warning& warning, load->warnings) {
+      for (const flags::Warning& warning : load->warnings) {
         LOG(WARNING) << warning.message;
       }
 

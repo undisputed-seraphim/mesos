@@ -103,7 +103,7 @@ Try<NetClsHandle> NetClsHandleManager::alloc(
   if (!used.contains(primary)) {
     used[primary].set(); // Set all handles.
 
-    foreach (const Interval<uint32_t>& handles, secondaries) {
+    for (const Interval<uint32_t>& handles : secondaries) {
       for (size_t secondary = handles.lower();
            secondary < handles.upper(); secondary++) {
         used[primary].reset(secondary);
@@ -145,7 +145,7 @@ Try<Nothing> NetClsHandleManager::reserve(const NetClsHandle& handle)
   if (!used.contains(handle.primary)) {
     used[handle.primary].set(); // Set all handles.
 
-    foreach (const Interval<uint32_t>& handles, secondaries) {
+    for (const Interval<uint32_t>& handles : secondaries) {
       for (size_t secondary = handles.lower();
            secondary < handles.upper(); secondary++) {
         used[handle.primary].reset(secondary);

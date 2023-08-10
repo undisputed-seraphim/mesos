@@ -205,7 +205,7 @@ public:
         CHECK_SOME(volumeGidInfos);
 
         hashset<string> orphans;
-        foreach (const VolumeGidInfo& info, volumeGidInfos->infos()) {
+        for (const VolumeGidInfo& info : volumeGidInfos->infos()) {
           freeGids -= info.gid();
 
           // The operator could have changed the volume gid range, so as per
@@ -243,7 +243,7 @@ public:
         }
 
         // Deallocate all the orphaned paths.
-        foreach (const string& path, orphans) {
+        for (const string& path : orphans) {
           deallocate(path);
         }
       }
@@ -403,7 +403,7 @@ public:
     // to the original one (i.e., the primary group of its owner).
     vector<Future<Try<Nothing>>> futures;
     vector<pair<string, gid_t>> volumeGids;
-    foreach (const string& volume, sandboxPathVolumes) {
+    for (const string& volume : sandboxPathVolumes) {
       // Get the uid of the volume's owner.
       struct stat s;
       if (::stat(volume.c_str(), &s) < 0) {

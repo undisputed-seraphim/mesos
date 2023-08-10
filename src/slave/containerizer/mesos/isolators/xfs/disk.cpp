@@ -114,7 +114,7 @@ static Option<Bytes> getSandboxDisk(
 {
   Option<Bytes> bytes = None();
 
-  foreach (const Resource& resource, resources) {
+  for (const Resource& resource : resources) {
     if (resource.name() != "disk") {
       continue;
     }
@@ -148,7 +148,7 @@ Try<Isolator*> XfsDiskIsolatorProcess::create(const Flags& flags)
   vector<Resource> resources = CHECK_NOTERROR(Resources::fromString(
         flags.resources.getOrElse(""), flags.default_role));
 
-  foreach (const Resource& resource, resources) {
+  for (const Resource& resource : resources) {
     if (resource.name() != "disk" || !resource.has_disk()) {
       continue;
     }
@@ -270,11 +270,11 @@ Future<Nothing> XfsDiskIsolatorProcess::recover(
 
   hashset<ContainerID> alive;
 
-  foreach (const ContainerState& state, states) {
+  for (const ContainerState& state : states) {
     alive.insert(state.container_id());
   }
 
-  foreach (const string& sandbox, sandboxes.get()) {
+  for (const string& sandbox : sandboxes.get()) {
     // Skip the "latest" symlink.
     if (os::stat::islink(sandbox)) {
       continue;
@@ -319,8 +319,8 @@ Future<Nothing> XfsDiskIsolatorProcess::recover(
     }
   }
 
-  foreach (const ContainerState& state, states) {
-    foreach (const string& directory, state.ephemeral_volumes()) {
+  for (const ContainerState& state : states) {
+    for (const string& directory : state.ephemeral_volumes()) {
       Result<prid_t> projectId = xfs::getProjectId(directory);
       if (projectId.isError()) {
         return Failure(projectId.error());
@@ -389,7 +389,7 @@ Future<Nothing> XfsDiskIsolatorProcess::recover(
   // the agent isn't running. If that happened, the quota record would be
   // stale, but eventually the project ID would be re-used and the quota
   // updated correctly.
-  foreach (const string& directory, volumes.get()) {
+  for (const string& directory : volumes.get()) {
     Result<prid_t> projectId = xfs::getProjectId(directory);
     if (projectId.isError()) {
       return Failure(projectId.error());
@@ -433,7 +433,7 @@ Future<Nothing> XfsDiskIsolatorProcess::recover(
                    provisionerDirs.error());
   }
 
-  foreach (const string& directory, provisionerDirs.get()) {
+  for (const string& directory : provisionerDirs.get()) {
     if (!os::stat::isdir(directory)) {
       continue;
     }
@@ -504,7 +504,7 @@ Future<Option<ContainerLaunchInfo>> XfsDiskIsolatorProcess::prepare(
 
   // The ephemeral volumes share the same quota as the sandbox, so label
   // them with the project ID now.
-  foreach (const string& directory, containerConfig.ephemeral_volumes()) {
+  for (const string& directory : containerConfig.ephemeral_volumes()) {
     Try<Nothing> status = xfs::setProjectId(directory, projectId.get());
 
     if (status.isError()) {
@@ -629,7 +629,7 @@ Future<Nothing> XfsDiskIsolatorProcess::update(
   }
 
   // Make sure that we have project IDs assigned to all persistent volumes.
-  foreach (const Resource& resource, resourceRequests.persistentVolumes()) {
+  for (const Resource& resource : resourceRequests.persistentVolumes()) {
     CHECK(resource.disk().has_volume());
 
     const Bytes size = Megabytes(resource.scalar().value());
@@ -927,7 +927,7 @@ void XfsDiskIsolatorProcess::reclaimProjectIds()
   foreachpair (
       prid_t projectId, auto& roots, utils::copy(scheduledProjects)) {
     // Stop tracking any directories that have already been removed.
-    foreach (const string& directory, utils::copy(roots.directories)) {
+    for (const string& directory : utils::copy(roots.directories)) {
       if (!os::exists(directory)) {
         roots.directories.erase(directory);
 

@@ -1279,7 +1279,7 @@ struct SeccompTestParam
     if (caps.isSome()) {
       list<string> capabilities;
 
-      foreach (const Capability& capability, caps.get()) {
+      for (const Capability& capability : caps.get()) {
         capabilities.emplace_back(
             strings::format("\"CAP_%s\"", stringify(capability)).get());
       }

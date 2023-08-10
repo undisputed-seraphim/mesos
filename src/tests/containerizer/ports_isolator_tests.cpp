@@ -184,7 +184,7 @@ TEST(NetworkPortsIsolatorUtilityTest, QueryProcessSockets)
   vector<socket::Info> socketInfos;
 
   // Collect the Info for our own listening sockets.
-  foreach (uint32_t inode, socketInodes.get()) {
+  for (uint32_t inode : socketInodes.get()) {
     if (listeners->contains(inode)) {
         socketInfos.push_back(listeners->at(inode));
     }
@@ -198,7 +198,7 @@ TEST(NetworkPortsIsolatorUtilityTest, QueryProcessSockets)
   bool matched = false;
   process::network::inet::Address processAddress = process::address();
 
-  foreach (const auto& info, socketInfos) {
+  for (const auto& info : socketInfos) {
     // We can only match on the port, since libprocess will typically
     // indicate that it is listening on the ANY address (i.e. 0.0.0.0)
     // but the socket diagnostics will publish the actual address of a

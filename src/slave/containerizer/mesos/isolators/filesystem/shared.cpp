@@ -112,7 +112,7 @@ Future<Option<ContainerLaunchInfo>> SharedFilesystemIsolatorProcess::prepare(
   ContainerLaunchInfo launchInfo;
   launchInfo.add_clone_namespaces(CLONE_NEWNS);
 
-  foreach (const Volume& volume, executorInfo.container().volumes()) {
+  for (const Volume& volume : executorInfo.container().volumes()) {
     // Because the filesystem is shared we require the container path
     // already exist, otherwise containers can create arbitrary paths
     // outside their sandbox.
@@ -134,7 +134,7 @@ Future<Option<ContainerLaunchInfo>> SharedFilesystemIsolatorProcess::prepare(
     // Volume protobuf.
     // TODO(idownes): This test is unnecessarily strict and could be
     // relaxed if mounts could be re-ordered.
-    foreach (const string& containerPath, containerPaths) {
+    for (const string& containerPath : containerPaths) {
       if (strings::startsWith(volume.container_path(), containerPath)) {
         return Failure("Cannot mount volume to '" +
                         volume.container_path() +

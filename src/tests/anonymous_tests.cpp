@@ -57,7 +57,7 @@ TEST_F_TEMP_DISABLED_ON_WINDOWS(AnonymousTest, Running)
   // loaded.
   vector<process::Owned<Anonymous>> modules;
 
-  foreach (const string& name, ModuleManager::find<Anonymous>()) {
+  for (const string& name : ModuleManager::find<Anonymous>()) {
     Try<Anonymous*> create = ModuleManager::create<Anonymous>(name);
     ASSERT_SOME(create);
     modules.push_back(process::Owned<Anonymous>(create.get()));

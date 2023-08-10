@@ -39,7 +39,7 @@ int SetnsTestHelper::execute()
 {
   // Note: /proc has not been remounted so we can look up pid 1's
   // namespaces, even if we're in a separate pid namespace.
-  foreach (int nsType, ns::nstypes()) {
+  for (int nsType : ns::nstypes()) {
     if (nsType == CLONE_NEWPID) {
       // ns::setns() does not (currently) support pid namespaces so
       // this should return an error.

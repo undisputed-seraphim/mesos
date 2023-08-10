@@ -29,7 +29,7 @@ std::vector<MasterInfo::Capability> MASTER_CAPABILITIES()
   };
 
   std::vector<MasterInfo::Capability> result;
-  foreach (MasterInfo::Capability::Type type, types) {
+  for (MasterInfo::Capability::Type type : types) {
     MasterInfo::Capability capability;
     capability.set_type(type);
     result.push_back(capability);

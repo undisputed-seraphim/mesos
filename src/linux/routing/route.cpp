@@ -125,7 +125,7 @@ Result<net::IP> defaultGateway()
     return Error("Failed to get the routing table: " + rules.error());
   }
 
-  foreach (const Rule& rule, rules.get()) {
+  for (const Rule& rule : rules.get()) {
     if (rule.destination.isNone() && rule.gateway.isSome()) {
       return rule.gateway.get();
     }

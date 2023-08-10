@@ -43,7 +43,7 @@ TEST(LdcacheTest, Parse)
   ASSERT_SOME(cache);
   ASSERT_GT(cache->size(), 1u);
 
-  foreach (const ldcache::Entry& entry, cache.get()) {
+  for (const ldcache::Entry& entry : cache.get()) {
     Try<elf::File*> load = elf::File::load(entry.path);
     ASSERT_SOME(load);
 

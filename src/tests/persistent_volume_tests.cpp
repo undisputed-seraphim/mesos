@@ -155,11 +155,11 @@ protected:
     ACLs acls;
     set<string> roles;
 
-    foreach (const FrameworkInfo& framework, frameworks) {
+    for (const FrameworkInfo& framework : frameworks) {
       mesos::ACL::RegisterFramework* acl = acls.add_register_frameworks();
       acl->mutable_principals()->add_values(framework.principal());
 
-      foreach (const string& role, protobuf::framework::getRoles(framework)) {
+      for (const string& role : protobuf::framework::getRoles(framework)) {
         acl->mutable_roles()->add_values(role);
         roles.insert(role);
       }
@@ -2926,7 +2926,7 @@ TEST_P(PersistentVolumeTest, DestroyPersistentVolumeMultipleTasks)
   vector<Future<TaskStatus>> statuses {
     status1, status2, status3, status4, status5};
 
-  foreach (const Future<TaskStatus>& status, statuses) {
+  for (const Future<TaskStatus>& status : statuses) {
     if (status->state() == TASK_STARTING) {
       // ignore
     } else if (status->state() == TASK_RUNNING) {

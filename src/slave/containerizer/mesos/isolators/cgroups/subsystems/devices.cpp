@@ -75,7 +75,7 @@ Try<Owned<SubsystemProcess>> DevicesSubsystemProcess::create(
 {
   vector<cgroups::devices::Entry> whitelistDeviceEntries;
 
-  foreach (const char* _entry, DEFAULT_WHITELIST_ENTRIES) {
+  for (const char* _entry : DEFAULT_WHITELIST_ENTRIES) {
     Try<cgroups::devices::Entry> entry =
       cgroups::devices::Entry::parse(_entry);
 
@@ -84,7 +84,7 @@ Try<Owned<SubsystemProcess>> DevicesSubsystemProcess::create(
   }
 
   if (flags.allowed_devices.isSome()) {
-    foreach (const DeviceAccess& device_access,
+    for (const DeviceAccess& device_access :
              flags.allowed_devices->allowed_devices()) {
       if (!device_access.device().has_path()) {
         return Error("Whitelisted device has no device path provided");
@@ -203,7 +203,7 @@ Future<Nothing> DevicesSubsystemProcess::prepare(
     return Failure("Failed to deny all devices: " + deny.error());
   }
 
-  foreach (const cgroups::devices::Entry& entry, whitelistDeviceEntries) {
+  for (const cgroups::devices::Entry& entry : whitelistDeviceEntries) {
     Try<Nothing> allow = cgroups::devices::allow(hierarchy, cgroup, entry);
 
     if (allow.isError()) {

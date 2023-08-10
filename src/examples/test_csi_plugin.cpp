@@ -772,7 +772,7 @@ Status TestCSIPlugin::ControllerGetCapabilities(
     csi::v0::ControllerServiceCapability::RPC::LIST_VOLUMES,
   };
 
-  foreach (const csi::v0::ControllerServiceCapability::RPC::Type rpc, rpcs) {
+  for (const csi::v0::ControllerServiceCapability::RPC::Type rpc : rpcs) {
     response->add_capabilities()->mutable_rpc()->set_type(rpc);
   }
 
@@ -1139,7 +1139,7 @@ Status TestCSIPlugin::ControllerGetCapabilities(
     csi::v1::ControllerServiceCapability::RPC::LIST_VOLUMES,
   };
 
-  foreach (const csi::v1::ControllerServiceCapability::RPC::Type rpc, rpcs) {
+  for (const csi::v1::ControllerServiceCapability::RPC::Type rpc : rpcs) {
     response->add_capabilities()->mutable_rpc()->set_type(rpc);
   }
 

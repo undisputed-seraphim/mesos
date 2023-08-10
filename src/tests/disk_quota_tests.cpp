@@ -706,7 +706,7 @@ TEST_P(DiskQuotaEnforcement, ResourceStatistics)
     ASSERT_EQ(2, usage->disk_statistics().size());
 
     bool done = true;
-    foreach (const DiskStatistics& statistics, usage->disk_statistics()) {
+    for (const DiskStatistics& statistics : usage->disk_statistics()) {
       ASSERT_TRUE(statistics.has_limit_bytes());
       EXPECT_EQ(
           statistics.has_persistence() ? Megabytes(4) : Megabytes(3),

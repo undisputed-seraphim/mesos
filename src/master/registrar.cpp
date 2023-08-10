@@ -475,11 +475,11 @@ void RegistrarProcess::update()
 
   // Create the 'slaveIDs' accumulator.
   hashset<SlaveID> slaveIDs;
-  foreach (const Registry::Slave& slave, updatedRegistry->slaves().slaves()) {
+  for (const Registry::Slave& slave : updatedRegistry->slaves().slaves()) {
     slaveIDs.insert(slave.info().id());
   }
 
-  foreach (Owned<RegistryOperation>& operation, operations) {
+  for (Owned<RegistryOperation>& operation : operations) {
     // No need to process the result of the operation.
     (*operation)(updatedRegistry.get(), &slaveIDs);
   }

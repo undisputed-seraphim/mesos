@@ -71,7 +71,7 @@ Future<Nothing> PosixFilesystemIsolatorProcess::recover(
     const vector<ContainerState>& states,
     const hashset<ContainerID>& orphans)
 {
-  foreach (const ContainerState& state, states) {
+  for (const ContainerState& state : states) {
     infos.put(state.container_id(), Owned<Info>(new Info(state.directory())));
   }
 
@@ -115,7 +115,7 @@ Future<Option<ContainerLaunchInfo>> PosixFilesystemIsolatorProcess::prepare(
           }
 
           ContainerLaunchInfo launchInfo;
-          foreach (gid_t gid, infos[containerId]->gids) {
+          for (gid_t gid : infos[containerId]->gids) {
             // For command task with its own rootfs, the command executor will
             // run as root and the task itself will run as the specified normal
             // user, so here we add the supplementary group for the task and the
@@ -150,7 +150,7 @@ Future<Nothing> PosixFilesystemIsolatorProcess::update(
   Resources current = info->resources;
 
   // We first remove unneeded persistent volumes.
-  foreach (const Resource& resource, current.persistentVolumes()) {
+  for (const Resource& resource : current.persistentVolumes()) {
     // This is enforced by the master.
     CHECK(resource.disk().has_volume());
 
@@ -194,7 +194,7 @@ Future<Nothing> PosixFilesystemIsolatorProcess::update(
   vector<Future<gid_t>> futures;
 
   // We then link additional persistent volumes.
-  foreach (const Resource& resource, resourceRequests.persistentVolumes()) {
+  for (const Resource& resource : resourceRequests.persistentVolumes()) {
     // This is enforced by the master.
     CHECK(resource.disk().has_volume());
 

@@ -148,7 +148,7 @@ static bool isValidName(const string& s)
     return false;
   }
 
-  foreach (const char c, s) {
+  for (const char c : s) {
     if (!isalnum(c) && c != '_') {
       return false;
     }
@@ -165,7 +165,7 @@ static bool isValidType(const string& s)
     return false;
   }
 
-  foreach (const string& token, strings::split(s, ".")) {
+  for (const string& token : strings::split(s, ".")) {
     if (!isValidName(token)) {
       return false;
     }
@@ -636,7 +636,7 @@ Future<Nothing> StorageLocalResourceProviderProcess::recover()
           }
 
           if (resourceProviderState.isSome()) {
-            foreach (const Operation& operation,
+            for (const Operation& operation :
                      resourceProviderState->operations()) {
               Try<id::UUID> uuid =
                 id::UUID::fromBytes(operation.uuid().value());
@@ -652,7 +652,7 @@ Future<Nothing> StorageLocalResourceProviderProcess::recover()
             using ProfileEntry = google::protobuf::
               MapPair<string, ResourceProviderState::Storage::ProfileInfo>;
 
-            foreach (const ProfileEntry& entry, storage.profiles()) {
+            for (const ProfileEntry& entry : storage.profiles()) {
               profileInfos.put(
                   entry.first,
                   {entry.second.capability(), entry.second.parameters()});
@@ -662,7 +662,7 @@ Future<Nothing> StorageLocalResourceProviderProcess::recover()
             // resources without IDs) in `checkpointResourceProviderState` as
             // only these profiles might be used by pending operations, so we
             // validate here that all such profiles exist.
-            foreach (const Resource& resource, totalResources) {
+            for (const Resource& resource : totalResources) {
               if (!resource.disk().source().has_id() &&
                   resource.disk().source().has_profile() &&
                   !profileInfos.contains(resource.disk().source().profile())) {
@@ -800,7 +800,7 @@ Future<Nothing> StorageLocalResourceProviderProcess::reconcileResources(
         [alwaysUpdate, this]
         (const vector<vector<ResourceConversion>>& collected) {
           Resources result = totalResources;
-          foreach (const vector<ResourceConversion>& conversions, collected) {
+          for (const vector<ResourceConversion>& conversions : collected) {
             result = CHECK_NOTERROR(result.apply(conversions));
           }
 
@@ -854,7 +854,7 @@ StorageLocalResourceProviderProcess::reconcileOperationStatuses()
   }
 
   list<id::UUID> operationUuids;
-  foreach (const string& path, operationPaths.get()) {
+  for (const string& path : operationPaths.get()) {
     Try<id::UUID> uuid =
       slave::paths::parseOperationPath(resourceProviderDir, path);
 
@@ -897,7 +897,7 @@ StorageLocalResourceProviderProcess::reconcileOperationStatuses()
 
       // Garbage collect the operation streams after checkpointing.
       checkpointResourceProviderState();
-      foreach (const id::UUID& uuid, completedOperations) {
+      for (const id::UUID& uuid : completedOperations) {
         garbageCollectOperationPath(uuid);
       }
 
@@ -1043,7 +1043,7 @@ ResourceConversion StorageLocalResourceProviderProcess::computeConversion(
   Resources toRemove;
   Resources toAdd = discovered;
 
-  foreach (const Resource& resource, checkpointed) {
+  for (const Resource& resource : checkpointed) {
     Resources unconverted = createRawDiskResource(
         info,
         Bytes(resource.scalar().value() * Bytes::MEGABYTES),
@@ -1095,7 +1095,7 @@ StorageLocalResourceProviderProcess::getExistingVolumes()
       // Since we only support "exclusive" (MOUNT or BLOCK) disks, there should
       // be only one checkpointed resource for each volume ID.
       hashmap<string, Resource> checkpointedMap;
-      foreach (const Resource& resource, totalResources) {
+      for (const Resource& resource : totalResources) {
         if (resource.disk().source().has_id()) {
           // If the checkpointed resources contain duplicated volumes because of
           // a non-conforming CSI plugin, remove the duplicate.
@@ -1115,7 +1115,7 @@ StorageLocalResourceProviderProcess::getExistingVolumes()
       Resources discovered;
       hashset<string> discoveredVolumeIds;
 
-      foreach (const VolumeInfo& volumeInfo, volumeInfos) {
+      for (const VolumeInfo& volumeInfo : volumeInfos) {
         const Option<string> profile =
           checkpointedMap.contains(volumeInfo.id) &&
           checkpointedMap.at(volumeInfo.id).disk().source().has_profile()
@@ -1264,7 +1264,7 @@ Future<Nothing> StorageLocalResourceProviderProcess::updateProfiles(
     const hashset<string>& profiles)
 {
   // Remove disappeared profiles.
-  foreach (const string& profile, profileInfos.keys()) {
+  for (const string& profile : profileInfos.keys()) {
     if (!profiles.contains(profile)) {
       profileInfos.erase(profile);
     }
@@ -1272,7 +1272,7 @@ Future<Nothing> StorageLocalResourceProviderProcess::updateProfiles(
 
   // Translate and add newly appeared profiles.
   vector<Future<Nothing>> futures;
-  foreach (const string& profile, profiles) {
+  for (const string& profile : profiles) {
     // Since profiles are immutable after creation, we do not need to
     // translate any profile that is already in the mapping.
     if (profileInfos.contains(profile)) {
@@ -1430,7 +1430,7 @@ void StorageLocalResourceProviderProcess::publishResources(
 
     Resources resources = publish.resources();
     resources.unallocate();
-    foreach (const Resource& resource, resources) {
+    for (const Resource& resource : resources) {
       if (!totalResources.contains(resource)) {
         error = Error(
             "Cannot publish unknown resource '" + stringify(resource) + "'");
@@ -1463,7 +1463,7 @@ void StorageLocalResourceProviderProcess::publishResources(
   } else {
     vector<Future<Nothing>> futures;
 
-    foreach (const string& volumeId, volumeIds) {
+    for (const string& volumeId : volumeIds) {
       futures.push_back(volumeManager->publishVolume(volumeId));
     }
 
@@ -1550,7 +1550,7 @@ void StorageLocalResourceProviderProcess::reconcileOperations(
 {
   CHECK_EQ(READY, state);
 
-  foreach (const mesos::UUID& operationUuid, reconcile.operation_uuids()) {
+  for (const mesos::UUID& operationUuid : reconcile.operation_uuids()) {
     Try<id::UUID> uuid = id::UUID::fromBytes(operationUuid.value());
     CHECK_SOME(uuid);
 
@@ -1963,7 +1963,7 @@ StorageLocalResourceProviderProcess::applyCreate(
 {
   CHECK(operation.has_create());
 
-  foreach (const Resource& resource, operation.create().volumes()) {
+  for (const Resource& resource : operation.create().volumes()) {
     CHECK(Resources::isPersistentVolume(resource));
     CHECK(resource.disk().source().has_id());
 
@@ -1992,7 +1992,7 @@ StorageLocalResourceProviderProcess::applyDestroy(
 {
   CHECK(operation.has_destroy());
 
-  foreach (const Resource& resource, operation.destroy().volumes()) {
+  for (const Resource& resource : operation.destroy().volumes()) {
     CHECK(Resources::isPersistentVolume(resource));
     CHECK(resource.disk().source().has_id());
 
@@ -2040,7 +2040,7 @@ Try<Nothing> StorageLocalResourceProviderProcess::updateOperationStatus(
     // Strip away the allocation info when applying the conversion to
     // the total resources.
     vector<ResourceConversion> _conversions;
-    foreach (ResourceConversion conversion, conversions.get()) {
+    for (ResourceConversion conversion : conversions.get()) {
       convertedResources += conversion.converted;
       conversion.consumed.unallocate();
       conversion.converted.unallocate();
@@ -2163,14 +2163,14 @@ void StorageLocalResourceProviderProcess::checkpointResourceProviderState()
   // We do not need to checkpoint profiles for resources that have
   // volume IDs, as their volume capabilities are already checkpointed.
   hashset<string> requiredProfiles;
-  foreach (const Resource& resource, totalResources) {
+  for (const Resource& resource : totalResources) {
     if (!resource.disk().source().has_id()) {
       CHECK(resource.disk().source().has_profile());
       requiredProfiles.insert(resource.disk().source().profile());
     }
   }
 
-  foreach (const string& profile, requiredProfiles) {
+  for (const string& profile : requiredProfiles) {
     CHECK(profileInfos.contains(profile));
 
     const DiskProfileAdaptor::ProfileInfo& profileInfo =
@@ -2306,7 +2306,7 @@ StorageLocalResourceProviderProcess::Metrics::Metrics(const string& prefix)
       UNREACHABLE();
   };
 
-  foreach (const Offer::Operation::Type& type, operationTypes) {
+  for (const Offer::Operation::Type& type : operationTypes) {
     const string name = strings::lower(Offer::Operation::Type_Name(type));
 
     operations_pending.put(type, PushGauge(
@@ -2409,7 +2409,7 @@ Option<Error> StorageLocalResourceProvider::validate(
   // for `CSIPluginInfo`.
   bool hasNodeService = false;
 
-  foreach (const CSIPluginContainerInfo& container,
+  for (const CSIPluginContainerInfo& container :
            info.storage().plugin().containers()) {
     if (container.services().end() != find(
             container.services().begin(),

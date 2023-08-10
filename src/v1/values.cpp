@@ -416,7 +416,7 @@ Value::Ranges intervalSetToRanges(const IntervalSet<uint64_t>& set)
 {
   Value::Ranges ranges;
 
-  foreach (const Interval<uint64_t>& interval, set) {
+  for (const Interval<uint64_t>& interval : set) {
     Value::Range* range = ranges.add_range();
     range->set_begin(interval.lower());
     range->set_end(interval.upper() - 1);

@@ -72,7 +72,7 @@ protected:
 
   void TearDown() override
   {
-    foreach (const std::string& realm, realms) {
+    for (const std::string& realm : realms) {
       // We need to wait in order to ensure that the operation completes before
       // we leave `TearDown`. Otherwise, we may leak a mock object.
       AWAIT_READY(unsetAuthenticator(realm));

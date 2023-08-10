@@ -582,7 +582,7 @@ jmethodID Jvm::findMethod(
 
   std::ostringstream signature;
   signature << "(";
-  foreach (const Jvm::Class& type, argTypes) {
+  for (const Jvm::Class& type : argTypes) {
     signature << type.signature();
   }
   signature << ")" << returnType.signature();

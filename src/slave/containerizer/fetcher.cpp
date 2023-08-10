@@ -166,7 +166,7 @@ Try<Nothing> Fetcher::validateOutputFile(const string& path)
 
 static Try<Nothing> validateUris(const CommandInfo& commandInfo)
 {
-  foreach (const CommandInfo::URI& uri, commandInfo.uris()) {
+  for (const CommandInfo::URI& uri : commandInfo.uris()) {
     Try<Nothing> uriValidation = Fetcher::validateUri(uri.value());
     if (uriValidation.isError()) {
       return Error(uriValidation.error());
@@ -413,7 +413,7 @@ Future<Nothing> FetcherProcess::fetch(
   // times, then we simply add references the initial entry.
   hashmap<string, shared_ptr<Cache::Entry>> newEntries;
 
-  foreach (const CommandInfo::URI& uri, commandInfo.uris()) {
+  for (const CommandInfo::URI& uri : commandInfo.uris()) {
     if (!uri.cache()) {
       entries[uri] = None();
       continue;
@@ -1153,7 +1153,7 @@ FetcherProcess::Cache::selectVictims(const Bytes& requiredSpace)
 
   Bytes space = 0;
 
-  foreach (const shared_ptr<Cache::Entry>& entry, lruSortedEntries) {
+  for (const shared_ptr<Cache::Entry>& entry : lruSortedEntries) {
     if (!entry->isReferenced()) {
       victims.push_back(entry);
 
@@ -1183,7 +1183,7 @@ Try<Nothing> FetcherProcess::Cache::reserve(
       return Error("Could not free up enough fetcher cache space");
     }
 
-    foreach (const shared_ptr<Cache::Entry>& entry, victims.get()) {
+    for (const shared_ptr<Cache::Entry>& entry : victims.get()) {
       Try<Nothing> removal = remove(entry);
       if (removal.isError()) {
         return Error(removal.error());

@@ -98,7 +98,7 @@ public:
     if (overloaded) {
       list<QoSCorrection> corrections;
 
-      foreach (const ResourceUsage::Executor& executor, usage.executors()) {
+      for (const ResourceUsage::Executor& executor : usage.executors()) {
         // Set kill correction for all revocable executors.
         if (!Resources(executor.allocated()).revocable().empty()) {
           QoSCorrection correction;
@@ -178,7 +178,7 @@ static QoSController* create(const Parameters& parameters)
   Option<double> loadThreshold5Min = None();
   Option<double> loadThreshold15Min = None();
 
-  foreach (const Parameter& parameter, parameters.parameter()) {
+  for (const Parameter& parameter : parameters.parameter()) {
     if (parameter.key() == "load_threshold_5min") {
       // Try to parse the load 5min value.
       Try<double> thresholdParam = numify<double>(parameter.value());

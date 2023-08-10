@@ -33,7 +33,7 @@ class TestModuleImpl : public TestModule
 public:
   Try<Nothing> initialize(const mesos::Parameters& parameters) override
   {
-    foreach (const mesos::Parameter& parameter, parameters.parameter()) {
+    for (const mesos::Parameter& parameter : parameters.parameter()) {
       if (parameter.has_key() && parameter.has_value()) {
         flags[parameter.key()] = parameter.value();
       } else {

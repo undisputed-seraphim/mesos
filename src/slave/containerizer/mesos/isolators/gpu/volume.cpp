@@ -162,7 +162,7 @@ static Try<bool> isBlacklisted(
                    " '" + library + "': " + dependencies.error());
     }
 
-    foreach (const string& dependency, dependencies.get()) {
+    for (const string& dependency : dependencies.get()) {
       if (dependency == "libGLdispatch.so" ||
           strings::startsWith(dependency, "libnvidia-gl") ||
           strings::startsWith(dependency, "libnvidia-egl")) {
@@ -208,7 +208,7 @@ Environment NvidiaVolume::ENV(const ImageManifest& manifest) const
   vector<string> paths;
   vector<string> ldPaths;
 
-  foreach (const string& env, manifest.config().env()) {
+  for (const string& env : manifest.config().env()) {
     const vector<string> tokens = strings::split(env, "=", 2);
     if (tokens.size() != 2) {
       continue;
@@ -236,7 +236,7 @@ Environment NvidiaVolume::ENV(const ImageManifest& manifest) const
     path::join(containerPath, "lib"),
     path::join(containerPath, "lib64")};
 
-  foreach (const string& libraryPath, libraryPaths) {
+  for (const string& libraryPath : libraryPaths) {
     if (std::find(ldPaths.begin(), ldPaths.end(), libraryPath) ==
         ldPaths.end()) {
       ldPaths.push_back(libraryPath);
@@ -306,7 +306,7 @@ Try<NvidiaVolume> NvidiaVolume::create()
   // path to our `hostPath` (which may include the `hostPath` itself).
   // Only mount a new `tmpfs` over the `hostPath` if the filesysem we
   // find is marked as `noexec`.
-  foreach (const fs::MountInfoTable::Entry& entry,
+  for (const fs::MountInfoTable::Entry& entry :
            adaptor::reverse(table->entries)) {
     if (strings::startsWith(realpath.get(), entry.target)) {
       if (strings::contains(entry.vfsOptions, "noexec")) {
@@ -324,7 +324,7 @@ Try<NvidiaVolume> NvidiaVolume::create()
 
   // Create some directories in the volume if they don't yet exist.
   string directories[] = {"bin", "lib", "lib64" };
-  foreach (const string& directory, directories) {
+  for (const string& directory : directories) {
     string path = path::join(hostPath, directory);
 
     if (!os::exists(path)) {
@@ -336,7 +336,7 @@ Try<NvidiaVolume> NvidiaVolume::create()
   }
 
   // Fill in the `/bin` directory with BINARIES.
-  foreach (const string& binary, BINARIES) {
+  for (const string& binary : BINARIES) {
     string path = path::join(hostPath, "bin", binary);
 
     if (!os::exists(path)) {
@@ -370,8 +370,8 @@ Try<NvidiaVolume> NvidiaVolume::create()
     return Error("Failed to ldcache::parse: " + cache.error());
   }
 
-  foreach (const string& library, LIBRARIES) {
-    foreach (const ldcache::Entry& entry, cache.get()) {
+  for (const string& library : LIBRARIES) {
+    for (const ldcache::Entry& entry : cache.get()) {
       if (strings::startsWith(entry.name, library)) {
         // Copy the fully resolved `entry.path` (i.e. the path of the
         // library after following all symlinks) into either the
@@ -497,7 +497,7 @@ Try<NvidiaVolume> NvidiaVolume::create()
 // https://github.com/NVIDIA/nvidia-docker/wiki/Image-inspection-(version-1.0)
 bool NvidiaVolume::shouldInject(const ImageManifest& manifest) const
 {
-  foreach (const string& env, manifest.config().env()) {
+  for (const string& env : manifest.config().env()) {
     const vector<string> tokens = strings::split(env, "=", 2);
     if (tokens.size() != 2 || tokens[0] != "NVIDIA_VISIBLE_DEVICES") {
       continue;

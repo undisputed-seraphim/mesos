@@ -146,7 +146,7 @@ public:
 
     ASSERT_SOME(csiContainerPaths);
 
-    foreach (const string& path, csiContainerPaths.get()) {
+    for (const string& path : csiContainerPaths.get()) {
       Try<csi::paths::ContainerPath> containerPath =
         csi::paths::parseContainerPath(csiRootDir, path);
 

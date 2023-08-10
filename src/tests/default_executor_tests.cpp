@@ -2541,7 +2541,7 @@ TEST_P_TEMP_DISABLED_ON_WINDOWS(DefaultExecutorTest, ResourceLimitation)
   ASSERT_TRUE(failed->status().has_limitation());
   EXPECT_GT(failed->status().limitation().resources().size(), 0);
 
-  foreach (const v1::Resource& resource,
+  for (const v1::Resource& resource :
            failed->status().limitation().resources()) {
     EXPECT_EQ("disk", resource.name());
     EXPECT_EQ(mesos::v1::Value::SCALAR, resource.type());
@@ -3601,7 +3601,7 @@ TEST_P_TEMP_DISABLED_ON_WINDOWS(
     // futures are satisfied in the order in which the updates are received.
     testing::InSequence inSequence;
 
-    foreach (Future<v1::scheduler::Event::Update>& update, updates) {
+    for (Future<v1::scheduler::Event::Update>& update : updates) {
       EXPECT_CALL(*scheduler, update(_, _))
         .WillOnce(
             DoAll(
@@ -3635,7 +3635,7 @@ TEST_P_TEMP_DISABLED_ON_WINDOWS(
   taskStages[producerInfo.task_id()] = Stage::INITIAL;
   taskStages[consumerInfo.task_id()] = Stage::INITIAL;
 
-  foreach (Future<v1::scheduler::Event::Update>& update, updates) {
+  for (Future<v1::scheduler::Event::Update>& update : updates) {
     AWAIT_READY(update);
 
     const v1::TaskStatus& taskStatus = update->status();
@@ -3818,7 +3818,7 @@ TEST_P_TEMP_DISABLED_ON_WINDOWS(
     // futures are satisfied in the order in which the updates are received.
     testing::InSequence inSequence;
 
-    foreach (Future<v1::scheduler::Event::Update>& update, updates) {
+    for (Future<v1::scheduler::Event::Update>& update : updates) {
       EXPECT_CALL(*scheduler, update(_, _))
         .WillOnce(
             DoAll(
@@ -3855,7 +3855,7 @@ TEST_P_TEMP_DISABLED_ON_WINDOWS(
   taskStages[producerInfo.task_id()] = Stage::INITIAL;
   taskStages[consumerInfo.task_id()] = Stage::INITIAL;
 
-  foreach (Future<v1::scheduler::Event::Update>& update, updates) {
+  for (Future<v1::scheduler::Event::Update>& update : updates) {
     AWAIT_READY(update);
 
     const v1::TaskStatus& taskStatus = update->status();

@@ -128,7 +128,7 @@ Future<Option<ContainerLaunchInfo>> VolumeHostPathIsolatorProcess::prepare(
 
   ContainerLaunchInfo launchInfo;
 
-  foreach (const Volume& volume, containerInfo.volumes()) {
+  for (const Volume& volume : containerInfo.volumes()) {
     // NOTE: The validation here is for backwards compatibility. For
     // example, if an old master (no validation code) is used to
     // launch a task with a volume.

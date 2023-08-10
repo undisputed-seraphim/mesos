@@ -96,7 +96,7 @@ Future<Nothing> CpuSubsystemProcess::update(
             << " for container " << containerId;
 
   Option<double> cpuLimit;
-  foreach (auto&& limit, resourceLimits) {
+  for (auto&& limit : resourceLimits) {
     if (limit.first == "cpus") {
       cpuLimit = limit.second.value();
     }

@@ -2029,7 +2029,7 @@ TEST_P(Registrar_BENCHMARK_Test, Performance)
   Stopwatch watch;
   watch.start();
   Future<bool> result;
-  foreach (const SlaveInfo& info, infos) {
+  for (const SlaveInfo& info : infos) {
     result = registrar.apply(Owned<RegistryOperation>(new AdmitSlave(info)));
   }
   AWAIT_READY_FOR(result, Minutes(5));
@@ -2043,7 +2043,7 @@ TEST_P(Registrar_BENCHMARK_Test, Performance)
   // over, and then the previously registered agents reregistering
   // with the new master.
   watch.start();
-  foreach (const SlaveInfo& info, infos) {
+  for (const SlaveInfo& info : infos) {
     result = registrar.apply(Owned<RegistryOperation>(
         new MarkSlaveReachable(info)));
   }
@@ -2069,7 +2069,7 @@ TEST_P(Registrar_BENCHMARK_Test, Performance)
 
   // Remove slaves.
   watch.start();
-  foreach (const SlaveInfo& info, infos) {
+  for (const SlaveInfo& info : infos) {
     result = registrar2.apply(Owned<RegistryOperation>(new RemoveSlave(info)));
   }
   AWAIT_READY_FOR(result, Minutes(5));
@@ -2108,7 +2108,7 @@ TEST_P(Registrar_BENCHMARK_Test, MarkUnreachableThenReachable)
   Stopwatch watch;
   watch.start();
   Future<bool> result;
-  foreach (const SlaveInfo& info, infos) {
+  for (const SlaveInfo& info : infos) {
     result = registrar.apply(Owned<RegistryOperation>(new AdmitSlave(info)));
   }
   AWAIT_READY_FOR(result, Minutes(5));
@@ -2122,7 +2122,7 @@ TEST_P(Registrar_BENCHMARK_Test, MarkUnreachableThenReachable)
   TimeInfo unreachableTime = protobuf::getCurrentTime();
 
   watch.start();
-  foreach (const SlaveInfo& info, infos) {
+  for (const SlaveInfo& info : infos) {
     result = registrar.apply(Owned<RegistryOperation>(
         new MarkSlaveUnreachable(info, unreachableTime)));
   }
@@ -2136,7 +2136,7 @@ TEST_P(Registrar_BENCHMARK_Test, MarkUnreachableThenReachable)
 
   // Mark all slaves reachable.
   watch.start();
-  foreach (const SlaveInfo& info, infos) {
+  for (const SlaveInfo& info : infos) {
     result = registrar.apply(Owned<RegistryOperation>(
         new MarkSlaveReachable(info)));
   }
@@ -2177,7 +2177,7 @@ TEST_P(Registrar_BENCHMARK_Test, GcManyAgents)
   Stopwatch watch;
   watch.start();
   Future<bool> result;
-  foreach (const SlaveInfo& info, infos) {
+  for (const SlaveInfo& info : infos) {
     result = registrar.apply(Owned<RegistryOperation>(new AdmitSlave(info)));
   }
   AWAIT_READY_FOR(result, Minutes(5));
@@ -2191,7 +2191,7 @@ TEST_P(Registrar_BENCHMARK_Test, GcManyAgents)
   TimeInfo unreachableTime = protobuf::getCurrentTime();
 
   watch.start();
-  foreach (const SlaveInfo& info, infos) {
+  for (const SlaveInfo& info : infos) {
     result = registrar.apply(Owned<RegistryOperation>(
         new MarkSlaveUnreachable(info, unreachableTime)));
   }

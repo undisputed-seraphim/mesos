@@ -80,7 +80,7 @@ Try<Owned<Fetcher>> create(const Option<Flags>& _flags)
 
 Fetcher::Fetcher(const vector<Owned<Plugin>>& plugins)
 {
-  foreach (Owned<Plugin> _plugin, plugins) {
+  for (Owned<Plugin> _plugin : plugins) {
     Shared<Plugin> plugin = _plugin.share();
 
     if (pluginsByName.contains(plugin->name())) {
@@ -90,7 +90,7 @@ Fetcher::Fetcher(const vector<Owned<Plugin>>& plugins)
 
     pluginsByName[plugin->name()] = plugin;
 
-    foreach (const string& scheme, plugin->schemes()) {
+    for (const string& scheme : plugin->schemes()) {
       if (pluginsByScheme.contains(scheme)) {
         LOG(WARNING) << "Multiple URI fetcher plugins register "
                      << "URI scheme '" << scheme << "'";

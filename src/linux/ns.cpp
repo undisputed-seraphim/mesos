@@ -108,7 +108,7 @@ static set<string> namespaces()
 
   Try<std::list<string>> entries = os::ls("/proc/self/ns");
   if (entries.isSome()) {
-    foreach (const string& entry, entries.get()) {
+    for (const string& entry : entries.get()) {
       // Introduced in Linux 4.12, pid_for_children is a handle for the PID
       // namespace of child processes created by the current process.
       if (entry != "pid_for_children") {
@@ -125,7 +125,7 @@ set<int> nstypes()
 {
   set<int> result;
 
-  foreach (const string& ns, namespaces()) {
+  for (const string& ns : namespaces()) {
     Try<int> type = nstype(ns);
     if (type.isSome()) {
       result.insert(type.get());
@@ -140,7 +140,7 @@ Try<bool> supported(int nsTypes)
 {
   int supported = 0;
 
-  foreach (const int n, nstypes()) {
+  for (const int n : nstypes()) {
     if (nsTypes & n) {
       supported |= n;
     }
@@ -260,7 +260,7 @@ static void close(const Iterable& fds)
 {
   int errsav = errno;
 
-  foreach (int fd, fds) {
+  for (int fd : fds) {
     ::close(fd); // Need to call the async-signal safe version.
   }
 

@@ -305,7 +305,7 @@ AuthenticationResult createCombinedUnauthorized(
   vector<string> headers;
   vector<string> bodies;
 
-  foreach (const MockAuthenticator& authenticator, authenticators) {
+  for (const MockAuthenticator& authenticator : authenticators) {
     headers.push_back(authenticator.scheme() + " realm=\"" + REALM + "\"");
     bodies.push_back(
         "\"" + authenticator.scheme() + "\" authenticator returned:\n" +
@@ -326,7 +326,7 @@ AuthenticationResult createCombinedForbidden(
   AuthenticationResult result;
   vector<string> bodies;
 
-  foreach (const MockAuthenticator& authenticator, authenticators) {
+  for (const MockAuthenticator& authenticator : authenticators) {
     bodies.push_back(
         "\"" + authenticator.scheme() + "\" authenticator returned:\n" +
         authenticator.scheme() + " forbidden");

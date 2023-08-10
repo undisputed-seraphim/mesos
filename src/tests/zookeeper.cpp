@@ -70,7 +70,7 @@ void ZooKeeperTest::SetUpTestCase()
 
     CHECK_SOME(jars);
 
-    foreach (const string& jar, jars.get()) {
+    for (const string& jar : jars.get()) {
 #ifdef __WINDOWS__
       classpath += ";";
 #else

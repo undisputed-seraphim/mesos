@@ -371,7 +371,7 @@ void LocalResourceProviderDaemonProcess::initialize()
     return;
   }
 
-  foreach (const string& entry, entries.get()) {
+  for (const string& entry : entries.get()) {
     const string path = path::join(configDir.get(), entry);
 
     // Skip subdirectories in the resource provider config directory,
@@ -608,7 +608,7 @@ Future<Nothing> LocalResourceProviderDaemonProcess::cleanupContainers(
       vector<Future<Nothing>> futures;
 
       agent::Response response = devolve(v1Response.get());
-      foreach (const agent::Response::GetContainers::Container& container,
+      for (const agent::Response::GetContainers::Container& container :
                response.get_containers().containers()) {
         const ContainerID& containerId = container.container_id();
 
@@ -688,7 +688,7 @@ Future<Nothing> LocalResourceProviderDaemonProcess::cleanupContainers(
       return await(futures)
         .then([cidPrefix](
             const vector<Future<Nothing>>& futures) -> Future<Nothing> {
-          foreach (const Future<Nothing>& future, futures) {
+          for (const Future<Nothing>& future : futures) {
             if (!future.isReady()) {
               return Failure(
                   "Failed to clean up containers prefixed by '" + cidPrefix +

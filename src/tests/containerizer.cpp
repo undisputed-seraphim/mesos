@@ -140,7 +140,7 @@ public:
     // 'executorEnvironment()' function? There are other places in the
     // code where we do this as well and it's likely we can do this once
     // in 'executorEnvironment()'.
-    foreach (const Environment::Variable& variable,
+    for (const Environment::Variable& variable :
              containerConfig.executor_info()
                .command().environment().variables()) {
       fullEnvironment.emplace(variable.name(), variable.value());

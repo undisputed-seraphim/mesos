@@ -47,7 +47,7 @@ vector<SlaveInfo::Capability> AGENT_CAPABILITIES()
   };
 
   vector<SlaveInfo::Capability> result;
-  foreach (SlaveInfo::Capability::Type type, types) {
+  for (SlaveInfo::Capability::Type type : types) {
     SlaveInfo::Capability capability;
     capability.set_type(type);
     result.push_back(capability);

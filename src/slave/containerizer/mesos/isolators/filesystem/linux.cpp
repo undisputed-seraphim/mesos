@@ -182,7 +182,7 @@ static Try<Nothing> makeStandardDevices(
 
   // Import each device into the chroot environment. Copy both the
   // mode and the device itself from the corresponding host device.
-  foreach (const string& device, devices) {
+  for (const string& device : devices) {
     Try<Nothing> mknod = fs::chroot::copyDeviceNode(
         path::join("/",  "dev", device),
         path::join(devicesDir, device));
@@ -207,7 +207,7 @@ static Try<Nothing> makeStandardDevices(
     {"pts/ptmx",        path::join(rootDir, "dev", "ptmx")}
   };
 
-  foreach (const auto& symlink, symlinks) {
+  for (const auto& symlink : symlinks) {
     *launchInfo.add_file_operations() =
       containerSymlinkOperation(symlink.first, symlink.second);
   }
@@ -299,7 +299,7 @@ static Try<Nothing> ensureSharedMount(const string& _targetDir)
   if (targetDirMount->shared().isNone()) {
     bindMountNeeded = true;
   } else {
-    foreach (const fs::MountInfoTable::Entry& entry, table->entries) {
+    for (const fs::MountInfoTable::Entry& entry : table->entries) {
       // Skip 'targetDirMount' and any mount underneath it. Also, we
       // skip those mounts whose targets are not the parent of the
       // target directory because even if they are in the same peer
@@ -585,7 +585,7 @@ Future<Nothing> LinuxFilesystemIsolatorProcess::recover(
     const vector<ContainerState>& states,
     const hashset<ContainerID>& orphans)
 {
-  foreach (const ContainerState& state, states) {
+  for (const ContainerState& state : states) {
     Option<ExecutorInfo> executorInfo;
     if (state.has_executor_info()) {
       executorInfo = state.executor_info();
@@ -606,7 +606,7 @@ Future<Nothing> LinuxFilesystemIsolatorProcess::recover(
 
   vector<Future<Nothing>> cleanups;
 
-  foreach (const fs::MountInfoTable::Entry& entry, table->entries) {
+  for (const fs::MountInfoTable::Entry& entry : table->entries) {
     // Check for mounts inside an executor's run path. These are
     // persistent volumes mounts.
     Try<paths::ExecutorRunPath> runPath =
@@ -748,7 +748,7 @@ Future<Option<ContainerLaunchInfo>> LinuxFilesystemIsolatorProcess::prepare(
         containerConfig.rootfs(),
         MS_REC | MS_BIND);
 
-    foreach (const ContainerMountInfo& mnt, ROOTFS_CONTAINER_MOUNTS) {
+    for (const ContainerMountInfo& mnt : ROOTFS_CONTAINER_MOUNTS) {
       // The target for special mounts must always be an absolute path.
       CHECK(path::is_absolute(mnt.target()));
 
@@ -809,7 +809,7 @@ Future<Option<ContainerLaunchInfo>> LinuxFilesystemIsolatorProcess::prepare(
 
     // Apply container path masking for non-privileged containers.
     if (!privileged.get()) {
-      foreach (const string& path, ROOTFS_MASKED_PATHS) {
+      for (const string& path : ROOTFS_MASKED_PATHS) {
         launchInfo.add_masked_paths(
             path::join(containerConfig.rootfs(), path));
       }
@@ -830,7 +830,7 @@ Future<Option<ContainerLaunchInfo>> LinuxFilesystemIsolatorProcess::prepare(
             return Failure("Unknown container");
           }
 
-          foreach (gid_t gid, infos[containerId]->gids) {
+          for (gid_t gid : infos[containerId]->gids) {
             // For command task with its own rootfs, the command executor will
             // run as root and the task itself will run as the specified normal
             // user, so here we add the supplementary group for the task and the
@@ -869,7 +869,7 @@ Future<Nothing> LinuxFilesystemIsolatorProcess::update(
   Resources current = info->resources;
 
   // We first remove unneeded persistent volumes.
-  foreach (const Resource& resource, current.persistentVolumes()) {
+  for (const Resource& resource : current.persistentVolumes()) {
     // This is enforced by the master.
     CHECK(resource.disk().has_volume());
 
@@ -924,7 +924,7 @@ Future<Nothing> LinuxFilesystemIsolatorProcess::update(
   vector<Future<gid_t>> futures;
 
   // We then mount new persistent volumes.
-  foreach (const Resource& resource, resourceRequests.persistentVolumes()) {
+  for (const Resource& resource : resourceRequests.persistentVolumes()) {
     // This is enforced by the master.
     CHECK(resource.disk().has_volume());
 
@@ -1037,7 +1037,7 @@ Future<Nothing> LinuxFilesystemIsolatorProcess::update(
       // Check a particular persistent volume is mounted or not.
       bool volumeMounted = false;
 
-      foreach (const fs::MountInfoTable::Entry& entry, table->entries) {
+      for (const fs::MountInfoTable::Entry& entry : table->entries) {
         // TODO(gilbert): Check source of the mount matches the entry's
         // root. Note that the root is relative to the root of its parent
         // mount. See:
@@ -1136,7 +1136,7 @@ Future<Nothing> LinuxFilesystemIsolatorProcess::cleanup(
   vector<string> unmountErrors;
 
   // Reverse unmount order to handle nested mount points.
-  foreach (const fs::MountInfoTable::Entry& entry,
+  for (const fs::MountInfoTable::Entry& entry :
            adaptor::reverse(table->entries)) {
     // NOTE: All persistent volumes are mounted at targets under the
     // container's work directory. We unmount all the persistent

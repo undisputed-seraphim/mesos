@@ -804,7 +804,7 @@ Slave::~Slave()
       process::Clock::resume();
     }
 
-    foreach (const ContainerID& containerId, containers.get()) {
+    for (const ContainerID& containerId : containers.get()) {
       process::Future<Option<ContainerTermination>> termination =
         containerizer->destroy(containerId);
 

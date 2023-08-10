@@ -106,7 +106,7 @@ Future<Nothing> VolumeCSIIsolatorProcess::recover(
     const vector<ContainerState>& states,
     const hashset<ContainerID>& orphans)
 {
-  foreach (const ContainerState& state, states) {
+  for (const ContainerState& state : states) {
     const ContainerID& containerId = state.container_id();
 
     Try<Nothing> recover = recoverContainer(containerId);
@@ -120,7 +120,7 @@ Future<Nothing> VolumeCSIIsolatorProcess::recover(
   // Recover any orphan containers that we might have check pointed.
   // These orphan containers will be destroyed by the containerizer
   // through the regular cleanup path. See MESOS-2367 for details.
-  foreach (const ContainerID& containerId, orphans) {
+  for (const ContainerID& containerId : orphans) {
     Try<Nothing> recover = recoverContainer(containerId);
     if (recover.isError()) {
       return Failure(
@@ -138,7 +138,7 @@ Future<Nothing> VolumeCSIIsolatorProcess::recover(
         rootDir + "': " + entries.error());
   }
 
-  foreach (const string& entry, entries.get()) {
+  for (const string& entry : entries.get()) {
     ContainerID containerId =
       protobuf::parseContainerId(Path(entry).basename());
 
@@ -219,7 +219,7 @@ Try<Nothing> VolumeCSIIsolatorProcess::recoverContainer(
   }
 
   hashset<CSIVolume> volumes;
-  foreach (const CSIVolume& volume, read->volumes()) {
+  for (const CSIVolume& volume : read->volumes()) {
     VLOG(1) << "Recovering CSI volume with plugin '" << volume.plugin_name()
             << "' and ID '" << volume.id() << "' for container " << containerId;
 
@@ -257,7 +257,7 @@ Future<Option<ContainerLaunchInfo>> VolumeCSIIsolatorProcess::prepare(
   // Represents the CSI volume mounts that we want to do for the container.
   vector<Mount> mounts;
 
-  foreach (const Volume& _volume, containerConfig.container_info().volumes()) {
+  for (const Volume& _volume : containerConfig.container_info().volumes()) {
     if (!_volume.has_source() ||
         !_volume.source().has_type() ||
         _volume.source().type() != Volume::Source::CSI_VOLUME) {
@@ -362,7 +362,7 @@ Future<Option<ContainerLaunchInfo>> VolumeCSIIsolatorProcess::prepare(
 
   // Create the `CSIVolumes` protobuf message to checkpoint.
   CSIVolumes state;
-  foreach (const CSIVolume& volume, volumeSet) {
+  for (const CSIVolume& volume : volumeSet) {
     state.add_volumes()->CopyFrom(volume);
   }
 
@@ -381,7 +381,7 @@ Future<Option<ContainerLaunchInfo>> VolumeCSIIsolatorProcess::prepare(
   // Invoke CSI server to publish the volumes.
   vector<Future<string>> futures;
   futures.reserve(mounts.size());
-  foreach (const Mount& mount, mounts) {
+  for (const Mount& mount : mounts) {
     futures.push_back(csiServer->publishVolume(mount.volume));
   }
 
@@ -409,7 +409,7 @@ Future<Option<ContainerLaunchInfo>> VolumeCSIIsolatorProcess::_prepare(
 
   vector<string> messages;
   vector<string> sources;
-  foreach (const Future<string>& future, futures) {
+  for (const Future<string>& future : futures) {
     if (!future.isReady()) {
       messages.push_back(future.isFailed() ? future.failure() : "discarded");
       continue;
@@ -486,7 +486,7 @@ Future<Nothing> VolumeCSIIsolatorProcess::cleanup(
 
   hashmap<CSIVolume, int> references;
   foreachvalue (const Owned<Info>& info, infos) {
-    foreach (const CSIVolume& volume, info->volumes) {
+    for (const CSIVolume& volume : info->volumes) {
       if (!references.contains(volume)) {
         references[volume] = 1;
       } else {
@@ -497,7 +497,7 @@ Future<Nothing> VolumeCSIIsolatorProcess::cleanup(
 
   vector<Future<Nothing>> futures;
 
-  foreach (const CSIVolume& volume, infos[containerId]->volumes) {
+  for (const CSIVolume& volume : infos[containerId]->volumes) {
     if (references.contains(volume) && references[volume] > 1) {
       VLOG(1) << "Cannot unpublish the volume with plugin '"
               << volume.plugin_name() << "' and ID '" << volume.id()
@@ -536,7 +536,7 @@ Future<Nothing> VolumeCSIIsolatorProcess::_cleanup(
     const vector<Future<Nothing>>& futures)
 {
   vector<string> messages;
-  foreach (const Future<Nothing>& future, futures) {
+  for (const Future<Nothing>& future : futures) {
     if (!future.isReady()) {
       messages.push_back(future.isFailed() ? future.failure() : "discarded");
     }

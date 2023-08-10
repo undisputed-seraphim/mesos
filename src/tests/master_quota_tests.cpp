@@ -132,7 +132,7 @@ static string createUpdateQuotaRequestBody(
   mesos::master::Call call;
   call.set_type(mesos::master::Call::UPDATE_QUOTA);
   call.mutable_update_quota()->set_force(force);
-  foreach (const QuotaConfig& config, configs) {
+  for (const QuotaConfig& config : configs) {
     *call.mutable_update_quota()->mutable_quota_configs()->Add() = config;
   }
 

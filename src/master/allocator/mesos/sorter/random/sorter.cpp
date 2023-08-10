@@ -127,7 +127,7 @@ void RandomSorter::add(const string& clientPath)
     }
 
     Option<Node*> child = [&]() -> Option<Node*> {
-      foreach (Node* c, current->children) {
+      for (Node* c : current->children) {
         if (c->name == *token) return c;
       }
       return None();
@@ -435,7 +435,7 @@ hashset<RandomSorter::Node*> RandomSorter::activeInternalNodes() const
 
         case Node::INTERNAL: {
           bool active = false;
-          foreach (Node* child, node->children) {
+          for (Node* child : node->children) {
             if (searchActiveInternal(child, result)) {
               active = true;
             }
@@ -530,11 +530,11 @@ void RandomSorter::SortInfo::updateRelativeWeights()
       // Calculate active children's total weights.
       double totalWeights_ = 0.0;
 
-      foreach (Node* child, node->children) {
+      for (Node* child : node->children) {
         totalWeights_ += isActive(child) ? sorter->getWeight(child) : 0.0;
       }
 
-      foreach (Node* child, node->children) {
+      for (Node* child : node->children) {
         if (isActive(child)) {
           calculateRelativeWeights(
               child, totalWeights_ - sorter->getWeight(child), relativeWeight);

@@ -70,7 +70,7 @@ Try<hashset<string>> ldd(
     // Collect the ELF dependencies of this path into the needed
     // list, scanning the ld.so cache to find the actual path of
     // each needed library.
-    foreach (const string& dependency, _dependencies.get()) {
+    for (const string& dependency : _dependencies.get()) {
       auto entry = std::find_if(
           cache.begin(),
           cache.end(),

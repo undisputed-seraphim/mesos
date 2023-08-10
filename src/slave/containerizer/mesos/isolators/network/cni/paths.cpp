@@ -80,7 +80,7 @@ Try<list<string>> getNetworkNames(
   }
 
   list<string> networkNames;
-  foreach (const string& entry, entries.get()) {
+  for (const string& entry : entries.get()) {
     const string path = path::join(networkInfoDir, entry);
 
     if (os::stat::isdir(path)) {
@@ -128,7 +128,7 @@ Try<list<string>> getInterfaces(
   }
 
   list<string> ifNames;
-  foreach (const string& entry, entries.get()) {
+  for (const string& entry : entries.get()) {
     const string path = path::join(networkDir, entry);
 
     if (os::stat::isdir(path)) {

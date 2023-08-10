@@ -978,7 +978,7 @@ Mesos::Mesos(
   }
 
   // Log any flag warnings (after logging is initialized).
-  foreach (const flags::Warning& warning, load->warnings) {
+  for (const flags::Warning& warning : load->warnings) {
     LOG(WARNING) << warning.message;
   }
 

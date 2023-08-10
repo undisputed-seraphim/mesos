@@ -392,7 +392,7 @@ TEST_F(VolumeHostPathIsolatorTest, ROOT_VolumeFromHostForceCreation)
   };
 
   // Ensure none of `hostPaths` exists.
-  foreach (const string& hostPath, hostPaths) {
+  for (const string& hostPath : hostPaths) {
     ASSERT_FALSE(os::exists(hostPath));
   }
 
@@ -425,7 +425,7 @@ TEST_F(VolumeHostPathIsolatorTest, ROOT_VolumeFromHostForceCreation)
   EXPECT_WEXITSTATUS_EQ(0, wait->get().status());
 
   // Expect `hostPath` was created and is a directory.
-  foreach (const string& hostPath, hostPaths) {
+  for (const string& hostPath : hostPaths) {
     EXPECT_TRUE(os::stat::isdir(hostPath));
   }
 }

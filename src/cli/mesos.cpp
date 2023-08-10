@@ -43,10 +43,10 @@ void usage(const char* argv0)
   list<string> commands;
 
   if (PATH.isSome()) {
-    foreach (const string& path, strings::split(PATH.get(), ":")) {
+    for (const string& path : strings::split(PATH.get(), ":")) {
       Try<list<string>> matches = fs::list(path::join(path, "mesos-*"));
       if (matches.isSome()) {
-        foreach (const string& match, matches.get()) {
+        for (const string& match : matches.get()) {
           Try<bool> access = os::access(match, X_OK);
           if (access.isSome() && access.get()) {
             string basename = Path(match).basename();
@@ -66,7 +66,7 @@ void usage(const char* argv0)
     << "Available commands:" << endl
     << "    help" << endl;
 
-  foreach (const string& command, commands) {
+  for (const string& command : commands) {
     cerr << "    " << command << endl;
   }
 }

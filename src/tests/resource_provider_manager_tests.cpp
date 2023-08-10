@@ -1155,7 +1155,7 @@ TEST_P(ResourceProviderManagerHttpApiTest, ConvertResources)
   const v1::Offer& offer2 = offers2->offers(0);
 
   Option<v1::Resource> mountDisk;
-  foreach (const v1::Resource& resource, offer2.resources()) {
+  for (const v1::Resource& resource : offer2.resources()) {
     if (resource.has_provider_id()) {
       mountDisk = resource;
     }

@@ -34,7 +34,7 @@ Try<bool> UpdateWeights::perform(
     return false; // No mutation.
   }
 
-  foreach (const WeightInfo& weightInfo, weightInfos) {
+  for (const WeightInfo& weightInfo : weightInfos) {
     bool hasStored = false;
     for (int i = 0; i < registry->weights().size(); ++i) {
       Registry::Weight* weight = registry->mutable_weights(i);

@@ -70,7 +70,7 @@ LeaderDetectorProcess::LeaderDetectorProcess(Group* _group)
 
 LeaderDetectorProcess::~LeaderDetectorProcess()
 {
-  foreach (Promise<Option<Group::Membership>>* promise, promises) {
+  for (Promise<Option<Group::Membership>>* promise : promises) {
     promise->future().discard();
     delete promise;
   }
@@ -127,7 +127,7 @@ void LeaderDetectorProcess::watched(
     // will directly fail as a result.
     error = Error(memberships.failure());
     leader = None();
-    foreach (Promise<Option<Group::Membership>>* promise, promises) {
+    for (Promise<Option<Group::Membership>>* promise : promises) {
       promise->fail(memberships.failure());
       delete promise;
     }
@@ -144,7 +144,7 @@ void LeaderDetectorProcess::watched(
   // membership id). We do not fulfill any of our promises if the
   // incumbent wins the election.
   Option<Group::Membership> current;
-  foreach (const Group::Membership& membership, memberships.get()) {
+  for (const Group::Membership& membership : memberships.get()) {
     current = min(current, membership);
   }
 
@@ -154,7 +154,7 @@ void LeaderDetectorProcess::watched(
                   ? "(id='" + stringify(current->id()) + "')"
                   : "None");
 
-    foreach (Promise<Option<Group::Membership>>* promise, promises) {
+    for (Promise<Option<Group::Membership>>* promise : promises) {
       promise->set(current);
       delete promise;
     }

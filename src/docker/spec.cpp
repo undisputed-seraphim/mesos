@@ -283,7 +283,7 @@ Option<Error> validate(const ImageManifest& manifest)
   }
 
   // Verify 'fsLayers' field.
-  foreach (const ImageManifest::FsLayer& fslayer, manifest.fslayers()) {
+  for (const ImageManifest::FsLayer& fslayer : manifest.fslayers()) {
     const string& blobSum = fslayer.blobsum();
     if (!strings::contains(blobSum, ":")) {
       return Error("Incorrect 'blobSum' format: " + blobSum);

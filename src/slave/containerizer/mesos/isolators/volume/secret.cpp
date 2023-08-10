@@ -163,7 +163,7 @@ Future<Option<ContainerLaunchInfo>> VolumeSecretIsolatorProcess::prepare(
       createContainerMount("ramfs", sandboxSecretRootDir, "ramfs", 0));
 
   vector<Future<Nothing>> futures;
-  foreach (const Volume& volume, containerInfo.volumes()) {
+  for (const Volume& volume : containerInfo.volumes()) {
     if (!volume.has_source() ||
         !volume.source().has_type() ||
         volume.source().type() != Volume::Source::SECRET) {

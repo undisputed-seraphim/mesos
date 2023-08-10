@@ -340,7 +340,7 @@ CombinedAuthenticator::CombinedAuthenticator(
     vector<Owned<Authenticator>>&& _authenticators)
 {
   // Initialize the set of offered authentication schemes.
-  foreach (const Owned<Authenticator>& authenticator, _authenticators) {
+  for (const Owned<Authenticator>& authenticator : _authenticators) {
     schemes.insert(authenticator->scheme());
   }
 

@@ -480,7 +480,7 @@ Future<Image> RegistryPullerProcess::___pull(
   return collect(futures)
     .then([=]() -> Future<Image> {
       // Remove the tarballs after the extraction.
-      foreach (const string& blobSum, blobSums) {
+      for (const string& blobSum : blobSums) {
         const string tar = path::join(directory, blobSum);
 
         Try<Nothing> rm = os::rm(tar);
@@ -493,7 +493,7 @@ Future<Image> RegistryPullerProcess::___pull(
 
       Image image;
       image.mutable_reference()->CopyFrom(reference);
-      foreach (const string& layerId, layerIds) {
+      for (const string& layerId : layerIds) {
         image.add_layer_ids(layerId);
       }
 
@@ -563,7 +563,7 @@ Future<Image> RegistryPullerProcess::____pull(
   return collect(futures)
     .then([=]() -> Future<Image> {
       // Remove the tarballs after the extraction.
-      foreach (const string& digest, digests) {
+      for (const string& digest : digests) {
         // Skip if the digest represents the image manifest config.
         if (digest == manifest.config().digest()) {
           continue;
@@ -580,7 +580,7 @@ Future<Image> RegistryPullerProcess::____pull(
       Image image;
       image.set_config_digest(manifest.config().digest());
       image.mutable_reference()->CopyFrom(reference);
-      foreach (const string& layerId, layerIds) {
+      for (const string& layerId : layerIds) {
         image.add_layer_ids(layerId);
       }
 
@@ -680,7 +680,7 @@ Future<hashset<string>> RegistryPullerProcess::fetchBlobs(
 {
   vector<Future<Nothing>> futures;
 
-  foreach (const string& digest, digests) {
+  for (const string& digest : digests) {
     URI blobUri;
 
     if (normalizedRef.has_registry()) {

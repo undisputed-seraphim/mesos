@@ -56,7 +56,7 @@ Try<Nothing> HookManager::initialize(const string& hookList)
 {
   synchronized (mutex) {
     const vector<string> hooks = strings::split(hookList, ",");
-    foreach (const string& hook, hooks) {
+    for (const string& hook : hooks) {
       if (availableHooks->contains(hook)) {
         return Error("Hook module '" + hook + "' already loaded");
       }
@@ -264,7 +264,7 @@ Future<DockerTaskExecutorPrepareInfo>
         -> Future<DockerTaskExecutorPrepareInfo> {
       DockerTaskExecutorPrepareInfo taskExecutorDecoratorInfo;
 
-      foreach (const Option<DockerTaskExecutorPrepareInfo>& result, results) {
+      for (const Option<DockerTaskExecutorPrepareInfo>& result : results) {
         if (result.isSome()) {
           taskExecutorDecoratorInfo.MergeFrom(result.get());
         }

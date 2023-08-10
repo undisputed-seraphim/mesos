@@ -304,7 +304,7 @@ MasterLoadTest::launchSimultaneousRequests(
   [&] {
     // Send out all http requests based on the specifications
     // found in `descriptors` and store the result in `requests`.
-    foreach (const RequestDescriptor& descriptor, descriptors) {
+    for (const RequestDescriptor& descriptor : descriptors) {
       for (size_t i=0; i < REQUESTS_PER_DESCRIPTOR; ++i) {
         Future<Response> response = process::http::get(
             master_->pid,

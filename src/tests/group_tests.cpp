@@ -269,7 +269,7 @@ TEST_F(GroupTest, MultipleGroups)
   Future<bool> cancelled;
 
   // Now watch the membership owned by group1 from group2.
-  foreach (const Group::Membership& membership, memberships2.get()) {
+  for (const Group::Membership& membership : memberships2.get()) {
     if (membership == membership1.get()) {
       cancelled = membership.cancelled();
       break;

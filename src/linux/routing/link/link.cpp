@@ -68,7 +68,7 @@ Result<string> eth0()
         mainRoutingTable.error());
   }
 
-  foreach (const route::Rule& rule, mainRoutingTable.get()) {
+  for (const route::Rule& rule : mainRoutingTable.get()) {
     if (rule.destination.isNone()) {
       // Check if the public interface exists.
       Try<bool> exists = link::exists(rule.link);
@@ -95,7 +95,7 @@ Result<string> lo()
     return Error("Failed to get all the links: " + links.error());
   }
 
-  foreach (const string& link, links.get()) {
+  for (const string& link : links.get()) {
     Result<bool> test = link::internal::test(link, IFF_LOOPBACK);
     if (test.isError()) {
       return Error("Failed to check the flag on link: " + link);

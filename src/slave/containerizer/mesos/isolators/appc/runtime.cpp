@@ -168,7 +168,7 @@ Option<Environment> AppcRuntimeIsolatorProcess::getLaunchEnvironment(
 
   Environment environment;
 
-  foreach (const appc::spec::ImageManifest::Environment& env,
+  for (const appc::spec::ImageManifest::Environment& env :
            containerConfig.appc().manifest().app().environment()) {
     // Keep all environment from runtime isolator. If there exists
     // environment variable duplicate cases, it will be overwritten

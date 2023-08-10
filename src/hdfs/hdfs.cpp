@@ -277,7 +277,7 @@ Future<Bytes> HDFS::du(const string& _path)
       // then the name of the path we gave. The 'hadoop' command can
       // emit various WARN or other log messages, so we make an effort
       // to scan for the field we want.
-      foreach (const string& line, strings::tokenize(result.out, "\n")) {
+      for (const string& line : strings::tokenize(result.out, "\n")) {
         // Note that we use tokenize() rather than split() since
         // fields can be delimited by multiple spaces.
         vector<string> fields = strings::tokenize(line, " \t");

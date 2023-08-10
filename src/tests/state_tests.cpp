@@ -673,7 +673,7 @@ TEST_F(LogStateTest, Diff)
   // Convert each Log::Entry to an Operation.
   vector<Operation> operations;
 
-  foreach (const Log::Entry& entry, entries.get()) {
+  for (const Log::Entry& entry : entries.get()) {
     // Parse the Operation from the Log::Entry.
     Operation operation;
 

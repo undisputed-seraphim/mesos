@@ -122,7 +122,7 @@ Future<Nothing> PosixDiskIsolatorProcess::recover(
     const vector<ContainerState>& states,
     const hashset<ContainerID>& orphans)
 {
-  foreach (const ContainerState& state, states) {
+  for (const ContainerState& state : states) {
     // If this is a nested container, we do not need to create an Info
     // struct for it because we only perform disk space check for the
     // top level container.
@@ -137,7 +137,7 @@ Future<Nothing> PosixDiskIsolatorProcess::recover(
 
     Owned<Info> info(new Info(state.directory()));
 
-    foreach (const string& path, state.ephemeral_volumes()) {
+    for (const string& path : state.ephemeral_volumes()) {
       info->directories.insert(path);
     }
 
@@ -165,7 +165,7 @@ Future<Option<ContainerLaunchInfo>> PosixDiskIsolatorProcess::prepare(
 
   Owned<Info> info(new Info(containerConfig.directory()));
 
-  foreach (const string& path, containerConfig.ephemeral_volumes()) {
+  for (const string& path : containerConfig.ephemeral_volumes()) {
     info->directories.insert(path);
   }
 
@@ -230,7 +230,7 @@ Future<Nothing> PosixDiskIsolatorProcess::update(
   // This stores the updated quotas.
   hashmap<string, Resources> quotas;
 
-  foreach (const Resource& resource, resourceRequests) {
+  for (const Resource& resource : resourceRequests) {
     if (resource.name() != "disk") {
       continue;
     }
@@ -270,7 +270,7 @@ Future<Nothing> PosixDiskIsolatorProcess::update(
   // updates below.
   if (quotas.contains(info->sandbox)) {
     const Resources quota = quotas[info->sandbox];
-    foreach (const string& path, info->directories) {
+    for (const string& path : info->directories) {
       quotas[path] = quota;
     }
   }
@@ -286,7 +286,7 @@ Future<Nothing> PosixDiskIsolatorProcess::update(
   }
 
   // Remove paths that we no longer interested in.
-  foreach (const string& path, info->paths.keys()) {
+  for (const string& path : info->paths.keys()) {
     if (!quotas.contains(path)) {
       // Cancel the usage collection as we are no longer interested.
       info->paths[path].usage.discard();
@@ -379,7 +379,7 @@ void PosixDiskIsolatorProcess::_collect(
       // disk resources because its quota will be enforced by the
       // underlying filesystem.
       bool isDiskSourceMount = false;
-      foreach (const Resource& resource, info->paths[path].quota) {
+      for (const Resource& resource : info->paths[path].quota) {
         if (resource.has_disk() &&
             resource.disk().has_source() &&
             resource.disk().source().type() ==
@@ -508,7 +508,7 @@ Bytes PosixDiskIsolatorProcess::Info::ephemeralUsage() const
 {
   Bytes usage;
 
-  foreach (const string& path, directories) {
+  for (const string& path : directories) {
     usage += paths.at(path).lastUsage.getOrElse(0);
   }
 
@@ -532,7 +532,7 @@ public:
     // either return a Failure here, or does not allow 'excludes' to
     // be specified on OSX.
 
-    foreach (const Owned<Entry>& entry, entries) {
+    for (const Owned<Entry>& entry : entries) {
       if (entry->path == path) {
         return entry->promise.future();
       }
@@ -555,7 +555,7 @@ protected:
 
   void finalize() override
   {
-    foreach (const Owned<Entry>& entry, entries) {
+    for (const Owned<Entry>& entry : entries) {
       if (entry->du.isSome() && entry->du->status().isPending()) {
         os::killtree(entry->du->pid(), SIGKILL);
       }
@@ -621,7 +621,7 @@ private:
 
 #ifdef __linux__
     // Add paths that need to be excluded.
-    foreach (const string& exclude, entry->excludes) {
+    for (const string& exclude : entry->excludes) {
       command.push_back("--exclude");
       command.push_back(exclude);
     }

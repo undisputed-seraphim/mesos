@@ -817,7 +817,7 @@ Try<Nothing> TaskStatusUpdateStream::replay(
 
   VLOG(1) << "Replaying task status update stream for task " << taskId;
 
-  foreach (const StatusUpdate& update, updates) {
+  for (const StatusUpdate& update : updates) {
     // Handle the update.
     _handle(update, StatusUpdateRecord::UPDATE);
 

@@ -165,7 +165,7 @@ Try<Nothing> CSIServerProcess::initializePlugin(const Option<string>& name)
   // initialize the plugin(s) based on the configuration(s) found.
   hashmap<string, CSIPluginInfo> pluginConfigs;
 
-  foreach (const string& entry, entries.get()) {
+  for (const string& entry : entries.get()) {
     const string path = path::join(pluginConfigDir, entry);
 
     // Ignore directory entries.
@@ -458,7 +458,7 @@ hashset<CSIPluginContainerInfo::Service> extractServices(
   hashset<CSIPluginContainerInfo::Service> result;
 
   if (plugin.containers_size() > 0) {
-    foreach (const CSIPluginContainerInfo& container, plugin.containers()) {
+    for (const CSIPluginContainerInfo& container : plugin.containers()) {
       for (int i = 0; i < container.services_size(); ++i) {
         result.insert(container.services(i));
       }
@@ -466,7 +466,7 @@ hashset<CSIPluginContainerInfo::Service> extractServices(
   } else {
     CHECK(plugin.endpoints_size() > 0);
 
-    foreach (const CSIPluginEndpoint& endpoint, plugin.endpoints()) {
+    for (const CSIPluginEndpoint& endpoint : plugin.endpoints()) {
       result.insert(endpoint.csi_service());
     }
   }

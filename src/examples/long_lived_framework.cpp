@@ -271,7 +271,7 @@ protected:
 
     metrics.offers_received += offers.size();
 
-    foreach (const Offer& offer, offers) {
+    for (const Offer& offer : offers) {
       if (agentId.isNone()) {
         // No active executor running in the cluster.
         // Launch a new task with executor.
@@ -572,7 +572,7 @@ int main(int argc, char** argv)
   mesos::internal::logging::initialize(argv[0], false);
 
   // Log any flag warnings.
-  foreach (const flags::Warning& warning, load->warnings) {
+  for (const flags::Warning& warning : load->warnings) {
     LOG(WARNING) << warning.message;
   }
 

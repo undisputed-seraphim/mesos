@@ -69,7 +69,7 @@ bool isSelectedResourceProvider(
 
       const auto& selector = profileManifest.resource_provider_selector();
 
-      foreach (const auto& resourceProvider, selector.resource_providers()) {
+      for (const auto& resourceProvider : selector.resource_providers()) {
         if (resourceProviderInfo.type() == resourceProvider.type() &&
             resourceProviderInfo.name() == resourceProvider.name()) {
           return true;
@@ -107,7 +107,7 @@ static Option<Error> validateSelector(
 
       const auto& selector = profileManifest.resource_provider_selector();
 
-      foreach (const auto& resourceProvider, selector.resource_providers()) {
+      for (const auto& resourceProvider : selector.resource_providers()) {
         if (resourceProvider.type().empty()) {
           return Error(
               "'type' is a required field for ResourceProviderSelector");
@@ -146,7 +146,7 @@ static Option<Error> validateSelector(
 
 Option<Error> validate(const DiskProfileMapping& mapping)
 {
-  foreach (const auto& entry, mapping.profile_matrix()) {
+  for (const auto& entry : mapping.profile_matrix()) {
     Option<Error> selector = validateSelector(entry.second);
 
     if (selector.isSome()) {
@@ -187,7 +187,7 @@ Option<Error> validate(const csi::v0::VolumeCapability& capability)
     // size is calculated. So this check is conservative and does not
     // include padding or array separators in the size calculation.
     size_t size = 0;
-    foreach (const string& flag, capability.mount().mount_flags()) {
+    for (const string& flag : capability.mount().mount_flags()) {
       size += flag.size();
     }
 

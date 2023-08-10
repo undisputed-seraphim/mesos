@@ -124,7 +124,7 @@ int main(int argc, char** argv)
   mesos::internal::logging::initialize(argv[0], true, flags); // Catch signals.
 
   // Log any flag warnings (after logging is initialized).
-  foreach (const flags::Warning& warning, load->warnings) {
+  for (const flags::Warning& warning : load->warnings) {
     LOG(WARNING) << warning.message;
   }
 

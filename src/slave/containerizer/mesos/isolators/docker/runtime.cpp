@@ -190,7 +190,7 @@ Option<Environment> DockerRuntimeIsolatorProcess::getLaunchEnvironment(
 
   Environment environment;
 
-  foreach (const string& env,
+  for (const string& env :
            containerConfig.docker().manifest().config().env()) {
     // Use `find_first_of` to prevent to case that there are
     // multiple '=' existing.
@@ -339,7 +339,7 @@ Result<CommandInfo> DockerRuntimeIsolatorProcess::getLaunchCommand(
     // set by user. The logic below is the case that no argument is
     // set by user.
     if (command.arguments_size() == config.entrypoint_size()) {
-      foreach (const string& cmd, config.cmd()) {
+      for (const string& cmd : config.cmd()) {
         command.add_arguments(cmd);
       }
     }

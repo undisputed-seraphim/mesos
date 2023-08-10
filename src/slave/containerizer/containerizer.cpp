@@ -92,7 +92,7 @@ Try<Resources> Containerizer::resources(const Flags& flags)
   bool hasDisk = false;
   bool hasPorts = false;
 
-  foreach (const Resource& resource, resourceList) {
+  for (const Resource& resource : resourceList) {
     if (resource.name() == "cpus") {
       hasCpus = true;
     } else if (resource.name() == "mem") {
@@ -289,7 +289,7 @@ Try<Containerizer*> Containerizer::create(
   // Create containerizer(s).
   vector<Containerizer*> containerizers;
 
-  foreach (const string& type, containerizerTypes) {
+  for (const string& type : containerizerTypes) {
     if (type == "mesos") {
       Try<MesosContainerizer*> containerizer = MesosContainerizer::create(
           flags,

@@ -820,7 +820,7 @@ Future<Response> Master::Http::createVolumes(
   }
 
   RepeatedPtrField<Resource> volumes;
-  foreach (const JSON::Value& value, parse->values) {
+  for (const JSON::Value& value : parse->values) {
     Try<Resource> volume = ::protobuf::parse<Resource>(value);
     if (volume.isError()) {
       return BadRequest(
@@ -991,7 +991,7 @@ Future<Response> Master::Http::destroyVolumes(
   }
 
   RepeatedPtrField<Resource> volumes;
-  foreach (const JSON::Value& value, parse->values) {
+  for (const JSON::Value& value : parse->values) {
     Try<Resource> volume = ::protobuf::parse<Resource>(value);
     if (volume.isError()) {
       return BadRequest(
@@ -1881,7 +1881,7 @@ Future<Response> Master::Http::reserve(
       }
 
       RepeatedPtrField<Resource> resources;
-      foreach (const JSON::Value& value, parse->values) {
+      for (const JSON::Value& value : parse->values) {
         Try<Resource> resource = ::protobuf::parse<Resource>(value);
         if (resource.isError()) {
           return Error(
@@ -3059,7 +3059,7 @@ mesos::maintenance::Schedule Master::Http::_getMaintenanceSchedule(
 
   mesos::maintenance::Schedule schedule;
 
-  foreach (const mesos::maintenance::Window& window,
+  for (const mesos::maintenance::Window& window :
            master->maintenance.schedules.front().windows()) {
     mesos::maintenance::Window window_;
 
@@ -3112,7 +3112,7 @@ Future<Response> Master::Http::__updateMaintenanceSchedule(
     const mesos::maintenance::Schedule& schedule,
     const Owned<ObjectApprovers>& approvers) const
 {
-  foreach (const mesos::maintenance::Window& window, schedule.windows()) {
+  for (const mesos::maintenance::Window& window : schedule.windows()) {
     for (const MachineID& machine : window.machine_ids()) {
       if (!approvers->approved<UPDATE_MAINTENANCE_SCHEDULE>(machine)) {
         return Forbidden();
@@ -3155,7 +3155,7 @@ Future<Response> Master::Http::___updateMaintenanceSchedule(
   // Put the machines in the updated schedule into a set.
   // Save the unavailability, to help with updating some machines.
   hashmap<MachineID, Unavailability> unavailabilities;
-  foreach (const mesos::maintenance::Window& window, schedule.windows()) {
+  for (const mesos::maintenance::Window& window : schedule.windows()) {
     for (const MachineID& id : window.machine_ids()) {
       unavailabilities[id] = window.unavailability();
     }
@@ -3188,7 +3188,7 @@ Future<Response> Master::Http::___updateMaintenanceSchedule(
 
   // Save each new machine, with the unavailability
   // and starting in `DRAINING` mode.
-  foreach (const mesos::maintenance::Window& window, schedule.windows()) {
+  for (const mesos::maintenance::Window& window : schedule.windows()) {
     for (const MachineID& id : window.machine_ids()) {
       if (master->machines.contains(id) &&
           master->machines[id].info.mode() != MachineInfo::UP) {
@@ -4114,7 +4114,7 @@ Future<Response> Master::Http::unreserve(
   }
 
   RepeatedPtrField<Resource> resources;
-  foreach (const JSON::Value& value, parse->values) {
+  for (const JSON::Value& value : parse->values) {
     Try<Resource> resource = ::protobuf::parse<Resource>(value);
     if (resource.isError()) {
       return BadRequest(

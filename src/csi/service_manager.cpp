@@ -491,7 +491,7 @@ ServiceManagerProcess::getContainers()
       hashmap<ContainerID, Option<ContainerStatus>> result;
 
       agent::Response response = internal::devolve(v1Response.get());
-      foreach (const agent::Response::GetContainers::Container& container,
+      for (const agent::Response::GetContainers::Container& container :
                response.get_containers().containers()) {
         // Container IDs of this CSI plugin must contain the given prefix. See
         // `LocalResourceProvider::principal` for details.

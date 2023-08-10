@@ -179,7 +179,7 @@ JNIEXPORT jobject JNICALL Java_org_apache_mesos_Log_00024Reader_read
   jmethodID add = env->GetMethodID(clazz, "add", "(Ljava/lang/Object;)Z");
 
   // Loop through C++ list and add each entry to the Java list.
-  foreach (const Log::Entry& entry, entries.get()) {
+  for (const Log::Entry& entry : entries.get()) {
     jobject jentry = convert<Log::Entry>(env, entry);
     env->CallBooleanMethod(jentries, add, jentry);
   }

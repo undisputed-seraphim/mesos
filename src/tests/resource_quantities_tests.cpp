@@ -42,7 +42,7 @@ static vector<pair<string, double>> toVector(
 {
   vector<pair<string, double>> result;
 
-  foreach (auto&& quantity, quantities) {
+  for (auto&& quantity : quantities) {
     result.push_back(std::make_pair(quantity.first, quantity.second.value()));
   }
 
@@ -360,7 +360,7 @@ static vector<pair<string, double>> toVector(
 {
   vector<pair<string, double>> result;
 
-  foreach (auto& limit, limits) {
+  for (auto& limit : limits) {
     result.push_back(std::make_pair(limit.first, limit.second.value()));
   }
 

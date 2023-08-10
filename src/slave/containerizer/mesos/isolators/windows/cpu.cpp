@@ -65,7 +65,7 @@ bool WindowsCpuIsolatorProcess::supportsStandalone() { return true; }
 Future<Nothing> WindowsCpuIsolatorProcess::recover(
     const vector<ContainerState>& state, const hashset<ContainerID>& orphans)
 {
-  foreach (const ContainerState& run, state) {
+  for (const ContainerState& run : state) {
     // This should (almost) never occur: see comment in
     // SubprocessLauncher::recover().
     if (infos.contains(run.container_id())) {

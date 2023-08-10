@@ -62,7 +62,7 @@ Try<Owned<SubsystemProcess>> PerfEventSubsystemProcess::create(
   }
 
   set<string> events;
-  foreach (const string& event,
+  for (const string& event :
            strings::tokenize(flags.perf_events.get(), ",")) {
     events.insert(event);
   }

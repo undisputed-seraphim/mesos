@@ -202,7 +202,7 @@ Try<net::IP::Network> getNonLoopbackIP()
         links.error());
   }
 
-  foreach (const string& link, links.get()) {
+  for (const string& link : links.get()) {
     Result<net::IP::Network> hostNetwork =
       net::IP::Network::fromLinkDevice(link, AF_INET);
 

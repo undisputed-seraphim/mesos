@@ -104,7 +104,7 @@ void WhitelistWatcher::watch()
   } else {
     hashset<string> hostnames;
     vector<string> lines = strings::tokenize(read.get(), "\n");
-    foreach (const string& hostname, lines) {
+    for (const string& hostname : lines) {
       hostnames.insert(hostname);
     }
     whitelist = hostnames;

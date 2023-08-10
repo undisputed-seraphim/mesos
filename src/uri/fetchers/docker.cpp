@@ -956,7 +956,7 @@ Future<Nothing> DockerFetcherPluginProcess::fetchBlobs(
 {
   vector<Future<Nothing>> futures;
 
-  foreach (const string& digest, digests) {
+  for (const string& digest : digests) {
     URI blob = uri::docker::blob(
         uri.path(),                         // The 'repository'.
         digest,                             // The 'digest'.

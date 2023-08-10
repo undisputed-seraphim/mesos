@@ -188,7 +188,7 @@ Try<SlaveState> SlaveState::recover(
   }
 
   // Recover each of the frameworks.
-  foreach (const string& path, frameworks.get()) {
+  for (const string& path : frameworks.get()) {
     FrameworkID frameworkId;
     frameworkId.set_value(Path(path).basename());
 
@@ -248,7 +248,7 @@ Try<SlaveState> SlaveState::recover(
 
     if (target.isSome()) {
       state.operations = std::vector<Operation>();
-      foreach (const Operation& operation, target->operations()) {
+      for (const Operation& operation : target->operations()) {
         state.operations->push_back(operation);
       }
     }
@@ -270,7 +270,7 @@ Try<SlaveState> SlaveState::recover(
 
     if (resourceState.isSome()) {
       state.operations = std::vector<Operation>();
-      foreach (const Operation& operation, resourceState->operations()) {
+      for (const Operation& operation : resourceState->operations()) {
         state.operations->push_back(operation);
       }
     }
@@ -369,7 +369,7 @@ Try<FrameworkState> FrameworkState::recover(
   }
 
   // Recover the executors.
-  foreach (const string& path, executors.get()) {
+  for (const string& path : executors.get()) {
     ExecutorID executorId;
     executorId.set_value(Path(path).basename());
 
@@ -414,7 +414,7 @@ Try<ExecutorState> ExecutorState::recover(
   }
 
   // Recover the runs.
-  foreach (const string& path, runs.get()) {
+  for (const string& path : runs.get()) {
     if (Path(path).basename() == paths::LATEST_SYMLINK) {
       const Result<string> latest = os::realpath(path);
       if (latest.isNone()) {
@@ -581,7 +581,7 @@ Try<RunState> RunState::recover(
   }
 
   // Recover tasks.
-  foreach (const string& path, tasks.get()) {
+  for (const string& path : tasks.get()) {
     TaskID taskId;
     taskId.set_value(Path(path).basename());
 

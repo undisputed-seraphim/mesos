@@ -413,7 +413,7 @@ Option<Error> validate(
       // Because standalone containers are launched outside of the master's
       // offer cycle, some resource types or fields may not be specified.
       if (!launch.container_id().has_parent()) {
-        foreach (Resource resource, launch.resources()) {
+        for (Resource resource : launch.resources()) {
           // Upgrade the resources (in place) to simplify validation.
           upgradeResource(&resource);
 

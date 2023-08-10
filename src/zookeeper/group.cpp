@@ -740,7 +740,7 @@ Try<bool> GroupProcess::cache()
   // Convert results to sequence numbers and (optionally) labels.
   hashmap<int32_t, Option<string>> sequences;
 
-  foreach (const string& result, results) {
+  for (const string& result : results) {
     vector<string> tokens = strings::tokenize(result, "_");
     Option<string> label = None();
     if (tokens.size() > 1) {

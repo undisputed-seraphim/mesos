@@ -92,7 +92,7 @@ static Try<set<Gpu>> enumerateGpus(
 
   set<Gpu> gpus;
 
-  foreach (unsigned int index, indices) {
+  for (unsigned int index : indices) {
     Try<nvmlDevice_t> handle = nvml::deviceGetHandleByIndex(index);
     if (handle.isError()) {
       return Error("Failed to nvml::deviceGetHandleByIndex: " + handle.error());

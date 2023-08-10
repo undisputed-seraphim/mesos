@@ -112,7 +112,7 @@ Try<Isolator*> CgroupsIsolatorProcess::create(const Flags& flags)
           "Failed to get the enabled subsystems: " + enabledSubsystems.error());
     }
 
-    foreach (const string& subsystemName, enabledSubsystems.get()) {
+    for (const string& subsystemName : enabledSubsystems.get()) {
       if (supportedSubsystems.count(subsystemName) == 0) {
         // Skip when the subsystem is not supported by Mesos yet.
         LOG(WARNING) << "Cannot automatically load the subsystem '"
@@ -131,7 +131,7 @@ Try<Isolator*> CgroupsIsolatorProcess::create(const Flags& flags)
     LOG(INFO) << "Automatically loading subsystems: "
               << stringify(subsystemSet);
   } else {
-    foreach (string isolator, strings::tokenize(flags.isolation, ",")) {
+    for (string isolator : strings::tokenize(flags.isolation, ",")) {
       if (!strings::startsWith(isolator, "cgroups/")) {
         // Skip when the isolator is not related to cgroups.
         continue;
@@ -146,7 +146,7 @@ Try<Isolator*> CgroupsIsolatorProcess::create(const Flags& flags)
 
       // A cgroups isolator name may map to multiple subsystems. We need to
       // convert the isolator name to its associated subsystems.
-      foreach (const string& subsystemName, isolatorMap.get(isolator)) {
+      for (const string& subsystemName : isolatorMap.get(isolator)) {
         subsystemSet.insert(subsystemName);
       }
     }
@@ -154,7 +154,7 @@ Try<Isolator*> CgroupsIsolatorProcess::create(const Flags& flags)
 
   CHECK(!subsystemSet.empty());
 
-  foreach (const string& subsystemName, subsystemSet) {
+  for (const string& subsystemName : subsystemSet) {
     // Prepare hierarchy if it does not exist.
     Try<string> hierarchy = cgroups::prepare(
         flags.cgroups_hierarchy,
@@ -205,7 +205,7 @@ Future<Nothing> CgroupsIsolatorProcess::recover(
 {
   // Recover active containers first.
   vector<Future<Nothing>> recovers;
-  foreach (const ContainerState& state, states) {
+  for (const ContainerState& state : states) {
     // If we are a nested container with shared cgroups, we do not
     // need to recover anything since its ancestor will have cgroups
     // created for them.
@@ -237,7 +237,7 @@ Future<Nothing> CgroupsIsolatorProcess::_recover(
     const vector<Future<Nothing>>& futures)
 {
   vector<string> errors;
-  foreach (const Future<Nothing>& future, futures) {
+  for (const Future<Nothing>& future : futures) {
     if (!future.isReady()) {
       errors.push_back((future.isFailed()
           ? future.failure()
@@ -254,7 +254,7 @@ Future<Nothing> CgroupsIsolatorProcess::_recover(
   hashset<ContainerID> knownOrphans;
   hashset<ContainerID> unknownOrphans;
 
-  foreach (const string& hierarchy, subsystems.keys()) {
+  for (const string& hierarchy : subsystems.keys()) {
     Try<vector<string>> cgroups = cgroups::get(
         hierarchy,
         flags.cgroups_root);
@@ -265,7 +265,7 @@ Future<Nothing> CgroupsIsolatorProcess::_recover(
           cgroups.error());
     }
 
-    foreach (const string& cgroup, cgroups.get()) {
+    for (const string& cgroup : cgroups.get()) {
       // Ignore the slave cgroup (see the --slave_subsystems flag).
       // TODO(idownes): Remove this when the cgroups layout is
       // updated, see MESOS-1185.
@@ -301,11 +301,11 @@ Future<Nothing> CgroupsIsolatorProcess::_recover(
 
   vector<Future<Nothing>> recovers;
 
-  foreach (const ContainerID& containerId, knownOrphans) {
+  for (const ContainerID& containerId : knownOrphans) {
     recovers.push_back(___recover(containerId));
   }
 
-  foreach (const ContainerID& containerId, unknownOrphans) {
+  for (const ContainerID& containerId : unknownOrphans) {
     recovers.push_back(___recover(containerId));
   }
 
@@ -323,7 +323,7 @@ Future<Nothing> CgroupsIsolatorProcess::__recover(
     const vector<Future<Nothing>>& futures)
 {
   vector<string> errors;
-  foreach (const Future<Nothing>& future, futures) {
+  for (const Future<Nothing>& future : futures) {
     if (!future.isReady()) {
       errors.push_back((future.isFailed()
           ? future.failure()
@@ -339,7 +339,7 @@ Future<Nothing> CgroupsIsolatorProcess::__recover(
 
   // Known orphan cgroups will be destroyed by the containerizer using
   // the normal cleanup path. See MESOS-2367 for details.
-  foreach (const ContainerID& containerId, unknownOrphans) {
+  for (const ContainerID& containerId : unknownOrphans) {
     LOG(INFO) << "Cleaning up unknown orphaned container " << containerId;
     cleanup(containerId);
   }
@@ -358,7 +358,7 @@ Future<Nothing> CgroupsIsolatorProcess::___recover(
   hashset<string> recoveredSubsystems;
 
   // TODO(haosdent): Use foreachkey once MESOS-5037 is resolved.
-  foreach (const string& hierarchy, subsystems.keys()) {
+  for (const string& hierarchy : subsystems.keys()) {
     if (!cgroups::exists(hierarchy, cgroup)) {
       // This may occur in two cases:
       // 1. If the executor has exited and the isolator has destroyed
@@ -374,7 +374,7 @@ Future<Nothing> CgroupsIsolatorProcess::___recover(
       continue;
     }
 
-    foreach (const Owned<Subsystem>& subsystem, subsystems.get(hierarchy)) {
+    for (const Owned<Subsystem>& subsystem : subsystems.get(hierarchy)) {
       recoveredSubsystems.insert(subsystem->name());
       recovers.push_back(subsystem->recover(containerId, cgroup));
     }
@@ -396,7 +396,7 @@ Future<Nothing> CgroupsIsolatorProcess::____recover(
     const vector<Future<Nothing>>& futures)
 {
   vector<string> errors;
-  foreach (const Future<Nothing>& future, futures) {
+  for (const Future<Nothing>& future : futures) {
     if (!future.isReady()) {
       errors.push_back((future.isFailed()
           ? future.failure()
@@ -459,7 +459,7 @@ Future<Option<ContainerLaunchInfo>> CgroupsIsolatorProcess::prepare(
   vector<Future<Nothing>> prepares;
 
   // TODO(haosdent): Use foreachkey once MESOS-5037 is resolved.
-  foreach (const string& hierarchy, subsystems.keys()) {
+  for (const string& hierarchy : subsystems.keys()) {
     string path = path::join(hierarchy, infos[containerId]->cgroup);
 
     VLOG(1) << "Creating cgroup at '" << path << "' "
@@ -480,7 +480,7 @@ Future<Option<ContainerLaunchInfo>> CgroupsIsolatorProcess::prepare(
           "'" + path + "': " + create.error());
     }
 
-    foreach (const Owned<Subsystem>& subsystem, subsystems.get(hierarchy)) {
+    for (const Owned<Subsystem>& subsystem : subsystems.get(hierarchy)) {
       infos[containerId]->subsystems.insert(subsystem->name());
       prepares.push_back(subsystem->prepare(
           containerId,
@@ -553,7 +553,7 @@ Future<Option<ContainerLaunchInfo>> CgroupsIsolatorProcess::_prepare(
     const vector<Future<Nothing>>& futures)
 {
   vector<string> errors;
-  foreach (const Future<Nothing>& future, futures) {
+  for (const Future<Nothing>& future : futures) {
     if (!future.isReady()) {
       errors.push_back((future.isFailed()
           ? future.failure()
@@ -596,9 +596,9 @@ Future<Option<ContainerLaunchInfo>> CgroupsIsolatorProcess::__prepare(
   // we need to create a symbolic link for each of them to the mount point.
   // E.g.: ln -s /sys/fs/cgroup/cpu,cpuacct /sys/fs/cgroup/cpu
   //       ln -s /sys/fs/cgroup/cpu,cpuacct /sys/fs/cgroup/cpuacct
-  foreach (const string& hierarchy, subsystems.keys()) {
+  for (const string& hierarchy : subsystems.keys()) {
     if (subsystems.get(hierarchy).size() > 1) {
-      foreach (const Owned<Subsystem>& subsystem, subsystems.get(hierarchy)) {
+      for (const Owned<Subsystem>& subsystem : subsystems.get(hierarchy)) {
         *launchInfo.add_file_operations() = containerSymlinkOperation(
             path::join("/sys/fs/cgroup", Path(hierarchy).basename()),
             path::join(
@@ -619,7 +619,7 @@ Future<Option<ContainerLaunchInfo>> CgroupsIsolatorProcess::__prepare(
         stringify(containerId));
   }
 
-  foreach (const string& hierarchy, subsystems.keys()) {
+  for (const string& hierarchy : subsystems.keys()) {
     *launchInfo.add_mounts() = protobuf::slave::createContainerMount(
         path::join(hierarchy, info->cgroup),
         path::join(
@@ -744,7 +744,7 @@ Future<Nothing> CgroupsIsolatorProcess::_isolate(
 {
   vector<string> errors;
 
-  foreach (const Future<Nothing>& future, futures) {
+  for (const Future<Nothing>& future : futures) {
     if (!future.isReady()) {
       errors.push_back((future.isFailed()
           ? future.failure()
@@ -770,7 +770,7 @@ Future<Nothing> CgroupsIsolatorProcess::_isolate(
   const string& cgroup = info->cgroup;
 
   // TODO(haosdent): Use foreachkey once MESOS-5037 is resolved.
-  foreach (const string& hierarchy, subsystems.keys()) {
+  for (const string& hierarchy : subsystems.keys()) {
     // If new cgroup subsystems are added after the agent
     // upgrade, the newly added cgroup subsystems do not
     // exist on old container's cgroup hierarchy. So skip
@@ -887,7 +887,7 @@ Future<Nothing> CgroupsIsolatorProcess::_update(
     const vector<Future<Nothing>>& futures)
 {
   vector<string> errors;
-  foreach (const Future<Nothing>& future, futures) {
+  for (const Future<Nothing>& future : futures) {
     if (!future.isReady()) {
       errors.push_back((future.isFailed()
           ? future.failure()
@@ -925,7 +925,7 @@ Future<ResourceStatistics> CgroupsIsolatorProcess::usage(
     .then([containerId](const vector<Future<ResourceStatistics>>& _usages) {
       ResourceStatistics result;
 
-      foreach (const Future<ResourceStatistics>& statistics, _usages) {
+      for (const Future<ResourceStatistics>& statistics : _usages) {
         if (statistics.isReady()) {
           result.MergeFrom(statistics.get());
         } else {
@@ -970,7 +970,7 @@ Future<ContainerStatus> CgroupsIsolatorProcess::status(
     .then([containerId](const vector<Future<ContainerStatus>>& _statuses) {
       ContainerStatus result;
 
-      foreach (const Future<ContainerStatus>& status, _statuses) {
+      for (const Future<ContainerStatus>& status : _statuses) {
         if (status.isReady()) {
           result.MergeFrom(status.get());
         } else {
@@ -1018,7 +1018,7 @@ Future<Nothing> CgroupsIsolatorProcess::_cleanup(
   CHECK(infos.contains(containerId));
 
   vector<string> errors;
-  foreach (const Future<Nothing>& future, futures) {
+  for (const Future<Nothing>& future : futures) {
     if (!future.isReady()) {
       errors.push_back((future.isFailed()
           ? future.failure()
@@ -1035,8 +1035,8 @@ Future<Nothing> CgroupsIsolatorProcess::_cleanup(
   vector<Future<Nothing>> destroys;
 
   // TODO(haosdent): Use foreachkey once MESOS-5037 is resolved.
-  foreach (const string& hierarchy, subsystems.keys()) {
-    foreach (const Owned<Subsystem>& subsystem, subsystems.get(hierarchy)) {
+  for (const string& hierarchy : subsystems.keys()) {
+    for (const Owned<Subsystem>& subsystem : subsystems.get(hierarchy)) {
       if (infos[containerId]->subsystems.contains(subsystem->name())) {
         destroys.push_back(cgroups::destroy(
             hierarchy,
@@ -1064,7 +1064,7 @@ Future<Nothing> CgroupsIsolatorProcess::__cleanup(
   CHECK(infos.contains(containerId));
 
   vector<string> errors;
-  foreach (const Future<Nothing>& future, futures) {
+  for (const Future<Nothing>& future : futures) {
     if (!future.isReady()) {
       errors.push_back((future.isFailed()
           ? future.failure()

@@ -303,7 +303,7 @@ TEST_F(ContainerLoggerTest, LOGROTATE_RotateInSandbox)
   // Once they finish reading the container's pipe, they should exit.
   Try<os::ProcessTree> pstrees = os::pstree(0);
   ASSERT_SOME(pstrees);
-  foreach (const os::ProcessTree& pstree, pstrees->children) {
+  for (const os::ProcessTree& pstree : pstrees->children) {
     // Wait for the logger subprocesses to exit, for up to 5 seconds each.
     Duration waited = Duration::zero();
     do {
@@ -472,7 +472,7 @@ TEST_F(ContainerLoggerTest, LOGROTATE_CustomRotateOptions)
   // Once they finish reading the container's pipe, they should exit.
   Try<os::ProcessTree> pstrees = os::pstree(0);
   ASSERT_SOME(pstrees);
-  foreach (const os::ProcessTree& pstree, pstrees->children) {
+  for (const os::ProcessTree& pstree : pstrees->children) {
     // Wait for the logger subprocesses to exit, for up to 5 seconds each.
     Duration waited = Duration::zero();
     do {
@@ -619,7 +619,7 @@ TEST_F(ContainerLoggerTest, LOGROTATE_ModuleFDOwnership)
   AWAIT_READY(executorTerminated);
 
   // Close all the FDs we opened.  Every `close` should succeed.
-  foreach (int fd, fds) {
+  for (int fd : fds) {
     ASSERT_SOME(os::close(fd));
   }
 
@@ -752,7 +752,7 @@ TEST_P(UserContainerLoggerTest,
   // Once they finish reading the container's pipe, they should exit.
   Try<os::ProcessTree> pstrees = os::pstree(0);
   ASSERT_SOME(pstrees);
-  foreach (const os::ProcessTree& pstree, pstrees->children) {
+  for (const os::ProcessTree& pstree : pstrees->children) {
     // Wait for the logger subprocesses to exit, for up to 5 seconds each.
     Duration waited = Duration::zero();
     do {
