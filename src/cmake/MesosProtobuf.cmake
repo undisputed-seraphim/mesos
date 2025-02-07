@@ -101,15 +101,10 @@ function(PROTOC_GENERATE)
     set(JAVA_OUT ${MESOS_BIN_SRC_DIR}/java/generated)
   endif()
 
-  get_target_property(
-    PROTOBUF_INCLUDE_DIR
-    protobuf
-    INTERFACE_INCLUDE_DIRECTORIES)
-
   set(PROTOC_OPTIONS
     -I${MESOS_PUBLIC_INCLUDE_DIR}
     -I${MESOS_SRC_DIR}
-    -I${PROTOBUF_INCLUDE_DIR}
+    -I${Protobuf_INCLUDE_DIRS}
     --cpp_out=${CPP_OUT})
 
   foreach (LIB_PROTO_PATH IN LISTS LIB_PROTO_PATHS)
@@ -119,7 +114,7 @@ function(PROTOC_GENERATE)
   if (PROTOC_GRPC)
     list(APPEND PROTOC_OPTIONS
       --grpc_out=${CPP_OUT}
-      --plugin=protoc-gen-grpc=$<TARGET_FILE:grpc_cpp_plugin>)
+      --plugin=protoc-gen-grpc=$<TARGET_FILE:gRPC::grpc_cpp_plugin>)
   endif ()
 
   if (JAVA_OUT)
@@ -170,11 +165,6 @@ function(PROTOC_GENERATE)
 
   if (JAVA_OUT)
     list(APPEND PROTOC_DEPENDS make_bin_java_dir)
-  endif ()
-
-  # Make sure that the gRPC plugin is built.
-  if (PROTOC_GRPC)
-    list(APPEND PROTOC_DEPENDS grpc_cpp_plugin)
   endif ()
 
   # Compile the .proto file.

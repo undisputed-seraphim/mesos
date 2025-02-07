@@ -9,7 +9,7 @@
 #       path at configuration time, even though it depends on `mesos-jar` to
 #       run Maven at build time. Coupled with (1) and (2) this makes it
 #       impossible to use.
-set(MESOS_JAR ${CMAKE_CURRENT_BINARY_DIR}/target/mesos-${MESOS_PACKAGE_VERSION}.jar)
+set(MESOS_JAR ${CMAKE_CURRENT_BINARY_DIR}/target/mesos-${Mesos_VERSION}.jar)
 set(PROTOBUF_JAR ${CMAKE_CURRENT_BINARY_DIR}/target/dependency/protobuf-java-${PROTOBUF_VERSION}.jar)
 set(MESOS_SHADED_PROTOBUF_JAR  ${CMAKE_CURRENT_BINARY_DIR}/target/mesos-${PACKAGE_VERSION}-shaded-protobuf.jar)
 

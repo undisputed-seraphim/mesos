@@ -16,22 +16,13 @@
 
 # THE MESOS PROJECT.
 ####################
-if (NOT WIN32)
-  cmake_minimum_required(VERSION 3.7.0)
-else ()
-  cmake_minimum_required(VERSION 3.8.0)
-endif ()
+cmake_minimum_required(VERSION 3.25)
+project(Mesos VERSION 1.12.0)
 
-project(Mesos)
-set(MESOS_MAJOR_VERSION 1)
-set(MESOS_MINOR_VERSION 12)
-set(MESOS_PATCH_VERSION 0)
-set(PACKAGE_VERSION
-  ${MESOS_MAJOR_VERSION}.${MESOS_MINOR_VERSION}.${MESOS_PATCH_VERSION})
-
-set(MESOS_PACKAGE_VERSION ${PACKAGE_VERSION})
-set(MESOS_PACKAGE_SOVERSION 0)
-
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # CMAKE MODULE SETUP.
 #####################
@@ -47,6 +38,10 @@ include(cotire)
 # Configuration.
 include(MesosConfigure)
 
+set(Protobuf_USE_STATIC_LIBS ON)
+find_package(Protobuf 3.21 REQUIRED)
+find_package(gRPC 1.15 REQUIRED)
+find_package(leveldb 1.23 REQUIRED)
 
 # SUBDIRECTORIES.
 #################
@@ -68,7 +63,7 @@ endif ()
 # PACKAGING.
 ############
 # Set the basename of any packages to 'mesos-<version>'.
-set(CPACK_PACKAGE_FILE_NAME "mesos-${MESOS_PACKAGE_VERSION}")
+set(CPACK_PACKAGE_FILE_NAME "mesos-${Mesos_VERSION}")
 set(CPACK_SOURCE_PACKAGE_FILE_NAME ${CPACK_PACKAGE_FILE_NAME})
 
 # By default, all forms of binary packages are disabled.
@@ -101,9 +96,9 @@ if (NOT WIN32)
   # build. Because these are written as Shell scripts, they cannot be
   # run on Windows.
   add_custom_target(dist
-    COMMAND ${CMAKE_SOURCE_DIR}/cmake/dist.sh ${MESOS_PACKAGE_VERSION})
+    COMMAND ${CMAKE_SOURCE_DIR}/cmake/dist.sh ${Mesos_VERSION})
 
   add_custom_target(distcheck
-    COMMAND ${CMAKE_SOURCE_DIR}/cmake/distcheck.sh ${MESOS_PACKAGE_VERSION}
+    COMMAND ${CMAKE_SOURCE_DIR}/cmake/distcheck.sh ${Mesos_VERSION}
     DEPENDS dist)
 endif ()

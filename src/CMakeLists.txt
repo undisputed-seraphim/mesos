@@ -122,7 +122,7 @@ add_library(
   ${INTERNAL_PROTOBUF_SRC})
 
 target_link_libraries(mesos-protobufs PUBLIC
-  protobuf
+  protobuf::libprotobuf
   grpc)
 
 target_include_directories(
@@ -619,8 +619,7 @@ add_library(mesos ${MESOS_SRC})
 
 set_target_properties(
   mesos PROPERTIES
-  VERSION ${MESOS_PACKAGE_VERSION}
-  SOVERSION ${MESOS_PACKAGE_SOVERSION})
+  VERSION ${Mesos_VERSION})
 
 target_compile_definitions(
   mesos PUBLIC
@@ -648,7 +647,7 @@ target_link_libraries(
   $<$<AND:$<PLATFORM_ID:Linux>,$<BOOL:${ENABLE_NVML}>>:nvml>)
 
 if (NOT WIN32)
-  target_link_libraries(mesos PUBLIC leveldb)
+  target_link_libraries(mesos PUBLIC leveldb::leveldb)
   target_link_libraries(mesos PUBLIC re2)
 endif ()
 
