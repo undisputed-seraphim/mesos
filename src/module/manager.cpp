@@ -272,7 +272,7 @@ Try<Nothing> ModuleManager::loadManifest(const Modules& modules)
   synchronized (mutex) {
     initialize();
 
-    foreach (const Modules::Library& library, modules.libraries()) {
+    for (const auto& library : modules.libraries()) {
       string libraryName;
       if (library.has_file()) {
         libraryName = library.file();
@@ -295,7 +295,7 @@ Try<Nothing> ModuleManager::loadManifest(const Modules& modules)
       }
 
       // Load module manifests.
-      foreach (const Modules::Library::Module& module, library.modules()) {
+      for (const auto& module : library.modules()) {
         if (!module.has_name()) {
           return Error(
               "Error: module name not provided with library '" + libraryName +
@@ -366,7 +366,7 @@ Try<Nothing> ModuleManager::load(const string& modulesDir)
   }
 
   moduleManifests->sort();
-  foreach (const string& filename, moduleManifests.get()) {
+  for (const auto& filename : moduleManifests.get()) {
     const string filepath = path::join(modulesDir, filename);
     VLOG(1) << "Processing module manifest from '" << filepath << "'";
 

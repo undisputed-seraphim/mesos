@@ -470,7 +470,7 @@ TEST_F(Cgroups2Test, ROOT_CGROUPS2_GetCgroups)
     path::join(TEST_CGROUP, "test3"),
   };
 
-  foreach (const string& cgroup, cgroups) {
+  for (const auto& cgroup : cgroups) {
     ASSERT_SOME(cgroups2::create(cgroup, true));
   }
 

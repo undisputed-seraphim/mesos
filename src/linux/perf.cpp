@@ -287,8 +287,8 @@ Future<hashmap<string, mesos::PerfStatistics>> sample(
   };
 
   // Add all pairwise combinations of event and cgroup.
-  foreach (const string& event, events) {
-    foreach (const string& cgroup, cgroups) {
+  for (const auto& event : events) {
+    for (const auto& cgroup : cgroups) {
       argv.push_back("--event");
       argv.push_back(event);
       argv.push_back("--cgroup");
@@ -331,7 +331,7 @@ bool valid(const set<string>& events)
 {
   vector<string> argv = {"stat"};
 
-  foreach (const string& event, events) {
+  for (const auto& event : events) {
     argv.push_back("--event");
     argv.push_back(event);
   }
@@ -413,7 +413,7 @@ Try<hashmap<string, mesos::PerfStatistics>> parse(
 {
   hashmap<string, mesos::PerfStatistics> statistics;
 
-  foreach (const string& line, strings::tokenize(output, "\n")) {
+  for (const auto& line : strings::tokenize(output, "\n")) {
     Try<Sample> sample = Sample::parse(line);
 
     if (sample.isError()) {

@@ -1214,7 +1214,7 @@ Try<string> Environment::mkdtemp()
 void tests::Environment::TemporaryDirectoryEventListener::OnTestEnd(
     const testing::TestInfo&)
 {
-  foreach (const string& directory, directories) {
+  for (const auto& directory : directories) {
 #ifdef __linux__
     // Try to remove any mounts under 'directory'.
     if (::geteuid() == 0) {

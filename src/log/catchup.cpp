@@ -483,7 +483,7 @@ Future<Nothing> catchup(
 
   Future<Nothing> future = Nothing();
 
-  foreach (const Interval<uint64_t>& interval, positions) {
+  for (const auto& interval : positions) {
     future = future.then(
         lambda::bind(
             f,

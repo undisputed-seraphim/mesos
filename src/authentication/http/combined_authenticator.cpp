@@ -107,7 +107,7 @@ CombinedAuthenticatorProcess::CombinedAuthenticatorProcess(
 bool CombinedAuthenticatorProcess::anyUnauthorized(
     const list<SchemeResultPair>& authenticationResults)
 {
-  foreach (const SchemeResultPair& result, authenticationResults) {
+  for (const auto& result : authenticationResults) {
     if (result.second.isSome() && result.second->unauthorized.isSome()) {
       return true;
     }
@@ -120,7 +120,7 @@ bool CombinedAuthenticatorProcess::anyUnauthorized(
 bool CombinedAuthenticatorProcess::anyForbidden(
     const list<SchemeResultPair>& authenticationResults)
 {
-  foreach (const SchemeResultPair& result, authenticationResults) {
+  for (const auto& result : authenticationResults) {
     if (result.second.isSome() && result.second->forbidden.isSome()) {
       return true;
     }
@@ -133,7 +133,7 @@ bool CombinedAuthenticatorProcess::anyForbidden(
 bool CombinedAuthenticatorProcess::anyError(
     const list<SchemeResultPair>& authenticationResults)
 {
-  foreach (const SchemeResultPair& result, authenticationResults) {
+  for (const auto& result : authenticationResults) {
     if (result.second.isError()) {
       return true;
     }
@@ -148,7 +148,7 @@ vector<string> CombinedAuthenticatorProcess::extractUnauthorizedHeaders(
 {
   vector<string> headers;
 
-  foreach (const SchemeResultPair& result, authenticationResults) {
+  for (const auto& result : authenticationResults) {
     if (result.second.isSome() &&
         result.second->unauthorized.isSome() &&
         result.second->unauthorized->headers.contains("WWW-Authenticate")) {
@@ -340,7 +340,7 @@ CombinedAuthenticator::CombinedAuthenticator(
     vector<Owned<Authenticator>>&& _authenticators)
 {
   // Initialize the set of offered authentication schemes.
-  foreach (const Owned<Authenticator>& authenticator, _authenticators) {
+  for (const auto& authenticator : _authenticators) {
     schemes.insert(authenticator->scheme());
   }
 

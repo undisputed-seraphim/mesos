@@ -164,7 +164,7 @@ static Try<Nothing> logProcesses(const string& cgroup)
 
   if (!processes->empty()) {
     vector<string> infos;
-    foreach (pid_t pid, *processes) {
+    for (auto& pid : *processes) {
       Result<os::Process> proc = os::process(pid);
 
       // Print the command if it's available.
@@ -369,7 +369,7 @@ static Try<Nothing> initializeCgroups(const slave::Flags& flags)
       // For each process, we print its pid as well as its command
       // to help triaging.
       vector<string> infos;
-      foreach (pid_t pid, processes.get()) {
+      for (auto& pid : processes.get()) {
         Result<os::Process> proc = os::process(pid);
 
         // Only print the command if available.
@@ -455,7 +455,7 @@ int main(int argc, char** argv)
   logging::initialize(argv[0], true, flags); // Catch signals.
 
   // Log any flag warnings (after logging is initialized).
-  foreach (const flags::Warning& warning, load->warnings) {
+  for (const auto& warning : load->warnings) {
     LOG(WARNING) << warning.message;
   }
 
@@ -607,7 +607,7 @@ int main(int argc, char** argv)
     if (firewall.has_disabled_endpoints()) {
       hashset<string> paths;
 
-      foreach (const string& path, firewall.disabled_endpoints().paths()) {
+      for (const auto& path : firewall.disabled_endpoints().paths()) {
         paths.insert(path);
       }
 
@@ -638,7 +638,7 @@ int main(int argc, char** argv)
   }
 
   // Create anonymous modules.
-  foreach (const string& name, ModuleManager::find<Anonymous>()) {
+  for (const auto& name : ModuleManager::find<Anonymous>()) {
     Try<Anonymous*> create = ModuleManager::create<Anonymous>(name);
     if (create.isError()) {
       EXIT(EXIT_FAILURE)

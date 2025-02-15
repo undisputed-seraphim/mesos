@@ -651,7 +651,7 @@ inline TCommandInfo createCommandInfo(
   }
   if (!arguments.empty()) {
     commandInfo.set_shell(false);
-    foreach (const std::string& arg, arguments) {
+    for (const auto& arg : arguments) {
       commandInfo.add_arguments(arg);
     }
   }
@@ -913,7 +913,7 @@ inline TContainerInfo createContainerInfo(
     image->CopyFrom(createDockerImage<TImage>(imageName.get()));
   }
 
-  foreach (const TVolume& volume, volumes) {
+  for (const auto& volume : volumes) {
     info.add_volumes()->CopyFrom(volume);
   }
 
@@ -1065,7 +1065,7 @@ template <typename TTaskGroupInfo, typename TTaskInfo>
 inline TTaskGroupInfo createTaskGroupInfo(const std::vector<TTaskInfo>& tasks)
 {
   TTaskGroupInfo taskGroup;
-  foreach (const TTaskInfo& task, tasks) {
+  for (const auto& task : tasks) {
     taskGroup.add_tasks()->CopyFrom(task);
   }
   return taskGroup;
@@ -1401,7 +1401,7 @@ inline google::protobuf::RepeatedPtrField<TWeightInfo> createWeightInfos(
 {
   google::protobuf::RepeatedPtrField<TWeightInfo> infos;
   std::vector<std::string> tokens = strings::tokenize(weightsFlag, ",");
-  foreach (const std::string& token, tokens) {
+  for (const auto& token : tokens) {
     std::vector<std::string> pair = strings::tokenize(token, "=");
     EXPECT_EQ(2u, pair.size());
     double weight = atof(pair[1].c_str());
@@ -1422,7 +1422,7 @@ inline hashmap<std::string, double> convertToHashmap(
 {
   hashmap<std::string, double> weights;
 
-  foreach (const TWeightInfo& weightInfo, weightInfos) {
+  for (const auto& weightInfo : weightInfos) {
     weights[weightInfo.role()] = weightInfo.weight();
   }
 
@@ -1562,7 +1562,7 @@ inline typename TOffer::Operation LAUNCH(const std::vector<TTaskInfo>& tasks)
   typename TOffer::Operation operation;
   operation.set_type(TOffer::Operation::LAUNCH);
 
-  foreach (const TTaskInfo& task, tasks) {
+  for (const auto& task : tasks) {
     operation.mutable_launch()->add_task_infos()->CopyFrom(task);
   }
 
@@ -2366,7 +2366,7 @@ inline mesos::v1::scheduler::Call createCallAccept(
   mesos::v1::scheduler::Call::Accept* accept = call.mutable_accept();
   accept->add_offer_ids()->CopyFrom(offer.id());
 
-  foreach (const mesos::v1::Offer::Operation& operation, operations) {
+  for (const auto& operation : operations) {
     accept->add_operations()->CopyFrom(operation);
   }
 
@@ -2634,7 +2634,7 @@ ACTION_P(DeclineOffers, filters)
 ACTION_P(EnqueueOffers, queue)
 {
   std::vector<Offer> offers = arg1;
-  foreach (const Offer& offer, offers) {
+  for (const auto& offer : offers) {
     queue->put(offer);
   }
 }
@@ -2871,8 +2871,8 @@ using TestMesos = tests::scheduler::TestMesos<
 // having any resource that passes the filter.
 MATCHER_P(OffersHaveAnyResource, filter, "")
 {
-  foreach (const Offer& offer, arg.offers()) {
-    foreach (const Resource& resource, offer.resources()) {
+  for (const auto& offer : arg.offers()) {
+    for (const auto& resource : offer.resources()) {
       if (filter(resource)) {
         return true;
       }
@@ -2900,7 +2900,7 @@ ACTION(DeclineOffers)
 
   Call::Decline* decline = call.mutable_decline();
 
-  foreach (const Offer& offer, arg1.offers()) {
+  for (const auto& offer : arg1.offers()) {
     decline->add_offer_ids()->CopyFrom(offer.id());
 
     if (!call.has_framework_id()) {
@@ -3370,7 +3370,7 @@ public:
     if (resources.isSome()) {
       Resources injected;
 
-      foreach (Resource resource, resources.get()) {
+      for (auto& resource : resources.get()) {
         resource.mutable_provider_id()->CopyFrom(info.id());
         injected += resource;
       }
@@ -3959,8 +3959,8 @@ void ExpectNoFutureUnionHttpProtobufs(
 // contains an offer having any resource that passes the filter.
 MATCHER_P(OffersHaveAnyResource, filter, "")
 {
-  foreach (const Offer& offer, arg) {
-    foreach (const Resource& resource, offer.resources()) {
+  for (const auto& offer : arg) {
+    for (const auto& resource : offer.resources()) {
       if (filter(resource)) {
         return true;
       }
@@ -3975,7 +3975,7 @@ MATCHER_P(OffersHaveAnyResource, filter, "")
 // contains an offer having the specified resource.
 MATCHER_P(OffersHaveResource, resource, "")
 {
-  foreach (const Offer& offer, arg) {
+  for (const auto& offer : arg) {
     Resources resources = offer.resources();
 
     // If `resource` is not allocated, we are matching offers against

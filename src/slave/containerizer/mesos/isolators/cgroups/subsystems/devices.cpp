@@ -75,7 +75,7 @@ Try<Owned<SubsystemProcess>> DevicesSubsystemProcess::create(
 {
   vector<cgroups::devices::Entry> whitelistDeviceEntries;
 
-  foreach (const char* _entry, DEFAULT_WHITELIST_ENTRIES) {
+  for (const auto& _entry : DEFAULT_WHITELIST_ENTRIES) {
     Try<cgroups::devices::Entry> entry =
       cgroups::devices::Entry::parse(_entry);
 
@@ -203,7 +203,7 @@ Future<Nothing> DevicesSubsystemProcess::prepare(
     return Failure("Failed to deny all devices: " + deny.error());
   }
 
-  foreach (const cgroups::devices::Entry& entry, whitelistDeviceEntries) {
+  for (const auto& entry : whitelistDeviceEntries) {
     Try<Nothing> allow = cgroups::devices::allow(hierarchy, cgroup, entry);
 
     if (allow.isError()) {

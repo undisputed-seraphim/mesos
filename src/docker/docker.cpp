@@ -428,7 +428,7 @@ Try<Docker::Container> Docker::Container::create(const string& output)
   }
 
   if (devicesArray.isSome()) {
-    foreach (const JSON::Value& entry, devicesArray->values) {
+    for (const auto& entry : devicesArray->values) {
       if (!entry.is<JSON::Object>()) {
         return Error("Malformed HostConfig.Devices"
                      " entry '" + stringify(entry) + "'");
@@ -471,7 +471,7 @@ Try<Docker::Container> Docker::Container::create(const string& output)
   }
 
   if (dnsArray.isSome()) {
-    foreach (const JSON::Value& entry, dnsArray->values) {
+    for (const auto& entry : dnsArray->values) {
       if (!entry.is<JSON::String>()) {
         return Error("Malformed HostConfig.Dns"
                      " entry '" + stringify(entry) + "'");
@@ -492,7 +492,7 @@ Try<Docker::Container> Docker::Container::create(const string& output)
   }
 
   if (dnsOptionArray.isSome()) {
-    foreach (const JSON::Value& entry, dnsOptionArray->values) {
+    for (const auto& entry : dnsOptionArray->values) {
       if (!entry.is<JSON::String>()) {
         return Error("Malformed HostConfig.DnsOptions"
                      " entry '" + stringify(entry) + "'");
@@ -513,7 +513,7 @@ Try<Docker::Container> Docker::Container::create(const string& output)
   }
 
   if (dnsSearchArray.isSome()) {
-    foreach (const JSON::Value& entry, dnsSearchArray->values) {
+    for (const auto& entry : dnsSearchArray->values) {
       if (!entry.is<JSON::String>()) {
         return Error("Malformed HostConfig.DnsSearch"
                      " entry '" + stringify(entry) + "'");
@@ -562,7 +562,7 @@ Try<Docker::Image> Docker::Image::create(const JSON::Object& json)
     if (values.size() != 0) {
       vector<string> result;
 
-      foreach (const JSON::Value& value, values) {
+      for (const auto& value : values) {
         if (!value.is<JSON::String>()) {
           return Error("Expecting entrypoint value to be type string");
         }
@@ -594,7 +594,7 @@ Try<Docker::Image> Docker::Image::create(const JSON::Object& json)
     if (values.size() != 0) {
       map<string, string> result;
 
-      foreach (const JSON::Value& value, values) {
+      for (const auto& value : values) {
         if (!value.is<JSON::String>()) {
           return Error("Expecting environment value to be type string");
         }
@@ -654,7 +654,7 @@ Try<Docker::RunOptions> Docker::RunOptions::create(
   }
 
   if (resourceLimits.isSome()) {
-    foreach (auto&& limit, resourceLimits.get()) {
+    for (auto& limit : resourceLimits.get()) {
       if (limit.first == "cpus") {
         cpuLimit = limit.second.value();
       } else if (limit.first == "mem") {
@@ -744,7 +744,7 @@ Try<Docker::RunOptions> Docker::RunOptions::create(
   }
 
   Option<string> volumeDriver;
-  foreach (const Volume& volume, containerInfo.volumes()) {
+  for (const auto& volume : containerInfo.volumes()) {
     // The 'container_path' can be either an absolute path or a
     // relative path. If it is a relative path, it would be prefixed
     // with the container sandbox directory.
@@ -915,7 +915,7 @@ Try<Docker::RunOptions> Docker::RunOptions::create(
     foreach (const ContainerInfo::DockerInfo::PortMapping& mapping,
              dockerInfo.port_mappings()) {
       bool found = false;
-      foreach (const Value::Range& range, portRanges->range()) {
+      for (const auto& range : portRanges->range()) {
         if (mapping.host_port() >= range.begin() &&
             mapping.host_port() <= range.end()) {
           found = true;
@@ -948,7 +948,7 @@ Try<Docker::RunOptions> Docker::RunOptions::create(
 
   bool dnsSpecified = false;
   bool networkSpecified = false;
-  foreach (const Parameter& parameter, dockerInfo.parameters()) {
+  for (const auto& parameter : dockerInfo.parameters()) {
     if (!networkSpecified && 
         (parameter.key() == "net" || 
          parameter.key() == "network")) {
@@ -1055,7 +1055,7 @@ Try<Docker::RunOptions> Docker::RunOptions::create(
       options.arguments.push_back(commandInfo.value());
     }
 
-    foreach (const string& argument, commandInfo.arguments()) {
+    for (const auto& argument : commandInfo.arguments()) {
       options.arguments.push_back(argument);
     }
   }
@@ -1145,12 +1145,12 @@ Future<Option<int>> Docker::run(
     }
   }
 
-  foreach (const string& dns, options.dns) {
+  for (const auto& dns : options.dns) {
     argv.push_back("--dns");
     argv.push_back(dns);
   }
 
-  foreach (const string& search, options.dnsSearch) {
+  for (const auto& search : options.dnsSearch) {
     argv.push_back("--dns-search");
     argv.push_back(search);
   }
@@ -1165,7 +1165,7 @@ Future<Option<int>> Docker::run(
     }
   }
 
-  foreach (const string& opt, options.dnsOpt) {
+  for (const auto& opt : options.dnsOpt) {
     argv.push_back("--dns-opt");
     argv.push_back(opt);
   }
@@ -1175,7 +1175,7 @@ Future<Option<int>> Docker::run(
     argv.push_back(options.hostname.get());
   }
 
-  foreach (const Docker::PortMapping& mapping, options.portMappings) {
+  for (const auto& mapping : options.portMappings) {
     argv.push_back("-p");
 
     string portMapping = stringify(mapping.hostPort) + ":" +
@@ -1188,7 +1188,7 @@ Future<Option<int>> Docker::run(
     argv.push_back(portMapping);
   }
 
-  foreach (const Device& device, options.devices) {
+  for (const auto& device : options.devices) {
     if (!device.hostPath.is_absolute()) {
       return Failure("Device path '" + device.hostPath.string() + "'"
                      " is not an absolute path");
@@ -1227,7 +1227,7 @@ Future<Option<int>> Docker::run(
     argv.push_back(options.name.get());
   }
 
-  foreach (const string& option, options.additionalOptions) {
+  for (const auto& option : options.additionalOptions) {
     argv.push_back(option);
   }
 
@@ -1712,7 +1712,7 @@ void Docker::inspectBatches(
 
   collect(batch).onAny([=](const Future<vector<Docker::Container>>& c) {
     if (c.isReady()) {
-      foreach (const Docker::Container& container, c.get()) {
+      for (const auto& container : c.get()) {
         containers->push_back(container);
       }
       if (lines->empty()) {

@@ -77,7 +77,7 @@ Try<Owned<ControllerProcess>> DeviceControllerProcess::create(
 {
   vector<cgroups::devices::Entry> whitelistDeviceEntries;
 
-  foreach (const char* _entry, DEFAULT_WHITELIST_ENTRIES) {
+  for (const auto& _entry : DEFAULT_WHITELIST_ENTRIES) {
     whitelistDeviceEntries.push_back(
       CHECK_NOTERROR(cgroups::devices::Entry::parse(_entry)));
   }

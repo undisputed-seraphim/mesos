@@ -141,7 +141,7 @@ public:
       }
 
       // Log any flag warnings.
-      foreach (const flags::Warning& warning, load->warnings) {
+      for (const auto& warning : load->warnings) {
         LOG(WARNING) << warning.message;
       }
     }
@@ -300,7 +300,7 @@ org_apache_mesos_LogrotateContainerLogger(
     [](const Parameters& parameters) -> ContainerLogger* {
       // Convert `parameters` into a map.
       map<string, string> values;
-      foreach (const Parameter& parameter, parameters.parameter()) {
+      for (const auto& parameter : parameters.parameter()) {
         values[parameter.key()] = parameter.value();
       }
 
@@ -314,7 +314,7 @@ org_apache_mesos_LogrotateContainerLogger(
       }
 
       // Log any flag warnings.
-      foreach (const flags::Warning& warning, load->warnings) {
+      for (const auto& warning : load->warnings) {
         LOG(WARNING) << warning.message;
       }
 

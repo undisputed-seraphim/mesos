@@ -196,7 +196,7 @@ Try<Isolator*> NetworkCniIsolatorProcess::create(const Flags& flags)
   if (rootDirMount->shared().isNone()) {
     bindMountNeeded = true;
   } else {
-    foreach (const fs::MountInfoTable::Entry& entry, table->entries) {
+    for (const auto& entry : table->entries) {
       // Skip 'rootDirMount' and any mount underneath it. Also, we
       // skip those mounts whose targets are not the parent of the CNI
       // network information root directory because even if they are
@@ -308,7 +308,7 @@ Try<hashmap<string, string>> NetworkCniIsolatorProcess::loadNetworkConfigs(
         configDir + "': " + entries.error());
   }
 
-  foreach (const string& entry, entries.get()) {
+  for (const auto& entry : entries.get()) {
     const string path = path::join(configDir, entry);
 
     // Ignore directory entries.
@@ -403,7 +403,7 @@ Future<Nothing> NetworkCniIsolatorProcess::recover(
   }
 
   hashmap<ContainerID, ContainerState> containerIdToState;
-  foreach (const ContainerState& state, states) {
+  for (const auto& state : states) {
     containerIdToState.put(state.container_id(), state);
   }
 
@@ -417,7 +417,7 @@ Future<Nothing> NetworkCniIsolatorProcess::recover(
   vector<ContainerID> unknownOrphans;
   vector<Future<Nothing>> cleanups;
 
-  foreach (const string& entry, entries.get()) {
+  for (const auto& entry : entries.get()) {
     ContainerID containerId =
       protobuf::parseContainerId(Path(entry).basename());
 
@@ -457,7 +457,7 @@ Future<Nothing> NetworkCniIsolatorProcess::recover(
       CHECK_EQ(cleanups.size(), unknownOrphans.size());
 
       int i = 0;
-      foreach (const Future<Nothing>& cleanup, cleanups) {
+      for (const auto& cleanup : cleanups) {
         if (!cleanup.isReady()) {
           LOG(ERROR) << "Failed to cleanup unknown orphaned container "
                      << unknownOrphans.at(i) << ": "
@@ -506,7 +506,7 @@ Try<Nothing> NetworkCniIsolatorProcess::_recover(
   }
 
   hashmap<string, ContainerNetwork> containerNetworks;
-  foreach (const string& networkName, networkNames.get()) {
+  for (const auto& networkName : networkNames.get()) {
     Try<list<string>> interfaces = paths::getInterfaces(
         rootDir.get(),
         containerId,
@@ -1000,7 +1000,7 @@ Future<Nothing> NetworkCniIsolatorProcess::_isolate(
     const vector<Future<Nothing>>& attaches)
 {
   vector<string> messages;
-  foreach (const Future<Nothing>& attach, attaches) {
+  for (const auto& attach : attaches) {
     if (!attach.isReady()) {
       messages.push_back(
           attach.isFailed() ? attach.failure() : "discarded");
@@ -1697,7 +1697,7 @@ Future<Nothing> NetworkCniIsolatorProcess::_cleanup(
   CHECK(infos.contains(containerId));
 
   vector<string> messages;
-  foreach (const Future<Nothing>& detach, detaches) {
+  for (const auto& detach : detaches) {
     if (!detach.isReady()) {
       messages.push_back(
           detach.isFailed() ? detach.failure() : "discarded");

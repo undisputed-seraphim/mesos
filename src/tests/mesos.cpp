@@ -642,7 +642,7 @@ void ContainerizerTest<slave::MesosContainerizer>::SetUpTestCase()
     // Clean up any testing hierarchies.
     Try<set<string>> hierarchies = cgroups::hierarchies();
     ASSERT_SOME(hierarchies);
-    foreach (const string& hierarchy, hierarchies.get()) {
+    for (const auto& hierarchy : hierarchies.get()) {
       if (strings::startsWith(hierarchy, TEST_CGROUPS_HIERARCHY)) {
         AWAIT_READY(cgroups::cleanup(hierarchy));
       }
@@ -667,7 +667,7 @@ void ContainerizerTest<slave::MesosContainerizer>::TearDownTestCase()
     // Clean up any testing hierarchies.
     Try<set<string>> hierarchies = cgroups::hierarchies();
     ASSERT_SOME(hierarchies);
-    foreach (const string& hierarchy, hierarchies.get()) {
+    for (const auto& hierarchy : hierarchies.get()) {
       if (strings::startsWith(hierarchy, TEST_CGROUPS_HIERARCHY)) {
         AWAIT_READY(cgroups::cleanup(hierarchy));
       }
@@ -709,7 +709,7 @@ void ContainerizerTest<slave::MesosContainerizer>::TearDown()
 void ContainerizerTest<slave::MesosContainerizer>::SetUpCgroups()
 {
   // Determine the base hierarchy.
-  foreach (const string& subsystem, subsystems) {
+  for (const auto& subsystem : subsystems) {
     Result<string> hierarchy = cgroups::hierarchy(subsystem);
     ASSERT_FALSE(hierarchy.isError());
 
@@ -738,7 +738,7 @@ void ContainerizerTest<slave::MesosContainerizer>::SetUpCgroups()
   }
 
   // Mount the subsystem if necessary.
-  foreach (const string& subsystem, subsystems) {
+  for (const auto& subsystem : subsystems) {
     const string& hierarchy = path::join(baseHierarchy, subsystem);
 
     Try<bool> mounted = cgroups::mounted(hierarchy, subsystem);
@@ -767,7 +767,7 @@ void ContainerizerTest<slave::MesosContainerizer>::SetUpCgroups()
       Try<vector<string>> cgroups = cgroups::get(hierarchy);
       ASSERT_SOME(cgroups);
 
-      foreach (const string& cgroup, cgroups.get()) {
+      for (const auto& cgroup : cgroups.get()) {
         // Remove any cgroups that start with TEST_CGROUPS_ROOT.
         if (strings::startsWith(cgroup, TEST_CGROUPS_ROOT)) {
           AWAIT_READY(cgroups::destroy(hierarchy, cgroup))
@@ -811,13 +811,13 @@ void ContainerizerTest<slave::MesosContainerizer>::SetUpCgroupsV2()
 
 void ContainerizerTest<slave::MesosContainerizer>::TearDownCgroups()
 {
-  foreach (const string& subsystem, subsystems) {
+  for (const auto& subsystem : subsystems) {
     string hierarchy = path::join(baseHierarchy, subsystem);
 
     Try<vector<string>> cgroups = cgroups::get(hierarchy);
     ASSERT_SOME(cgroups);
 
-    foreach (const string& cgroup, cgroups.get()) {
+    for (const auto& cgroup : cgroups.get()) {
       // Remove any cgroups that start with TEST_CGROUPS_ROOT.
       if (strings::startsWith(cgroup, TEST_CGROUPS_ROOT)) {
         // Cgroup destruction relies on `delay`s,

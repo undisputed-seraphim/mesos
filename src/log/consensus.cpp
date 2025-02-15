@@ -144,7 +144,7 @@ private:
     }
 
     responses = future.get();
-    foreach (const Future<PromiseResponse>& response, responses) {
+    for (const auto& response : responses) {
       response.onReady(defer(self(), &Self::received, lambda::_1));
     }
   }
@@ -347,7 +347,7 @@ private:
     }
 
     responses = future.get();
-    foreach (const Future<PromiseResponse>& response, responses) {
+    for (const auto& response : responses) {
       response.onReady(defer(self(), &Self::received, lambda::_1));
     }
   }
@@ -530,7 +530,7 @@ private:
     }
 
     responses = future.get();
-    foreach (const Future<WriteResponse>& response, responses) {
+    for (const auto& response : responses) {
       response.onReady(defer(self(), &Self::received, lambda::_1));
     }
   }

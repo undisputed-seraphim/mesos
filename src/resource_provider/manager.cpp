@@ -712,7 +712,7 @@ Future<Nothing> ResourceProviderManagerProcess::publishResources(
 {
   hashmap<ResourceProviderID, Resources> providedResources;
 
-  foreach (const Resource& resource, resources) {
+  for (const auto& resource : resources) {
     // NOTE: We ignore agent default resources here because those
     // resources do not need publish, and shouldn't be handled by the
     // resource provider manager.
@@ -997,7 +997,7 @@ void ResourceProviderManagerProcess::updateState(
     ResourceProvider* resourceProvider,
     const Call::UpdateState& update)
 {
-  foreach (const Resource& resource, update.resources()) {
+  for (const auto& resource : update.resources()) {
     CHECK_EQ(resource.provider_id(), resourceProvider->info.id());
   }
 

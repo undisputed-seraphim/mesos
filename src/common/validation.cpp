@@ -143,7 +143,7 @@ Option<Error> validateSecret(const Secret& secret)
 
 Option<Error> validateEnvironment(const Environment& environment)
 {
-  foreach (const Environment::Variable& variable, environment.variables()) {
+  for (const auto& variable : environment.variables()) {
     switch (variable.type()) {
       case Environment::Variable::SECRET: {
         if (!variable.has_secret()) {
@@ -290,7 +290,7 @@ Option<Error> validateContainerInfo(const ContainerInfo& containerInfo)
       << "): " << unionError.get();
   }
 
-  foreach (const Volume& volume, containerInfo.volumes()) {
+  for (const auto& volume : containerInfo.volumes()) {
     Option<Error> error = validateVolume(volume);
     if (error.isSome()) {
       return Error("Invalid volume: " + error->message);
@@ -654,7 +654,7 @@ Option<Error> validateOfferFilters(const OfferFilters& offerFilters)
 
       // Use `auto` instead of `protobuf::MapPair<string, Value::>` since
       // `foreach` is a macro and does not allow angle brackets.
-      foreach (auto&& quantity, quantities.quantities()) {
+      for (auto& quantity : quantities.quantities()) {
         Option<Error> error = validateInputScalarValue(quantity.second.value());
         if (error.isSome()) {
           return Error(

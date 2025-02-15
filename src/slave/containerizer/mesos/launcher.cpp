@@ -57,7 +57,7 @@ Try<Launcher*> SubprocessLauncher::create(const Flags& flags)
 Future<hashset<ContainerID>> SubprocessLauncher::recover(
     const vector<ContainerState>& states)
 {
-  foreach (const ContainerState& state, states) {
+  for (const auto& state : states) {
     const ContainerID& containerId = state.container_id();
     pid_t pid = static_cast<pid_t>(state.pid());
 

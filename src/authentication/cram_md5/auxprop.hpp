@@ -58,7 +58,7 @@ public:
   {
     synchronized (mutex) {
       if (properties.contains(user)) {
-        foreach (const Property& property, properties.get(user)) {
+        for (const auto& property : properties.get(user)) {
           if (property.name == name) {
             return property.values;
           }

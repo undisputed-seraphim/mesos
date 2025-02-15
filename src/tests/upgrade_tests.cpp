@@ -213,13 +213,13 @@ TEST_F(UpgradeTest, ReregisterOldAgentWithMultiRoleMaster)
 
   foreach (ExecutorInfo& executorInfo,
            *strippedReregisterSlaveMessage.mutable_executor_infos()) {
-    foreach (Resource& resource, *executorInfo.mutable_resources()) {
+    for (auto& resource : *executorInfo.mutable_resources()) {
       resource.clear_allocation_info();
     }
   }
 
-  foreach (Task& task, *strippedReregisterSlaveMessage.mutable_tasks()) {
-    foreach (Resource& resource, *task.mutable_resources()) {
+  for (auto& task : *strippedReregisterSlaveMessage.mutable_tasks()) {
+    for (auto& resource : *task.mutable_resources()) {
       resource.clear_allocation_info();
     }
   }
@@ -489,7 +489,7 @@ TEST_F(UpgradeTest, MultiRoleSchedulerUpgrade)
   // Check that the framework has been updated to use `roles` rather than `role`
   // in both the master and the agent.
   initializer_list<UPID> pids = { master.get()->pid, agent.get()->pid };
-  foreach (const UPID& pid, pids) {
+  for (const auto& pid : pids) {
     Future<Response> response = process::http::get(
         pid, "state", None(), createBasicAuthHeaders(DEFAULT_CREDENTIAL));
 

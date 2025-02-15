@@ -69,7 +69,7 @@ string formatResolverConfig(const DNS& dns)
 
   if (!dns.search().empty()) {
     resolv << "search";
-    foreach (const string& domain, dns.search()) {
+    for (const auto& domain : dns.search()) {
       resolv << " " << domain;
     }
     resolv << std::endl;
@@ -77,14 +77,14 @@ string formatResolverConfig(const DNS& dns)
 
   if (!dns.options().empty()) {
     resolv << "options";
-    foreach (const string& opt, dns.options()) {
+    for (const auto& opt : dns.options()) {
       resolv << " " << opt;
     }
     resolv << std::endl;
   }
 
   if (!dns.nameservers().empty()) {
-    foreach (const string& nameserver, dns.nameservers()) {
+    for (const auto& nameserver : dns.nameservers()) {
       resolv << "nameserver " << nameserver << std::endl;
     }
   }

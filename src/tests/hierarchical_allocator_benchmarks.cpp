@@ -609,11 +609,11 @@ TEST_P(BENCHMARK_HierarchicalAllocator_WithQuotaParam, LargeAndSmallQuota)
   // event-driven allocations, this behavior might change in the future).
   allocator->pause();
 
-  foreach (const string& role, smallQuotaRoles) {
+  for (const auto& role : smallQuotaRoles) {
     allocator->updateQuota(role, createQuota(smallQuotaResourcesString));
   }
 
-  foreach (const string& role, largeQuotaRoles) {
+  for (const auto& role : largeQuotaRoles) {
     allocator->updateQuota(role, createQuota(largeQuotaResourcesString));
   }
 
@@ -762,7 +762,7 @@ TEST_P(
     // event-driven allocations, this behavior might change in the future).
     allocator->pause();
 
-    foreach (const string& role, roles) {
+    for (const auto& role : roles) {
       allocator->updateQuota(role, createQuota(quotaResourcesString));
     }
 

@@ -314,7 +314,7 @@ public:
     LOG(INFO) << "Recovering " << statusUpdateType << " manager";
 
     State state;
-    foreach (const IDType& streamId, streamIds) {
+    for (const auto& streamId : streamIds) {
       Result<typename StatusUpdateStream::State> result =
         recoverStatusUpdateStream(streamId, strict);
 

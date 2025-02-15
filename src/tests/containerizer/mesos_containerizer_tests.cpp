@@ -313,7 +313,7 @@ public:
   {
     vector<Owned<Isolator>> isolators;
 
-    foreach (const Option<ContainerLaunchInfo>& launchInfo, launchInfos) {
+    for (const auto& launchInfo : launchInfos) {
       MockIsolator* isolator = new MockIsolator();
 
       EXPECT_CALL(*isolator, prepare(_, _))

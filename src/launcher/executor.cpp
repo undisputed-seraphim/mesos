@@ -505,7 +505,7 @@ protected:
     }
 
     if (taskSupplementaryGroups.isSome()) {
-      foreach (gid_t gid, taskSupplementaryGroups.get()) {
+      for (auto& gid : taskSupplementaryGroups.get()) {
         launchInfo.add_supplementary_groups(gid);
       }
     }
@@ -1386,7 +1386,7 @@ int main(int argc, char** argv)
   mesos::internal::logging::initialize(argv[0], true, flags); // Catch signals.
 
   // Log any flag warnings (after logging is initialized).
-  foreach (const flags::Warning& warning, load->warnings) {
+  for (const auto& warning : load->warnings) {
     LOG(WARNING) << warning.message;
   }
 

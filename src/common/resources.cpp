@@ -578,7 +578,7 @@ static Option<Error> validateCommandLineResources(const Resources& resources)
 {
   hashmap<string, Value::Type> nameTypes;
 
-  foreach (const Resource& resource, resources) {
+  for (const auto& resource : resources) {
     // These fields should only be provided programmatically,
     // not at the command line.
     if (Resources::isPersistentVolume(resource)) {
@@ -716,7 +716,7 @@ Try<Resources> Resources::parse(
   Resources result;
 
   // Validate the Resource objects.
-  foreach (Resource& resource, CHECK_NOTERROR(resources)) {
+  for (auto& resource : CHECK_NOTERROR(resources)) {
     // If invalid, propgate error instead of skipping the resource.
     Option<Error> error = Resources::validate(resource);
     if (error.isSome()) {
@@ -753,7 +753,7 @@ Try<vector<Resource>> Resources::fromJSON(
 
   vector<Resource> result;
 
-  foreach (Resource& resource, resourcesProtobuf.get()) {
+  for (auto& resource : resourcesProtobuf.get()) {
     // Set the default role if none was specified.
     //
     // NOTE: We rely on the fact that the result of this function is
@@ -778,7 +778,7 @@ Try<vector<Resource>> Resources::fromSimpleString(
 {
   vector<Resource> resources;
 
-  foreach (const string& token, strings::tokenize(text, ";")) {
+  for (const auto& token : strings::tokenize(text, ";")) {
     // TODO(anindya_sinha): Allow text based representation of resources
     // to specify PATH or MOUNT type disks along with its root.
     vector<string> pair = strings::tokenize(token, ":");
@@ -1121,7 +1121,7 @@ Option<Error> Resources::validate(const Resource& resource)
 
 Option<Error> Resources::validate(const RepeatedPtrField<Resource>& resources)
 {
-  foreach (const Resource& resource, resources) {
+  for (const auto& resource : resources) {
     Option<Error> error = validate(resource);
     if (error.isSome()) {
       return Error(
@@ -1473,7 +1473,7 @@ Resources::Resources(Resource&& resource)
 Resources::Resources(const vector<Resource>& _resources)
 {
   resourcesNoMutationWithoutExclusiveOwnership.reserve(_resources.size());
-  foreach (const Resource& resource, _resources) {
+  for (const auto& resource : _resources) {
     // NOTE: Invalid and zero Resource objects will be ignored.
     *this += resource;
   }
@@ -1483,7 +1483,7 @@ Resources::Resources(const vector<Resource>& _resources)
 Resources::Resources(vector<Resource>&& _resources)
 {
   resourcesNoMutationWithoutExclusiveOwnership.reserve(_resources.size());
-  foreach (Resource& resource, _resources) {
+  for (auto& resource : _resources) {
     // NOTE: Invalid and zero Resource objects will be ignored.
     *this += std::move(resource);
   }
@@ -1493,7 +1493,7 @@ Resources::Resources(vector<Resource>&& _resources)
 Resources::Resources(const RepeatedPtrField<Resource>& _resources)
 {
   resourcesNoMutationWithoutExclusiveOwnership.reserve(_resources.size());
-  foreach (const Resource& resource, _resources) {
+  for (const auto& resource : _resources) {
     // NOTE: Invalid and zero Resource objects will be ignored.
     *this += resource;
   }
@@ -1503,7 +1503,7 @@ Resources::Resources(const RepeatedPtrField<Resource>& _resources)
 Resources::Resources(RepeatedPtrField<Resource>&& _resources)
 {
   resourcesNoMutationWithoutExclusiveOwnership.reserve(_resources.size());
-  foreach (Resource& resource, _resources) {
+  for (auto& resource : _resources) {
     // NOTE: Invalid and zero Resource objects will be ignored.
     *this += std::move(resource);
   }
@@ -1547,15 +1547,15 @@ bool Resources::contains(const Resource& that) const
 // `ResourceQuantities`.
 bool Resources::contains(const ResourceQuantities& quantities) const
 {
-  foreach (auto& quantity, quantities){
+  for (auto& quantity : quantities){
     double remaining = quantity.second.value();
 
-    foreach (const Resource& r, get(quantity.first)) {
+    for (const auto& r : get(quantity.first)) {
       switch (r.type()) {
         case Value::SCALAR: remaining -= r.scalar().value(); break;
         case Value::SET:    remaining -= r.set().item_size(); break;
         case Value::RANGES:
-          foreach (const Value::Range& range, r.ranges().range()) {
+          for (const auto& range : r.ranges().range()) {
             remaining -= range.end() - range.begin() + 1;
             if (remaining <= 0) {
               break;
@@ -1831,7 +1831,7 @@ Option<Resources> Resources::find(const Resources& targets) const
   Resources total;
 
   // TODO(mzhu): Traverse `Resource_` to preserve `sharedCount`.
-  foreach (const Resource& target, targets) {
+  for (const auto& target : targets) {
     Option<Resources> found = find(target);
 
     // Each target needs to be found!
@@ -2108,7 +2108,7 @@ Option<Resources> Resources::find(const Resource& target) const
   predicates.push_back(isUnreserved);
   predicates.push_back([](const Resource&) { return true; });
 
-  foreach (const auto& predicate, predicates) {
+  for (const auto& predicate : predicates) {
     foreach (
         const Resource_Unsafe& resource_,
         total.filter(predicate).resourcesNoMutationWithoutExclusiveOwnership) {
@@ -2120,7 +2120,7 @@ Option<Resources> Resources::find(const Resource& target) const
       if (unreserved.contains(remaining)) {
         // The target has been found, return the result.
         // TODO(mzhu): Traverse `Resource_` to preserve `sharedCount`.
-        foreach (Resource r, remaining) {
+        for (auto& r : remaining) {
           r.mutable_reservations()->CopyFrom(
               resource_->resource.reservations());
           found.add(std::move(r));

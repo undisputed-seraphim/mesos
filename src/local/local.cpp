@@ -217,7 +217,7 @@ PID<Master> launch(const Flags& flags, Allocator* _allocator)
     }
 
     // Log any flag warnings.
-    foreach (const flags::Warning& warning, load->warnings) {
+    for (const auto& warning : load->warnings) {
       LOG(WARNING) << warning.message;
     }
 
@@ -339,7 +339,7 @@ PID<Master> launch(const Flags& flags, Allocator* _allocator)
     }
 
     // Create anonymous modules.
-    foreach (const string& name, ModuleManager::find<Anonymous>()) {
+    for (const auto& name : ModuleManager::find<Anonymous>()) {
       Try<Anonymous*> create = ModuleManager::create<Anonymous>(name);
       if (create.isError()) {
         EXIT(EXIT_FAILURE)
@@ -409,7 +409,7 @@ PID<Master> launch(const Flags& flags, Allocator* _allocator)
     }
 
     // Log any flag warnings (after logging is initialized).
-    foreach (const flags::Warning& warning, load->warnings) {
+    for (const auto& warning : load->warnings) {
       LOG(WARNING) << warning.message;
     }
 
@@ -588,7 +588,7 @@ void shutdown()
     delete files;
     files = nullptr;
 
-    foreach (GarbageCollector* gc, *garbageCollectors) {
+    for (auto& gc : *garbageCollectors) {
       delete gc;
     }
 
@@ -604,32 +604,32 @@ void shutdown()
     delete taskStatusUpdateManagers;
     taskStatusUpdateManagers = nullptr;
 
-    foreach (Fetcher* fetcher, *fetchers) {
+    for (auto& fetcher : *fetchers) {
       delete fetcher;
     }
 
     delete fetchers;
     fetchers = nullptr;
 
-    foreach (SecretResolver* secretResolver, *secretResolvers) {
+    for (auto& secretResolver : *secretResolvers) {
       delete secretResolver;
     }
 
-    foreach (SecretGenerator* secretGenerator, *secretGenerators) {
+    for (auto& secretGenerator : *secretGenerators) {
       delete secretGenerator;
     }
 
     delete secretGenerators;
     secretGenerators = nullptr;
 
-    foreach (ResourceEstimator* estimator, *resourceEstimators) {
+    for (auto& estimator : *resourceEstimators) {
       delete estimator;
     }
 
     delete resourceEstimators;
     resourceEstimators = nullptr;
 
-    foreach (QoSController* controller, *qosControllers) {
+    for (auto& controller : *qosControllers) {
       delete controller;
     }
 

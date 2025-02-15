@@ -131,7 +131,7 @@ Try<Owned<PortMapper>, PluginError> PortMapper::create(const string& _cniConfig)
         _excludeDevices.error(),
         ERROR_BAD_ARGS);
   } else if (_excludeDevices.isSome()) {
-    foreach (const JSON::Value& value, _excludeDevices->values) {
+    for (const auto& value : _excludeDevices->values) {
       if (!value.is<JSON::String>()) {
         return PluginError(
             "Failed to parse 'excludeDevices' list. "
@@ -263,7 +263,7 @@ string PortMapper::getIptablesRule(
 
   // Get list of devices to exclude.
   if (!excludeDevices.empty()) {
-    foreach (const string& device, excludeDevices) {
+    for (const auto& device : excludeDevices) {
       devices = "! -i " + device + " ";
     }
   }

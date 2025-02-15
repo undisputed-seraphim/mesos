@@ -80,7 +80,7 @@ Try<Owned<SubsystemProcess>> MemorySubsystemProcess::create(
   // root cgroup. We rely on `Counter::create` to test if memory
   // pressure listening is enabled or not. The created counters will
   // be destroyed immediately.
-  foreach (const Level& level, levels()) {
+  for (const auto& level : levels()) {
     Try<Owned<Counter>> counter = Counter::create(
         hierarchy,
         flags.cgroups_root,
@@ -298,7 +298,7 @@ Future<Nothing> MemorySubsystemProcess::update(
   }
 
   Option<double> memLimit = None();
-  foreach (auto&& limit, resourceLimits) {
+  for (auto& limit : resourceLimits) {
     if (limit.first == "mem") {
       memLimit = limit.second.value();
     }
@@ -422,7 +422,7 @@ Future<Nothing> MemorySubsystemProcess::update(
     setFunctions = {setMemswLimitInBytes, setLimitInBytes};
   }
 
-  foreach (const auto& setFunction, setFunctions) {
+  for (const auto& setFunction : setFunctions) {
     Try<Nothing> result = setFunction();
     if (result.isError()) {
       return Failure(result.error());
@@ -566,7 +566,7 @@ Future<ResourceStatistics> MemorySubsystemProcess::_usage(
   }
 
   vector<Level>::const_iterator iterator = levels.begin();
-  foreach (const Future<uint64_t>& value, values) {
+  for (const auto& value : values) {
     if (value.isReady()) {
       switch (*iterator) {
         case Level::LOW:
@@ -733,7 +733,7 @@ void MemorySubsystemProcess::pressureListen(
 {
   CHECK(infos.contains(containerId));
 
-  foreach (const Level& level, levels()) {
+  for (const auto& level : levels()) {
     Try<Owned<Counter>> counter = Counter::create(hierarchy, cgroup, level);
 
     if (counter.isError()) {

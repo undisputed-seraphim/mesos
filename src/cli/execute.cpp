@@ -494,7 +494,7 @@ protected:
   {
     CHECK_EQ(SUBSCRIBED, state);
 
-    foreach (const Offer& offer, offers) {
+    for (const auto& offer : offers) {
       // Strip the allocation from the offer since we use a single role.
       Resources offered = offer.resources();
       offered.unallocate();
@@ -507,7 +507,7 @@ protected:
       if (task.isSome()) {
         requiredResources = Resources(task->resources());
       } else {
-        foreach (const TaskInfo& _task, taskGroup->tasks()) {
+        for (const auto& _task : taskGroup->tasks()) {
           requiredResources += Resources(_task.resources());
         }
       }
@@ -538,7 +538,7 @@ protected:
 
           _task.mutable_resources()->CopyFrom(resources.get());
         } else {
-          foreach (TaskInfo _task, taskGroup->tasks()) {
+          for (auto& _task : taskGroup->tasks()) {
             _task.mutable_agent_id()->MergeFrom(offer.agent_id());
 
             // Takes resources first from the specified role, then from '*'.
@@ -613,7 +613,7 @@ protected:
        } else {
          vector<TaskID> taskIds;
 
-         foreach (const TaskInfo& _task, taskGroup->tasks()) {
+         for (const auto& _task : taskGroup->tasks()) {
            taskIds.push_back(_task.task_id());
          }
 
@@ -803,7 +803,7 @@ static Result<ContainerInfo> getContainerInfo(
   ContainerInfo containerInfo;
 
   if (volumes.isSome()) {
-    foreach (const Volume& volume, volumes.get()) {
+    for (const auto& volume : volumes.get()) {
       containerInfo.add_volumes()->CopyFrom(volume);
     }
   }
@@ -940,7 +940,7 @@ int main(int argc, char** argv)
   mesos::internal::logging::initialize(argv[0], false);
 
   // Log any flag warnings.
-  foreach (const flags::Warning& warning, load->warnings) {
+  for (const auto& warning : load->warnings) {
     LOG(WARNING) << warning.message;
   }
 
@@ -1090,7 +1090,7 @@ int main(int argc, char** argv)
   }
 
   if (flags.framework_capabilities.isSome()) {
-    foreach (const string& capability, flags.framework_capabilities.get()) {
+    for (const auto& capability : flags.framework_capabilities.get()) {
       FrameworkInfo::Capability::Type type;
 
       if (!FrameworkInfo::Capability::Type_Parse(capability, &type)) {
@@ -1122,7 +1122,7 @@ int main(int argc, char** argv)
 
     vector<Volume> _volumes;
 
-    foreach (const Volume& volume, parse.get()) {
+    for (const auto& volume : parse.get()) {
       _volumes.push_back(volume);
     }
 

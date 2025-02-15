@@ -439,7 +439,7 @@ template <typename Iterable>
 JSON::Object json(const Iterable& ranges)
 {
   Value::Ranges values;
-  foreach (const PortRange& range, ranges) {
+  for (const auto& range : ranges) {
     Value::Range value;
     value.set_begin(range.begin());
     value.set_end(range.end());
@@ -891,7 +891,7 @@ int PortMappingUpdate::execute()
   const string lo = flags.lo_name.get();
 
   if (portsToAdd.isSome()) {
-    foreach (const PortRange& range, portsToAdd.get()) {
+    for (const auto& range : portsToAdd.get()) {
       Try<Nothing> add = addContainerIPFilters(range, eth0, lo);
       if (add.isError()) {
         cerr << "Failed to add IP filters: " << add.error() << endl;
@@ -901,7 +901,7 @@ int PortMappingUpdate::execute()
   }
 
   if (portsToRemove.isSome()) {
-    foreach (const PortRange& range, portsToRemove.get()) {
+    for (const auto& range : portsToRemove.get()) {
       Try<Nothing> remove = removeContainerIPFilters(range, eth0, lo);
       if (remove.isError()) {
         cerr << "Failed to remove IP filters: " << remove.error() << endl;
@@ -1308,7 +1308,7 @@ int PortMappingStatistics::execute()
       return 1;
     }
 
-    foreach (const string& line, strings::tokenize(value.get(), "\n")) {
+    for (const auto& line : strings::tokenize(value.get(), "\n")) {
       if (!strings::startsWith(line, "TCP")) {
         continue;
       }
@@ -1368,7 +1368,7 @@ int PortMappingStatistics::execute()
     }
 
     vector<uint32_t> RTTs;
-    foreach (const diagnosis::socket::Info& info, infos.get()) {
+    for (const auto& info : infos.get()) {
       // We double check on family regardless.
       if (info.family != AF_INET) {
         continue;
@@ -1412,7 +1412,7 @@ int PortMappingStatistics::execute()
     hashmap<string, hashmap<string, int64_t>> SNMPStats;
     vector<string> keys;
     bool isKeyLine = true;
-    foreach (const string& line, strings::tokenize(value.get(), "\n")) {
+    for (const auto& line : strings::tokenize(value.get(), "\n")) {
       vector<string> fields = strings::tokenize(line, ":");
       if (fields.size() != 2) {
         cerr << "Failed to tokenize line '" << line << "' "
@@ -2713,7 +2713,7 @@ Try<Isolator*> PortMappingIsolatorProcess::create(const Flags& flags)
   procs.insert("/proc/sys/net/ipv4/neigh/default/gc_thresh3");
 
   hashmap<string, string> hostNetworkConfigurations;
-  foreach (const string& proc, procs) {
+  for (const auto& proc : procs) {
     Try<string> value = os::read(proc);
     if (value.isSome()) {
       LOG(INFO) << proc << " = '" << strings::trim(value.get()) << "'";
@@ -2756,7 +2756,7 @@ Try<Isolator*> PortMappingIsolatorProcess::create(const Flags& flags)
   }
 
   Option<fs::MountInfoTable::Entry> bindMountEntry;
-  foreach (const fs::MountInfoTable::Entry& entry, mountTable->entries) {
+  for (const auto& entry : mountTable->entries) {
     if (entry.target == bindMountRoot.get()) {
       bindMountEntry = entry;
     }
@@ -2806,7 +2806,7 @@ Try<Isolator*> PortMappingIsolatorProcess::create(const Flags& flags)
     } else {
       // We need to make sure that the shared mount is in its own peer
       // group. To check that, we need to get the parent mount.
-      foreach (const fs::MountInfoTable::Entry& entry, mountTable->entries) {
+      for (const auto& entry : mountTable->entries) {
         if (entry.id == bindMountEntry->parent) {
           // If the bind mount root and its parent mount are in the
           // same peer group, we need to re-do the following commands
@@ -2977,7 +2977,7 @@ Future<Nothing> PortMappingIsolatorProcess::recover(
   }
 
   hashset<pid_t> pids;
-  foreach (const string& name, links.get()) {
+  for (const auto& name : links.get()) {
     Option<pid_t> pid = getPidFromVeth(name);
     // Not all links follow the naming: mesos{pid}, so we simply
     // continue, e.g., eth0.
@@ -2999,7 +2999,7 @@ Future<Nothing> PortMappingIsolatorProcess::recover(
         "': " + entries.error());
   }
 
-  foreach (const string& entry, entries.get()) {
+  for (const auto& entry : entries.get()) {
     const string path = path::join(bindMountRoot, entry);
 
     // NOTE: We expect all regular files whose names are numbers under
@@ -3055,7 +3055,7 @@ Future<Nothing> PortMappingIsolatorProcess::recover(
   // and the pid is reused by a new container.
   multihashmap<pid_t, ContainerID> linkers;
 
-  foreach (const string& entry, entries.get()) {
+  for (const auto& entry : entries.get()) {
     const string path =
       path::join(PORT_MAPPING_BIND_MOUNT_SYMLINK_ROOT(), entry);
 
@@ -3113,10 +3113,10 @@ Future<Nothing> PortMappingIsolatorProcess::recover(
   // that it's possible that multiple container IDs map to the same
   // pid if the removal of a symlink fails in '_cleanup()' and the pid
   // is reused by a new container.
-  foreach (pid_t pid, linkers.keys()) {
+  for (auto& pid : linkers.keys()) {
     list<ContainerID> containerIds = linkers.get(pid);
     if (containerIds.size() > 1) {
-      foreach (const ContainerID& containerId, containerIds) {
+      for (const auto& containerId : containerIds) {
         const string linker = getSymlinkPath(containerId);
 
         LOG(WARNING) << "Removing duplicated network namespace handle symlink '"
@@ -3134,7 +3134,7 @@ Future<Nothing> PortMappingIsolatorProcess::recover(
   }
 
   // Now, actually recover the isolator from slave's state.
-  foreach (const ContainerState& state, states) {
+  for (const auto& state : states) {
     const ContainerID& containerId = state.container_id();
     pid_t pid = state.pid();
 
@@ -3191,13 +3191,13 @@ Future<Nothing> PortMappingIsolatorProcess::recover(
   // fail if there is some unknown orphan that cannot be cleaned up.
   vector<Info*> unknownOrphans;
 
-  foreach (pid_t pid, pids) {
+  for (auto& pid : pids) {
     Try<Info*> recover = _recover(pid);
     if (recover.isError()) {
       foreachvalue (Info* info, infos) {
         delete info;
       }
-      foreach (Info* info, unknownOrphans) {
+      for (auto& info : unknownOrphans) {
         delete info;
       }
 
@@ -3219,7 +3219,7 @@ Future<Nothing> PortMappingIsolatorProcess::recover(
     unknownOrphans.push_back(recover.get());
   }
 
-  foreach (Info* info, unknownOrphans) {
+  for (auto& info : unknownOrphans) {
     CHECK_SOME(info->pid);
     pid_t pid = info->pid.get();
 
@@ -3329,7 +3329,7 @@ PortMappingIsolatorProcess::_recover(pid_t pid)
   IntervalSet<uint16_t> ephemeralPorts;
   Option<uint16_t> flowId;
 
-  foreach (const ip::Classifier& classifier, vethIngressClassifiers.get()) {
+  for (const auto& classifier : vethIngressClassifiers.get()) {
     const Option<PortRange> sourcePorts = classifier.sourcePorts;
     const Option<PortRange> destinationPorts = classifier.destinationPorts;
 
@@ -4043,7 +4043,7 @@ Future<Nothing> PortMappingIsolatorProcess::update(
     hashset<PortRange> portsToRemove;
     IntervalSet<uint16_t> remaining = info->nonEphemeralPorts;
 
-    foreach (const ip::Classifier& classifier, classifiers.get()) {
+    for (const auto& classifier : classifiers.get()) {
       Option<PortRange> sourcePorts = classifier.sourcePorts;
       Option<PortRange> destinationPorts = classifier.destinationPorts;
 
@@ -4070,7 +4070,7 @@ Future<Nothing> PortMappingIsolatorProcess::update(
     // We then decide what port ranges need to be added.
     vector<PortRange> portsToAdd = getPortRanges(nonEphemeralPorts - remaining);
 
-    foreach (const PortRange& range, portsToAdd) {
+    for (const auto& range : portsToAdd) {
       if (info->flowId.isSome()) {
         LOG(INFO) << "Adding IP packet filters with ports " << range
                   << " with flow ID " << info->flowId.get()
@@ -4091,7 +4091,7 @@ Future<Nothing> PortMappingIsolatorProcess::update(
       }
     }
 
-    foreach (const PortRange& range, portsToRemove) {
+    for (const auto& range : portsToRemove) {
       LOG(INFO) << "Removing IP packet filters with ports " << range
                 << " for container with pid " << pid;
 
@@ -5357,7 +5357,7 @@ Try<Interval<uint16_t>> EphemeralPortsAllocator::allocate()
 
   Option<Interval<uint16_t>> allocated;
 
-  foreach (const Interval<uint16_t>& interval, free) {
+  for (const auto& interval : free) {
     uint16_t upper = interval.upper();
     uint16_t lower = interval.lower();
     uint16_t size = upper - lower;
@@ -5412,7 +5412,7 @@ vector<PortRange> getPortRanges(const IntervalSet<uint16_t>& ports)
 {
   vector<PortRange> ranges;
 
-  foreach (const Interval<uint16_t>& interval, ports) {
+  for (const auto& interval : ports) {
     uint16_t lower = interval.lower(); // Inclusive lower.
     uint16_t upper = interval.upper(); // Exclusive upper.
 

@@ -152,15 +152,15 @@ public:
   void TearDown() override
   {
     // Unload modules.
-    foreach (const Modules::Library& library, modules.libraries()) {
-      foreach (const Modules::Library::Module& module, library.modules()) {
+    for (const auto& library : modules.libraries()) {
+      for (const auto& module : library.modules()) {
         if (module.has_name()) {
           ASSERT_SOME(modules::ModuleManager::unload(module.name()));
         }
       }
     }
 
-    foreach (const string& slaveWorkDir, slaveWorkDirs) {
+    for (const auto& slaveWorkDir : slaveWorkDirs) {
       // Clean up CSI endpoint directories if there is any.
       const string csiRootDir = slave::paths::getCsiRootDir(slaveWorkDir);
 
@@ -168,7 +168,7 @@ public:
         csi::paths::getContainerPaths(csiRootDir, "*", "*");
       ASSERT_SOME(csiContainerPaths);
 
-      foreach (const string& path, csiContainerPaths.get()) {
+      for (const auto& path : csiContainerPaths.get()) {
         Try<csi::paths::ContainerPath> containerPath =
           csi::paths::parseContainerPath(csiRootDir, path);
         ASSERT_SOME(containerPath);
@@ -799,7 +799,7 @@ TEST_P(StorageLocalResourceProviderTest, DISABLED_SmallDisk)
 
   Option<Resource> storagePool;
   Option<Resource> preExistingVolume;
-  foreach (const Resource& resource, rawDisksOffers->at(0).resources()) {
+  for (const auto& resource : rawDisksOffers->at(0).resources()) {
     if (isStoragePool(resource, "test")) {
       storagePool = resource;
     } else if (isPreprovisionedVolume(resource)) {
@@ -2103,7 +2103,7 @@ TEST_P(StorageLocalResourceProviderTest, ROOT_AgentRegisteredWithNewId)
 
   // Check that the resource provider IDs of the volumes have changed.
   vector<string> volumePaths;
-  foreach (const Resource& volume, preprovisioned) {
+  for (const auto& volume : preprovisioned) {
     ASSERT_TRUE(volume.has_provider_id());
     ASSERT_TRUE(sourceIdToProviderId.contains(volume.disk().source().id()));
     ASSERT_NE(sourceIdToProviderId.at(volume.disk().source().id()),
@@ -2796,7 +2796,7 @@ TEST_P(
     ASSERT_SOME(volumePaths);
     ASSERT_FALSE(volumePaths->empty());
 
-    foreach (const string& path, volumePaths.get()) {
+    for (const auto& path : volumePaths.get()) {
       Try<csi::paths::VolumePath> volumePath =
         csi::paths::parseVolumePath(csiRootDir, path);
       ASSERT_SOME(volumePath);
@@ -3046,7 +3046,7 @@ TEST_P(
 
   Option<Resource> source;
 
-  foreach (const Resource& resource, rawDiskOffers->at(0).resources()) {
+  for (const auto& resource : rawDiskOffers->at(0).resources()) {
     if (isStoragePool(resource, "test")) {
       source = resource;
       break;
@@ -3090,7 +3090,7 @@ TEST_P(
 
   Option<Resource> volume;
 
-  foreach (const Resource& resource, volumeCreatedOffers->at(0).resources()) {
+  for (const auto& resource : volumeCreatedOffers->at(0).resources()) {
     if (isMountDisk(resource, "test")) {
       volume = resource;
       break;
@@ -3866,7 +3866,7 @@ TEST_P(
   ASSERT_SOME(volumePaths);
   ASSERT_FALSE(volumePaths->empty());
 
-  foreach (const string& path, volumePaths.get()) {
+  for (const auto& path : volumePaths.get()) {
     Try<csi::paths::VolumePath> volumePath =
       csi::paths::parseVolumePath(csiRootDir, path);
     ASSERT_SOME(volumePath);
@@ -4224,7 +4224,7 @@ TEST_P(StorageLocalResourceProviderTest, CreateDestroyPreprovisionedVolume)
 
   // Get the volume paths of the preprovisioned volumes.
   vector<string> volumePaths;
-  foreach (const Resource& volume, preprovisioned) {
+  for (const auto& volume : preprovisioned) {
     const string& volumePath = volume.disk().source().id();
     ASSERT_TRUE(os::exists(volumePath));
     volumePaths.push_back(volumePath);
@@ -4310,7 +4310,7 @@ TEST_P(StorageLocalResourceProviderTest, CreateDestroyPreprovisionedVolume)
   AWAIT_READY(offers);
 
   // Check if the volume is deleted by the test CSI plugin.
-  foreach (const string& volumePath, volumePaths) {
+  for (const auto& volumePath : volumePaths) {
     EXPECT_FALSE(os::exists(volumePath));
   }
 }
@@ -4416,7 +4416,7 @@ TEST_P(StorageLocalResourceProviderTest, RetryOperationStatusUpdate)
   const Offer& offer = offers->at(0);
 
   Option<Resource> source;
-  foreach (const Resource& resource, offer.resources()) {
+  for (const auto& resource : offer.resources()) {
     if (isStoragePool(resource, "test")) {
       source = resource;
       break;
@@ -4578,7 +4578,7 @@ TEST_P(
   const Offer& offer = offers->at(0);
 
   Option<Resource> source;
-  foreach (const Resource& resource, offer.resources()) {
+  for (const auto& resource : offer.resources()) {
     if (isStoragePool(resource, "test")) {
       source = resource;
       break;
@@ -4882,7 +4882,7 @@ TEST_P(StorageLocalResourceProviderTest, OperationUpdate)
 
   Option<v1::Resource> source;
   Option<mesos::v1::ResourceProviderID> resourceProviderId;
-  foreach (const v1::Resource& resource, offer.resources()) {
+  for (const auto& resource : offer.resources()) {
     if (isStoragePool(resource, "test")) {
       source = resource;
 
@@ -5008,7 +5008,7 @@ TEST_P(StorageLocalResourceProviderTest, OperationStateMetrics)
 
   Option<Resource> source;
 
-  foreach (const Resource& resource, rawDiskOffers->at(0).resources()) {
+  for (const auto& resource : rawDiskOffers->at(0).resources()) {
     if (isStoragePool(resource, "test")) {
       source = resource;
       break;
@@ -5047,7 +5047,7 @@ TEST_P(StorageLocalResourceProviderTest, OperationStateMetrics)
 
   Option<Resource> volume;
 
-  foreach (const Resource& resource, volumeCreatedOffers->at(0).resources()) {
+  for (const auto& resource : volumeCreatedOffers->at(0).resources()) {
     if (isMountDisk(resource, "test")) {
       volume = resource;
       break;
@@ -5224,7 +5224,7 @@ TEST_P(StorageLocalResourceProviderTest, CsiPluginRpcMetrics)
 
   Option<Resource> source;
 
-  foreach (const Resource& resource, rawDiskOffers->at(0).resources()) {
+  for (const auto& resource : rawDiskOffers->at(0).resources()) {
     if (isStoragePool(resource, "test")) {
       source = resource;
       break;
@@ -5261,7 +5261,7 @@ TEST_P(StorageLocalResourceProviderTest, CsiPluginRpcMetrics)
 
   Option<Resource> volume;
 
-  foreach (const Resource& resource, volumeCreatedOffers->at(0).resources()) {
+  for (const auto& resource : volumeCreatedOffers->at(0).resources()) {
     if (isMountDisk(resource, "test")) {
       volume = resource;
       break;
@@ -5601,7 +5601,7 @@ TEST_P(StorageLocalResourceProviderTest, RetryOperationStatusUpdateToScheduler)
 
   Option<v1::Resource> source;
   Option<mesos::v1::ResourceProviderID> resourceProviderId;
-  foreach (const v1::Resource& resource, offer.resources()) {
+  for (const auto& resource : offer.resources()) {
     if (isStoragePool(resource, "test")) {
       source = resource;
 
@@ -5805,7 +5805,7 @@ TEST_P(
 
   Option<v1::Resource> source;
   Option<mesos::v1::ResourceProviderID> resourceProviderId;
-  foreach (const v1::Resource& resource, offer.resources()) {
+  for (const auto& resource : offer.resources()) {
     if (isStoragePool(resource, "test")) {
       source = resource;
 
@@ -6218,7 +6218,7 @@ TEST_P(
   // Have the framework call CREATE_DISK, a non-speculative operation.
   Option<v1::Resource> rawDisk;
 
-  foreach (const v1::Resource& resource, offer.resources()) {
+  for (const auto& resource : offer.resources()) {
     if (isRaw(resource)) {
       rawDisk = resource;
       break;
@@ -6404,7 +6404,7 @@ TEST_P(
   // Have the framework call CREATE_DISK, a non-speculative operation.
   Option<v1::Resource> rawDisk;
 
-  foreach (const v1::Resource& resource, offer.resources()) {
+  for (const auto& resource : offer.resources()) {
     if (isRaw(resource)) {
       rawDisk = resource;
       break;
@@ -6678,7 +6678,7 @@ TEST_P(
   }
 
   vector<Resource> converted;
-  foreach (Resource resource, reserved) {
+  for (auto& resource : reserved) {
     if (Resources::isDisk(resource, Resource::DiskInfo::Source::MOUNT)) {
       resource.mutable_disk()->mutable_persistence()->set_id(
           id::UUID::random().toString());

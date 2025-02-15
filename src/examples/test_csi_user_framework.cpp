@@ -214,7 +214,7 @@ protected:
 private:
   void resourceOffers(const vector<Offer>& offers)
   {
-    foreach (const Offer& offer, offers) {
+    for (const auto& offer : offers) {
       cout << "Received offer " << offer.id() << " with "
            << Resources(offer.resources()) << endl;
 
@@ -281,7 +281,7 @@ private:
 
           if (type == RAW) {
             // We create `MOUNT` volumes out of `RAW` disk resources.
-            foreach (const Resource& resource, resources) {
+            for (const auto& resource : resources) {
               cout << "Converting 'RAW' disk to 'MOUNT' disk" << endl;
 
               Offer::Operation* operation = accept->add_operations();
@@ -297,7 +297,7 @@ private:
           } else if (type == MOUNT) {
             // We unreserve `MOUNT` disk resources so they can be
             // consumed by frameworks in other roles.
-            foreach (const Resource& resource, resources) {
+            for (const auto& resource : resources) {
               cout << "Unreserving 'MOUNT' disk" << endl;
 
               Offer::Operation* operation = accept->add_operations();
@@ -385,7 +385,7 @@ int main(int argc, char** argv)
   mesos::internal::logging::initialize(argv[0], true, flags); // Catch signals.
 
   // Log any flag warnings.
-  foreach (const flags::Warning& warning, load->warnings) {
+  for (const auto& warning : load->warnings) {
     LOG(WARNING) << warning.message;
   }
 

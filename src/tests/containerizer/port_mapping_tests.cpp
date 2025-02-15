@@ -167,7 +167,7 @@ static void cleanup(const string& eth0, const string& lo)
   Try<set<string>> links = net::links();
   ASSERT_SOME(links);
 
-  foreach (const string& name, links.get()) {
+  for (const auto& name : links.get()) {
     if (strings::startsWith(name, slave::PORT_MAPPING_VETH_PREFIX())) {
       ASSERT_SOME_TRUE(link::remove(name));
     }
@@ -177,7 +177,7 @@ static void cleanup(const string& eth0, const string& lo)
     Try<list<string>> entries = os::ls(slave::PORT_MAPPING_BIND_MOUNT_ROOT());
     ASSERT_SOME(entries);
 
-    foreach (const string& file, entries.get()) {
+    for (const auto& file : entries.get()) {
       string target = path::join(slave::PORT_MAPPING_BIND_MOUNT_ROOT(), file);
 
       // NOTE: Here, we ignore the unmount errors because previous tests
@@ -264,7 +264,7 @@ protected:
     Try<string> read = os::read("/etc/resolv.conf");
     ASSERT_SOME(read);
 
-    foreach (const string& line, strings::split(read.get(), "\n")) {
+    for (const auto& line : strings::split(read.get(), "\n")) {
       if (!strings::startsWith(line, "nameserver")) {
         continue;
       }
@@ -3270,7 +3270,7 @@ TEST_F(PortMappingMesosTest, ROOT_CGROUPS_RecoverMixedContainers)
   AWAIT_READY(containers);
   EXPECT_EQ(2u, containers->size());
 
-  foreach (const ContainerID& containerId, containers.get()) {
+  for (const auto& containerId : containers.get()) {
     // Do some basic checks to make sure the network isolator can
     // handle mixed types of containers correctly.
     Future<ResourceStatistics> usage = containerizer.get()->usage(containerId);
@@ -3404,7 +3404,7 @@ TEST_F(PortMappingMesosTest, ROOT_CGROUPS_CleanUpOrphan)
   // Expect no 'veth' devices.
   Try<set<string>> links = net::links();
   ASSERT_SOME(links);
-  foreach (const string& name, links.get()) {
+  for (const auto& name : links.get()) {
     EXPECT_FALSE(strings::startsWith(name, slave::PORT_MAPPING_VETH_PREFIX()));
   }
 

@@ -59,7 +59,7 @@ Try<process::Owned<ControllerProcess>> PerfEventControllerProcess::create(
   }
 
   set<string> events;
-  foreach (const string& event, strings::tokenize(*flags.perf_events, ",")) {
+  for (const auto& event : strings::tokenize(*flags.perf_events, ",")) {
     events.insert(event);
   }
 

@@ -98,8 +98,8 @@ public:
 
   void TearDown() override
   {
-    foreach (const Modules::Library& library, modules.libraries()) {
-      foreach (const Modules::Library::Module& module, library.modules()) {
+    for (const auto& library : modules.libraries()) {
+      for (const auto& module : library.modules()) {
         if (module.has_name()) {
           ASSERT_SOME(modules::ModuleManager::unload(module.name()));
         }

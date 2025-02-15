@@ -3601,7 +3601,7 @@ TEST_P_TEMP_DISABLED_ON_WINDOWS(
     // futures are satisfied in the order in which the updates are received.
     testing::InSequence inSequence;
 
-    foreach (Future<v1::scheduler::Event::Update>& update, updates) {
+    for (auto& update : updates) {
       EXPECT_CALL(*scheduler, update(_, _))
         .WillOnce(
             DoAll(
@@ -3635,7 +3635,7 @@ TEST_P_TEMP_DISABLED_ON_WINDOWS(
   taskStages[producerInfo.task_id()] = Stage::INITIAL;
   taskStages[consumerInfo.task_id()] = Stage::INITIAL;
 
-  foreach (Future<v1::scheduler::Event::Update>& update, updates) {
+  for (auto& update : updates) {
     AWAIT_READY(update);
 
     const v1::TaskStatus& taskStatus = update->status();
@@ -3818,7 +3818,7 @@ TEST_P_TEMP_DISABLED_ON_WINDOWS(
     // futures are satisfied in the order in which the updates are received.
     testing::InSequence inSequence;
 
-    foreach (Future<v1::scheduler::Event::Update>& update, updates) {
+    for (auto& update : updates) {
       EXPECT_CALL(*scheduler, update(_, _))
         .WillOnce(
             DoAll(
@@ -3855,7 +3855,7 @@ TEST_P_TEMP_DISABLED_ON_WINDOWS(
   taskStages[producerInfo.task_id()] = Stage::INITIAL;
   taskStages[consumerInfo.task_id()] = Stage::INITIAL;
 
-  foreach (Future<v1::scheduler::Event::Update>& update, updates) {
+  for (auto& update : updates) {
     AWAIT_READY(update);
 
     const v1::TaskStatus& taskStatus = update->status();
