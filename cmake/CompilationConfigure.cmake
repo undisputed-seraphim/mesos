@@ -307,12 +307,6 @@ endif ()
 # SYSTEM CHECKS.
 ################
 
-# Set the default standard to C++11 for all targets.
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-# Do not use, for example, `-std=gnu++11`.
-set(CMAKE_CXX_EXTENSIONS OFF)
-
 # Check that we are targeting a 64-bit architecture.
 if (NOT (CMAKE_SIZEOF_VOID_P EQUAL 8))
   message(
