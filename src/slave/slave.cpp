@@ -257,7 +257,7 @@ Slave::~Slave()
 
   Clock::cancel(pingTimer);
 
-  foreachvalue (Framework* framework, frameworks) {
+  for (auto [_, framework] : frameworks) {
     delete framework;
   }
 
@@ -558,7 +558,7 @@ void Slave::initialize()
         }
 
         bool foundEntry = false;
-        foreach (const fs::MountTable::Entry& entry, mountTable->entries) {
+        for (const auto& entry : mountTable->entries) {
           if (entry.dir == realpath.get()) {
             foundEntry = true;
             break;
@@ -1005,7 +1005,7 @@ void Slave::finalize()
 
   // NOTE: We use 'frameworks.keys()' here because 'shutdownFramework'
   // can potentially remove a framework from 'frameworks'.
-  foreach (const FrameworkID& frameworkId, frameworks.keys()) {
+  for (const auto& frameworkId : frameworks.keys()) {
     // TODO(benh): Because a shut down isn't instantaneous (but has
     // a shut down/kill phases) we might not actually propagate all
     // the status updates appropriately here. Consider providing
@@ -1067,7 +1067,7 @@ void Slave::shutdown(const UPID& from, const string& message)
     // terminated.
     // NOTE: We use 'frameworks.keys()' here because 'shutdownFramework'
     // can potentially remove a framework from 'frameworks'.
-    foreach (const FrameworkID& frameworkId, frameworks.keys()) {
+    for (const auto& frameworkId : frameworks.keys()) {
       shutdownFramework(from, frameworkId);
     }
   }
@@ -1091,15 +1091,15 @@ void Slave::drain(
   }
 
   hashmap<FrameworkID, hashset<TaskID>> pendingTaskIds;
-  foreachvalue (Framework* framework, frameworks) {
-    foreachvalue (const auto& taskMap, framework->pendingTasks) {
+  for (auto [_, framework] : frameworks) {
+    for (const auto& [_, taskMap] : framework->pendingTasks) {
       pendingTaskIds[framework->id()] = taskMap.keys();
     }
   }
 
   hashmap<FrameworkID, hashset<TaskID>> queuedTaskIds;
-  foreachvalue (Framework* framework, frameworks) {
-    foreachvalue (Executor* executor, framework->executors) {
+  for (auto [_, framework] : frameworks) {
+    for (auto [_, executor] : framework->executors) {
       foreachkey (const TaskID& taskId, executor->queuedTasks) {
         queuedTaskIds[framework->id()].insert(taskId);
       }
@@ -1107,8 +1107,8 @@ void Slave::drain(
   }
 
   hashmap<FrameworkID, hashset<TaskID>> launchedTaskIds;
-  foreachvalue (Framework* framework, frameworks) {
-    foreachvalue (Executor* executor, framework->executors) {
+  for (auto [_, framework] : frameworks) {
+    for (auto [_, executor] : framework->executors) {
       foreachkey (const TaskID& taskId, executor->launchedTasks) {
         launchedTaskIds[framework->id()].insert(taskId);
       }
@@ -1164,16 +1164,16 @@ void Slave::drain(
 
   // Frameworks may be removed within `kill()` or `killPendingTask()` below,
   // so we must copy them and their members before looping.
-  foreachvalue (Framework* framework, utils::copy(frameworks)) {
+  for (auto [_, framework] : utils::copy(frameworks)) {
     typedef hashmap<TaskID, TaskInfo> TaskMap;
-    foreachvalue (const TaskMap& tasks, utils::copy(framework->pendingTasks)) {
-      foreachvalue (const TaskInfo& task, tasks) {
+    for (const auto& [_, tasks] : utils::copy(framework->pendingTasks)) {
+      for (const auto& [_, task] : tasks) {
         killPendingTask(framework->id(), framework, task.task_id());
       }
     }
 
-    foreachvalue (Executor* executor, utils::copy(framework->executors)) {
-      foreachvalue (Task* task, executor->launchedTasks) {
+    for (auto [_, executor] : utils::copy(framework->executors)) {
+      for (auto [_, task] : executor->launchedTasks) {
         kill(framework->id(),
              framework,
              executor,
@@ -1184,7 +1184,7 @@ void Slave::drain(
                   : Option<KillPolicy>::none()));
       }
 
-      foreachvalue (const TaskInfo& task, utils::copy(executor->queuedTasks)) {
+      for (const auto& [_, task] : utils::copy(executor->queuedTasks)) {
         kill(framework->id(),
              framework,
              executor,
@@ -1234,7 +1234,7 @@ void Slave::attachTaskVolumeDirectory(
   CHECK_EQ(task.executor_id(), executorInfo.executor_id());
 
   // This is the case that the task has disk resources specified.
-  foreach (const Resource& resource, task.resources()) {
+  for (const Resource& resource : task.resources()) {
     // Ignore if there are no disk resources or if the
     // disk resources did not specify a volume mapping.
     if (!resource.has_disk() || !resource.disk().has_volume()) {
@@ -1277,7 +1277,7 @@ void Slave::attachTaskVolumeDirectory(
   // and the task's ContainerInfo has a `SANDBOX_PATH` volume with type
   // `PARENT` to share the executor's disk volume.
   hashset<string> executorContainerPaths;
-  foreach (const Resource& resource, executorInfo.resources()) {
+  for (const Resource& resource : executorInfo.resources()) {
     // Ignore if there are no disk resources or if the
     // disk resources did not specify a volume mapping.
     if (!resource.has_disk() || !resource.disk().has_volume()) {
@@ -1293,7 +1293,7 @@ void Slave::attachTaskVolumeDirectory(
   }
 
   if (task.has_container()) {
-    foreach (const Volume& volume, task.container().volumes()) {
+    for (const auto& volume : task.container().volumes()) {
       if (!volume.has_source() ||
           volume.source().type() != Volume::Source::SANDBOX_PATH) {
         continue;
@@ -1357,7 +1357,7 @@ void Slave::detachTaskVolumeDirectories(
          executorInfo.type() == ExecutorInfo::DEFAULT));
 
   hashset<string> executorContainerPaths;
-  foreach (const Resource& resource, executorInfo.resources()) {
+  for (const Resource& resource : executorInfo.resources()) {
     // Ignore if there are no disk resources or if the
     // disk resources did not specify a volume mapping.
     if (!resource.has_disk() || !resource.disk().has_volume()) {
@@ -1368,11 +1368,11 @@ void Slave::detachTaskVolumeDirectories(
     executorContainerPaths.insert(volume.container_path());
   }
 
-  foreach (const Task& task, tasks) {
+  for (const auto& task : tasks) {
     CHECK_EQ(task.executor_id(), executorInfo.executor_id());
 
     // This is the case that the task has disk resources specified.
-    foreach (const Resource& resource, task.resources()) {
+    for (const Resource& resource : task.resources()) {
       // Ignore if there are no disk resources or if the
       // disk resources did not specify a volume mapping.
       if (!resource.has_disk() || !resource.disk().has_volume()) {
@@ -1403,7 +1403,7 @@ void Slave::detachTaskVolumeDirectories(
     // and the task's ContainerInfo has a `SANDBOX_PATH` volume with type
     // `PARENT` to share the executor's disk volume.
     if (task.has_container()) {
-      foreach (const Volume& volume, task.container().volumes()) {
+      for (const auto& volume : task.container().volumes()) {
         if (!volume.has_source() ||
             volume.source().type() != Volume::Source::SANDBOX_PATH) {
           continue;
@@ -1888,10 +1888,10 @@ void Slave::reregistered(
   }
 
   // Reconcile any tasks per the master's request.
-  foreach (const ReconcileTasksMessage& reconcile, reconciliations) {
+  for (const auto& reconcile : reconciliations) {
     Framework* framework = getFramework(reconcile.framework_id());
 
-    foreach (const TaskStatus& status, reconcile.statuses()) {
+    for (const auto& status : reconcile.statuses()) {
       const TaskID& taskId = status.task_id();
 
       bool known = false;
@@ -2023,35 +2023,35 @@ void Slave::doReliableRegistration(Duration maxBackoff)
     message.mutable_resource_version_uuid()->CopyFrom(resourceVersion);
     message.mutable_slave()->CopyFrom(info);
 
-    foreachvalue (Framework* framework, frameworks) {
+    for (auto [_, framework] : frameworks) {
       message.add_frameworks()->CopyFrom(framework->info);
 
       // TODO(bmahler): We need to send the executors for these
       // pending tasks, and we need to send exited events if they
       // cannot be launched, see MESOS-1715, MESOS-1720, MESOS-1800.
       typedef hashmap<TaskID, TaskInfo> TaskMap;
-      foreachvalue (const TaskMap& tasks, framework->pendingTasks) {
-        foreachvalue (const TaskInfo& task, tasks) {
+      for (const auto& [_, tasks] : framework->pendingTasks) {
+        for (const auto& [_, task] : tasks) {
           message.add_tasks()->CopyFrom(protobuf::createTask(
               task, TASK_STAGING, framework->id()));
         }
       }
 
-      foreachvalue (Executor* executor, framework->executors) {
+      for (auto [_, executor] : framework->executors) {
         // Add launched, terminated, and queued tasks.
         // Note that terminated executors will only have terminated
         // unacknowledged tasks.
         // Note that for each task the latest state and status update
         // state (if any) is also included.
-        foreachvalue (Task* task, executor->launchedTasks) {
+        for (auto [_, task] : executor->launchedTasks) {
           message.add_tasks()->CopyFrom(*task);
         }
 
-        foreachvalue (Task* task, executor->terminatedTasks) {
+        for (auto [_, task] : executor->terminatedTasks) {
           message.add_tasks()->CopyFrom(*task);
         }
 
-        foreachvalue (const TaskInfo& task, executor->queuedTasks) {
+        for (const auto& [_, task] : executor->queuedTasks) {
           message.add_tasks()->CopyFrom(protobuf::createTask(
               task, TASK_STAGING, framework->id()));
         }
@@ -2097,12 +2097,12 @@ void Slave::doReliableRegistration(Duration maxBackoff)
                 << " terminated tasks, " << executor->completedTasks.size()
                 << " completed tasks";
 
-        foreachvalue (const Task* task, executor->terminatedTasks) {
+        for (const auto& [_, task] : executor->terminatedTasks) {
           VLOG(2) << "Reregistering terminated task " << task->task_id();
           completedFramework_->add_tasks()->CopyFrom(*task);
         }
 
-        foreach (const shared_ptr<Task>& task, executor->completedTasks) {
+        for (const auto& task : executor->completedTasks) {
           VLOG(2) << "Reregistering completed task " << task->task_id();
           completedFramework_->add_tasks()->CopyFrom(*task);
         }
@@ -2203,7 +2203,7 @@ void Slave::runTask(
 Option<Error> Slave::validateResourceLimitsAndIsolators(
     const vector<TaskInfo>& tasks)
 {
-  foreach (const TaskInfo& task, tasks) {
+  for (const auto& task : tasks) {
     if (!(task.has_container() &&
           task.container().type() == ContainerInfo::DOCKER)) {
       if (task.limits().count("cpus") &&
@@ -2246,7 +2246,7 @@ void Slave::run(
       const FrameworkInfo& frameworkInfo) {
     set<string> roles = protobuf::framework::getRoles(frameworkInfo);
 
-    foreach (Resource& resource, *resources) {
+    for (Resource& resource : *resources) {
       if (!resource.has_allocation_info()) {
         if (roles.size() != 1) {
           LOG(FATAL) << "Missing 'Resource.AllocationInfo' for resources"
@@ -2275,7 +2275,7 @@ void Slave::run(
   }
 
   if (taskGroup.isSome()) {
-    foreach (TaskInfo& task, *taskGroup->mutable_tasks()) {
+    for (auto& task : *taskGroup->mutable_tasks()) {
       injectAllocationInfo(task.mutable_resources(), frameworkInfo);
 
       if (task.has_executor()) {
@@ -2292,7 +2292,7 @@ void Slave::run(
   if (task.isSome()) {
     tasks.push_back(task.get());
   } else {
-    foreach (const TaskInfo& task, taskGroup->tasks()) {
+    for (const auto& task : taskGroup->tasks()) {
       tasks.push_back(task);
     }
   }
@@ -2302,7 +2302,7 @@ void Slave::run(
   LOG(INFO) << "Got assigned " << taskOrTaskGroup(task, taskGroup)
             << " for framework " << frameworkId;
 
-  foreach (const TaskInfo& _task, tasks) {
+  for (const auto& _task : tasks) {
     if (_task.slave_id() != info.id()) {
       LOG(WARNING)
         << "Agent " << info.id() << " ignoring running "
@@ -2393,7 +2393,7 @@ void Slave::run(
       taskState = TASK_LOST;
     }
 
-    foreach (const TaskInfo& _task, tasks) {
+    for (const auto& _task : tasks) {
       const StatusUpdate update = protobuf::createStatusUpdate(
           frameworkId,
           info.id(),
@@ -2494,7 +2494,7 @@ void Slave::run(
         taskState = TASK_LOST;
       }
 
-      foreach (const TaskInfo& _task, tasks) {
+      for (const auto& _task : tasks) {
         _framework->removePendingTask(_task.task_id());
 
         const StatusUpdate update = protobuf::createStatusUpdate(
@@ -2633,7 +2633,7 @@ Future<Nothing> Slave::_run(
   if (task.isSome()) {
     tasks.push_back(task.get());
   } else {
-    foreach (const TaskInfo& _task, taskGroup->tasks()) {
+    for (const auto& _task : taskGroup->tasks()) {
       tasks.push_back(_task);
     }
   }
@@ -2662,7 +2662,7 @@ Future<Nothing> Slave::_run(
 
     // Although we cannot send a status update in this case, we remove
     // the affected tasks from the pending tasks.
-    foreach (const TaskInfo& _task, tasks) {
+    for (const auto& _task : tasks) {
       framework->removePendingTask(_task.task_id());
     }
 
@@ -2678,7 +2678,7 @@ Future<Nothing> Slave::_run(
   // removed due to a kill arriving for one of the tasks in the group.
   bool allPending = true;
   bool allRemoved = true;
-  foreach (const TaskInfo& _task, tasks) {
+  for (const auto& _task : tasks) {
     if (framework->isPending(_task.task_id())) {
       allRemoved = false;
     } else {
@@ -2709,7 +2709,7 @@ Future<Nothing> Slave::_run(
   LOG(INFO) << "Authorizing " << taskOrTaskGroup(task, taskGroup)
             << " for framework " << frameworkId;
 
-  foreach (const TaskInfo& _task, tasks) {
+  for (const auto& _task : tasks) {
     authorizations.push_back(authorizeTask(_task, frameworkInfo));
   }
 
@@ -2727,7 +2727,7 @@ Future<Nothing> Slave::_run(
                  << taskOrTaskGroup(task, taskGroup) << " of framework "
                  << frameworkId << ": " << error;
 
-      foreach (const TaskInfo& _task, tasks) {
+      for (const auto& _task : tasks) {
         _framework->removePendingTask(_task.task_id());
 
         const StatusUpdate update = protobuf::createStatusUpdate(
@@ -2788,7 +2788,7 @@ Future<Nothing> Slave::_run(
 
         deque<bool> authorizations(future->begin(), future->end());
 
-        foreach (const TaskInfo& _task, tasks) {
+        for (const auto& _task : tasks) {
           bool authorized = authorizations.front();
           authorizations.pop_front();
 
@@ -2827,7 +2827,7 @@ void Slave::__run(
   if (task.isSome()) {
     tasks.push_back(task.get());
   } else {
-    foreach (const TaskInfo& _task, taskGroup->tasks()) {
+    for (const auto& _task : taskGroup->tasks()) {
       tasks.push_back(_task);
     }
   }
@@ -2866,7 +2866,7 @@ void Slave::__run(
         taskState = TASK_LOST;
       }
 
-      foreach (const TaskInfo& _task, tasks) {
+      for (const auto& _task : tasks) {
         const StatusUpdate update = protobuf::createStatusUpdate(
             frameworkId,
             info.id(),
@@ -2891,7 +2891,7 @@ void Slave::__run(
 
     // Although we cannot send a status update in this case, we remove
     // the affected tasks from the list of pending tasks.
-    foreach (const TaskInfo& _task, tasks) {
+    for (const auto& _task : tasks) {
       framework->removePendingTask(_task.task_id());
     }
 
@@ -2918,7 +2918,7 @@ void Slave::__run(
   // removed due to a kill arriving for one of the tasks in the group.
   bool allPending = true;
   bool allRemoved = true;
-  foreach (const TaskInfo& _task, tasks) {
+  for (const auto& _task : tasks) {
     if (framework->isPending(_task.task_id())) {
       allRemoved = false;
     } else {
@@ -2949,7 +2949,7 @@ void Slave::__run(
     return;
   }
 
-  foreach (const TaskInfo& _task, tasks) {
+  for (const auto& _task : tasks) {
     CHECK(framework->removePendingTask(_task.task_id()));
   }
 
@@ -3000,8 +3000,8 @@ void Slave::__run(
   // TODO(bbannier): Also check executor resources.
   if (!resourceVersionUuids.empty()) {
     hashset<Option<ResourceProviderID>> usedResourceProviderIds;
-    foreach (const TaskInfo& _task, tasks) {
-      foreach (const Resource& resource, _task.resources()) {
+    for (const auto& _task : tasks) {
+      for (const Resource& resource : _task.resources()) {
         usedResourceProviderIds.insert(resource.has_provider_id()
            ? Option<ResourceProviderID>(resource.provider_id())
            : None());
@@ -3071,13 +3071,13 @@ void Slave::__run(
   // send TASK_DROPPED status updates here since restarting the task
   // may succeed in the event that CheckpointResourcesMessage arrives
   // out of order.
-  foreach (const TaskInfo& _task, tasks) {
+  for (const auto& _task : tasks) {
     // We must unallocate the resources to check whether they are
     // contained in the unallocated total checkpointed resources.
     Resources checkpointedTaskResources =
       unallocated(_task.resources()).filter(needCheckpointing);
 
-    foreach (const Resource& resource, checkpointedTaskResources) {
+    for (const Resource& resource : checkpointedTaskResources) {
       if (!checkpointedResources.contains(resource)) {
         LOG(WARNING) << "Unknown checkpointed resource " << resource
                      << " for task " << _task
@@ -3121,7 +3121,7 @@ void Slave::__run(
   Resources checkpointedExecutorResources =
     unallocated(executorInfo.resources()).filter(needCheckpointing);
 
-  foreach (const Resource& resource, checkpointedExecutorResources) {
+  for (const Resource& resource : checkpointedExecutorResources) {
     if (!checkpointedResources.contains(resource)) {
       LOG(WARNING) << "Unknown checkpointed resource " << resource
                    << " for executor '" << executorId
@@ -3334,7 +3334,7 @@ void Slave::__run(
     // (e.g., Marathon/mesos-execute give 0.1 CPUs to the default executor) so
     // the executor may be throttled by CFS, see MESOS-9925 for details.
     Resources tasksResources;
-    foreach (const TaskInfo& _task, tasks) {
+    for (const auto& _task : tasks) {
       tasksResources += _task.resources();
     }
 
@@ -3392,7 +3392,7 @@ void Slave::__run(
         taskState = TASK_LOST;
       }
 
-      foreach (const TaskInfo& _task, tasks) {
+      for (const auto& _task : tasks) {
         const StatusUpdate update = protobuf::createStatusUpdate(
             frameworkId,
             info.id(),
@@ -3410,7 +3410,7 @@ void Slave::__run(
     }
     case Executor::REGISTERING:
       if (executor->checkpoint) {
-        foreach (const TaskInfo& _task, tasks) {
+        for (const auto& _task : tasks) {
           executor->checkpointTask(_task);
         }
       }
@@ -3418,7 +3418,7 @@ void Slave::__run(
       if (taskGroup.isSome()) {
         executor->enqueueTaskGroup(taskGroup.get());
       } else {
-        foreach (const TaskInfo& _task, tasks) {
+        for (const auto& _task : tasks) {
           executor->enqueueTask(_task);
         }
       }
@@ -3429,7 +3429,7 @@ void Slave::__run(
       break;
     case Executor::RUNNING: {
       if (executor->checkpoint) {
-        foreach (const TaskInfo& _task, tasks) {
+        for (const auto& _task : tasks) {
           executor->checkpointTask(_task);
         }
       }
@@ -3439,7 +3439,7 @@ void Slave::__run(
       if (taskGroup.isSome()) {
         executor->enqueueTaskGroup(taskGroup.get());
       } else {
-        foreach (const TaskInfo& _task, tasks) {
+        for (const auto& _task : tasks) {
           executor->enqueueTask(_task);
         }
       }
@@ -3544,7 +3544,7 @@ void Slave::___run(
     ostringstream out;
     if (!tasks.empty()) {
       vector<TaskID> taskIds;
-      foreach (const TaskInfo& task, tasks) {
+      for (const auto& task : tasks) {
         taskIds.push_back(task.task_id());
       }
       out << "tasks " << stringify(taskIds);
@@ -3560,7 +3560,7 @@ void Slave::___run(
       vector<vector<TaskID>> taskIds;
       for (auto it = taskGroups.begin(); it != taskGroups.end(); it++) {
         vector<TaskID> taskIds_;
-        foreach (const TaskInfo& task, (*it).tasks()) {
+        for (const auto& task : (*it).tasks()) {
           taskIds_.push_back(task.task_id());
         }
         taskIds.push_back(taskIds_);
@@ -3636,7 +3636,7 @@ void Slave::___run(
   // transitioned to TERMINATING when the queued tasks were killed.
   CHECK(executor->everSentTask() || !executor->queuedTasks.empty());
 
-  foreach (const TaskInfo& task, tasks) {
+  for (const auto& task : tasks) {
     // This is the case where the task is killed. No need to send
     // status update because it should be handled in 'killTask'.
     if (!executor->queuedTasks.contains(task.task_id())) {
@@ -3663,13 +3663,13 @@ void Slave::___run(
     executor->send(message);
   }
 
-  foreach (const TaskGroupInfo& taskGroup, taskGroups) {
+  for (const auto& taskGroup : taskGroups) {
     // The invariant here is that all queued tasks in the group
     // are still queued, or all were removed due to a kill arriving
     // for one of the tasks in the group.
     bool allQueued = true;
     bool allRemoved = true;
-    foreach (const TaskInfo& task, taskGroup.tasks()) {
+    for (const auto& task : taskGroup.tasks()) {
       if (executor->queuedTasks.contains(task.task_id())) {
         allRemoved = false;
       } else {
@@ -3693,7 +3693,7 @@ void Slave::___run(
     LOG(INFO) << "Sending queued " << taskOrTaskGroup(None(), taskGroup)
               << " to executor " << *executor;
 
-    foreach (const TaskInfo& task, taskGroup.tasks()) {
+    for (const auto& task : taskGroup.tasks()) {
       CHECK_SOME(executor->dequeueTask(task.task_id()));
       executor->addLaunchedTask(task);
     }
@@ -4082,7 +4082,7 @@ void Slave::killPendingTask(
 
   vector<StatusUpdate> updates;
   if (taskGroup.isSome()) {
-    foreach (const TaskInfo& task, taskGroup->tasks()) {
+    for (const auto& task : taskGroup->tasks()) {
       updates.push_back(protobuf::createStatusUpdate(
           frameworkId,
           info.id(),
@@ -4110,7 +4110,7 @@ void Slave::killPendingTask(
             framework->getExecutorIdForPendingTask(taskId))));
   }
 
-  foreach (const StatusUpdate& update, updates) {
+  for (const auto& update : updates) {
     // NOTE: Sending a terminal update (TASK_KILLED) synchronously
     // removes the task/task group from 'framework->pendingTasks'
     // and 'framework->pendingTaskGroups', so that it will not be
@@ -4144,7 +4144,7 @@ void Slave::kill(
 
       vector<StatusUpdate> updates;
       if (taskGroup.isSome()) {
-        foreach (const TaskInfo& task, taskGroup->tasks()) {
+        for (const auto& task : taskGroup->tasks()) {
           updates.push_back(protobuf::createStatusUpdate(
               frameworkId,
               info.id(),
@@ -4170,7 +4170,7 @@ void Slave::kill(
             executor->id));
       }
 
-      foreach (const StatusUpdate& update, updates) {
+      for (const auto& update : updates) {
         // NOTE: Sending a terminal update (TASK_KILLED) removes the
         // task/task group from 'executor->queuedTasks' and
         // 'executor->queuedTaskGroup', so that if the executor registers at
@@ -4206,7 +4206,7 @@ void Slave::kill(
 
         vector<StatusUpdate> updates;
         if (taskGroup.isSome()) {
-          foreach (const TaskInfo& task, taskGroup->tasks()) {
+          for (const auto& task : taskGroup->tasks()) {
             updates.push_back(protobuf::createStatusUpdate(
                 frameworkId,
                 info.id(),
@@ -4231,7 +4231,7 @@ void Slave::kill(
               executor->id));
         }
 
-        foreach (const StatusUpdate& update, updates) {
+        for (const auto& update : updates) {
           // NOTE: Sending a terminal update (TASK_KILLED) removes the
           // task/task group from 'executor->queuedTasks' and
           // 'executor->queuedTaskGroup', so that if the executor registers at
@@ -4325,7 +4325,7 @@ void Slave::shutdownFramework(
       // Shut down all executors of this framework.
       // NOTE: We use 'executors.keys()' here because 'shutdownExecutor'
       // and 'removeExecutor' can remove an executor from 'executors'.
-      foreach (const ExecutorID& executorId, framework->executors.keys()) {
+      for (const auto& executorId : framework->executors.keys()) {
         Executor* executor = framework->executors[executorId];
         CHECK(executor->state == Executor::REGISTERING ||
               executor->state == Executor::RUNNING ||
@@ -4591,11 +4591,11 @@ void Slave::checkpointResourceState(
 
   ResourceState resourceState;
 
-  foreach (const Resource& resource, resourcesToCheckpoint) {
+  for (const Resource& resource : resourcesToCheckpoint) {
     resourceState.add_resources()->CopyFrom(resource);
   }
 
-  foreach (const Operation& operation, operationsToCheckpoint.values()) {
+  for (const auto& operation : operationsToCheckpoint.values()) {
     resourceState.add_operations()->CopyFrom(operation);
   }
 
@@ -4727,7 +4727,7 @@ Try<Nothing> Slave::syncCheckpointedResources(
     hashmap<string, Resource> pathMap;
     const Resources& persistentVolumes = resources.persistentVolumes();
 
-    foreach (const Resource& volume, persistentVolumes) {
+    for (const auto& volume : persistentVolumes) {
       // This is validated in master.
       CHECK(Resources::isReserved(volume));
       string path = paths::getPersistentVolumePath(workDir, volume);
@@ -4755,7 +4755,7 @@ Try<Nothing> Slave::syncCheckpointedResources(
   // to support multiple disks, or raw disks. Depending on the
   // DiskInfo, we may want to create either directories under a root
   // directory, or LVM volumes from a given device.
-  foreach (const string& path, createPaths) {
+  for (const auto& path : createPaths) {
     const Resource& volume = newPathMap.at(path);
 
     // If creation of persistent volume fails, the agent exits.
@@ -4786,7 +4786,7 @@ Try<Nothing> Slave::syncCheckpointedResources(
   // remove the filesystem objects for the removed volume. Note that
   // for MOUNT disks, we don't remove the root directory (mount point)
   // of the volume.
-  foreach (const string& path, deletePaths) {
+  for (const auto& path : deletePaths) {
     const Resource& volume = oldPathMap.at(path);
 
     LOG(INFO) << "Deleting persistent volume '"
@@ -5346,7 +5346,7 @@ void Slave::subscribe(
       // right after it checkpointed the update but before it could send
       // the ACK to the executor). This is ok because the status update
       // manager correctly handles duplicate updates.
-      foreach (const Call::Update& update, subscribe.unacknowledged_updates()) {
+      for (const auto& update : subscribe.unacknowledged_updates()) {
         // NOTE: This also updates the executor's resources!
         statusUpdate(protobuf::createStatusUpdate(
             framework->id(),
@@ -5356,7 +5356,7 @@ void Slave::subscribe(
       }
 
       hashmap<TaskID, TaskInfo> unackedTasks;
-      foreach (const TaskInfo& task, subscribe.unacknowledged_tasks()) {
+      for (const auto& task : subscribe.unacknowledged_tasks()) {
         unackedTasks[task.task_id()] = task;
       }
 
@@ -5371,7 +5371,7 @@ void Slave::subscribe(
       // TODO(vinod): Consider checkpointing 'TaskInfo' instead of
       // 'Task' so that we can relaunch such tasks! Currently we don't
       // do it because 'TaskInfo.data' could be huge.
-      foreach (Task* task, executor->launchedTasks.values()) {
+      for (auto* task : executor->launchedTasks.values()) {
         if (task->state() == TASK_STAGING &&
             !unackedTasks.contains(task->task_id())) {
           mesos::TaskState newTaskState = TASK_DROPPED;
@@ -5432,8 +5432,8 @@ void Slave::subscribe(
       // Split the queued tasks between the task groups and tasks.
       LinkedHashMap<TaskID, TaskInfo> queuedTasks = executor->queuedTasks;
 
-      foreach (const TaskGroupInfo& taskGroup, executor->queuedTaskGroups) {
-        foreach (const TaskInfo& task, taskGroup.tasks()) {
+      for (const auto& taskGroup : executor->queuedTaskGroups) {
+        for (const auto& task : taskGroup.tasks()) {
           queuedTasks.erase(task.task_id());
         }
       }
@@ -5617,8 +5617,8 @@ void Slave::registerExecutor(
       // Split the queued tasks between the task groups and tasks.
       LinkedHashMap<TaskID, TaskInfo> queuedTasks = executor->queuedTasks;
 
-      foreach (const TaskGroupInfo& taskGroup, executor->queuedTaskGroups) {
-        foreach (const TaskInfo& task, taskGroup.tasks()) {
+      for (const auto& taskGroup : executor->queuedTaskGroups) {
+        for (const auto& task : taskGroup.tasks()) {
           queuedTasks.erase(task.task_id());
         }
       }
@@ -5773,7 +5773,7 @@ void Slave::reregisterExecutor(
       // right after it checkpointed the update but before it could send
       // the ACK to the executor). This is ok because the status update
       // manager correctly handles duplicate updates.
-      foreach (const StatusUpdate& update, updates) {
+      for (const auto& update : updates) {
         // NOTE: This also updates the executor's resources!
         statusUpdate(update, executor->pid.get());
       }
@@ -5794,7 +5794,7 @@ void Slave::reregisterExecutor(
                      executor->containerId));
 
       hashmap<TaskID, TaskInfo> unackedTasks;
-      foreach (const TaskInfo& task, tasks) {
+      for (const auto& task : tasks) {
         unackedTasks[task.task_id()] = task;
       }
 
@@ -5809,7 +5809,7 @@ void Slave::reregisterExecutor(
       // TODO(vinod): Consider checkpointing 'TaskInfo' instead of
       // 'Task' so that we can relaunch such tasks! Currently we
       // don't do it because 'TaskInfo.data' could be huge.
-      foreach (Task* task, executor->launchedTasks.values()) {
+      for (auto* task : executor->launchedTasks.values()) {
         if (task->state() == TASK_STAGING &&
             !unackedTasks.contains(task->task_id())) {
           mesos::TaskState newTaskState = TASK_DROPPED;
@@ -5909,12 +5909,12 @@ void Slave::reregisterExecutorTimeout()
 
   LOG(INFO) << "Cleaning up un-reregistered executors";
 
-  foreachvalue (Framework* framework, frameworks) {
+  for (auto [_, framework] : frameworks) {
     CHECK(framework->state == Framework::RUNNING ||
           framework->state == Framework::TERMINATING)
       << framework->state;
 
-    foreachvalue (Executor* executor, framework->executors) {
+    for (auto [_, executor] : framework->executors) {
       switch (executor->state) {
         case Executor::RUNNING:     // Executor reregistered.
         case Executor::TERMINATING:
@@ -6757,8 +6757,8 @@ Executor* Slave::getExecutor(const ContainerID& containerId) const
   // index based on container id and this likely won't have a
   // significant performance impact due to the low number of
   // executors per-agent).
-  foreachvalue (Framework* framework, frameworks) {
-    foreachvalue (Executor* executor, framework->executors) {
+  for (auto [_, framework] : frameworks) {
+    for (auto [_, executor] : framework->executors) {
       if (rootContainerId == executor->containerId) {
         return executor;
       }
@@ -6942,7 +6942,7 @@ ExecutorInfo Slave::getExecutorInfo(
   // ensure the allocation info is set, and the agent will
   // inject this later, when storing the task/executor.
   Option<string> role = None();
-  foreach (const Resource& resource, task.resources()) {
+  for (const Resource& resource : task.resources()) {
     if (role.isNone() && resource.has_allocation_info()) {
       role = resource.allocation_info().role();
     }
@@ -7160,7 +7160,7 @@ void Slave::executorTerminated(
       if (framework->state != Framework::TERMINATING) {
         // Transition all live launched tasks. Note that the map is
         // removed from within the loop due terminal status updates.
-        foreach (const TaskID& taskId, executor->launchedTasks.keys()) {
+        for (const auto& taskId : executor->launchedTasks.keys()) {
           Task* task = executor->launchedTasks.at(taskId);
 
           if (!protobuf::isTerminalState(task->state())) {
@@ -7171,7 +7171,7 @@ void Slave::executorTerminated(
 
         // Transition all queued tasks. Note that the map is removed
         // from within the loop due terminal status updates.
-        foreach (const TaskID& taskId, executor->queuedTasks.keys()) {
+        for (const auto& taskId : executor->queuedTasks.keys()) {
           sendExecutorTerminatedStatusUpdate(
               taskId, termination, frameworkId, executor);
         }
@@ -7271,15 +7271,15 @@ void Slave::removeExecutor(Framework* framework, Executor* executor)
   vector<Task> defaultExecutorTasks;
   if (executor->info.has_type() &&
       executor->info.type() == ExecutorInfo::DEFAULT) {
-    foreachvalue (const Task* task, executor->launchedTasks) {
+    for (const auto& [_, task] : executor->launchedTasks) {
       defaultExecutorTasks.push_back(*task);
     }
 
-    foreachvalue (const Task* task, executor->terminatedTasks) {
+    for (const auto& [_, task] : executor->terminatedTasks) {
       defaultExecutorTasks.push_back(*task);
     }
 
-    foreach (const shared_ptr<Task>& task, executor->completedTasks) {
+    for (const auto& task : executor->completedTasks) {
       defaultExecutorTasks.push_back(*task);
     }
   }
@@ -7768,7 +7768,7 @@ Future<Nothing> Slave::recover(const Try<state::State>& state)
     set<string> roles = protobuf::framework::getRoles(frameworkInfo);
 
     bool injectedAllocationInfo = false;
-    foreach (Resource& resource, *resources) {
+    for (Resource& resource : *resources) {
       if (!resource.has_allocation_info()) {
         if (roles.size() != 1) {
           LOG(FATAL) << "Missing 'Resource.AllocationInfo' for resources"
@@ -7794,12 +7794,12 @@ Future<Nothing> Slave::recover(const Try<state::State>& state)
   hashmap<ExecutorID, hashset<TaskID>> injectedTasks;
 
   if (slaveState.isSome()) {
-    foreachvalue (FrameworkState& frameworkState, slaveState->frameworks) {
+    for (auto& [_, frameworkState] : slaveState->frameworks) {
       if (!frameworkState.info.isSome()) {
         continue;
       }
 
-      foreachvalue (ExecutorState& executorState, frameworkState.executors) {
+      for (auto& [_, executorState] : frameworkState.executors) {
         if (!executorState.info.isSome()) {
           continue;
         }
@@ -7810,8 +7810,8 @@ Future<Nothing> Slave::recover(const Try<state::State>& state)
           injectedExecutors.insert(executorState.id);
         }
 
-        foreachvalue (RunState& runState, executorState.runs) {
-          foreachvalue (TaskState& taskState, runState.tasks) {
+        for (auto& [_, runState] : executorState.runs) {
+          for (auto& [_, taskState] : runState.tasks) {
             if (!taskState.info.isSome()) {
               continue;
             }
@@ -8042,7 +8042,7 @@ Future<Nothing> Slave::_recoverOperations(
           lambda::_1));
 
   if (state->operations.isSome()) {
-    foreach (const Operation& operation, state->operations.get()) {
+    for (const auto& operation : state->operations.get()) {
       Result<ResourceProviderID> resourceProviderId =
         getResourceProviderId(operation.info());
 
@@ -8078,7 +8078,7 @@ Future<Nothing> Slave::_recoverOperations(
   }
 
   list<id::UUID> operationUuids;
-  foreach (const string& path, operationPaths.get()) {
+  for (const auto& path : operationPaths.get()) {
     Try<id::UUID> uuid =
       slave::paths::parseSlaveOperationPath(metaDir, info.id(), path);
 
@@ -8154,7 +8154,7 @@ Future<Nothing> Slave::__recoverOperations(
   }
 
   // Garbage collect the operation streams.
-  foreach (const id::UUID& uuid, completedOperations) {
+  for (const auto& uuid : completedOperations) {
     const string path =
       slave::paths::getSlaveOperationPath(metaDir, info.id(), uuid);
 
@@ -8238,8 +8238,8 @@ Future<Nothing> Slave::_recover()
   // containerizer recovery is complete.
   recoveryInfo.reconnect = true;
 
-  foreachvalue (Framework* framework, frameworks) {
-    foreachvalue (Executor* executor, framework->executors) {
+  for (auto [_, framework] : frameworks) {
+    for (auto [_, executor] : framework->executors) {
       // Set up callback for executor termination.
       containerizer->wait(executor->containerId)
         .onAny(defer(self(),
@@ -8405,7 +8405,7 @@ void Slave::__recover(const Future<Nothing>& future)
   const string directory = path::join(flags.work_dir, "slaves");
   Try<list<string>> entries = os::ls(directory);
   if (entries.isSome()) {
-    foreach (const string& entry, entries.get()) {
+    for (const auto& entry : entries.get()) {
       string path = path::join(directory, entry);
       // Ignore non-directory entries.
       if (!os::stat::isdir(path)) {
@@ -8533,7 +8533,7 @@ void Slave::recoverFramework(
   }
 
   // Now recover the executors for this framework.
-  foreachvalue (const ExecutorState& executorState, state.executors) {
+  for (const auto& [_, executorState] : state.executors) {
     framework->recoverExecutor(
         executorState,
         executorsToRecheckpoint.contains(executorState.id),
@@ -8609,7 +8609,7 @@ void Slave::_forwardOversubscribed(const Future<Resources>& oversubscribable)
     // allocator only considers the slave's view of allocation when
     // calculating the available oversubscribed resources to offer.
     Resources oversubscribed;
-    foreachvalue (Framework* framework, frameworks) {
+    for (auto [_, framework] : frameworks) {
       oversubscribed += unallocated(
           framework->allocatedResources().revocable());
     }
@@ -8665,7 +8665,7 @@ UpdateSlaveMessage Slave::generateResourceProviderUpdate() const
   message.mutable_resource_version_uuid()->CopyFrom(resourceVersion);
   message.mutable_operations();
 
-  foreachvalue (const Operation* operation, operations) {
+  for (const auto& [_, operation] : operations) {
     Result<ResourceProviderID> resourceProviderId =
       getResourceProviderId(operation->info());
 
@@ -8680,7 +8680,7 @@ UpdateSlaveMessage Slave::generateResourceProviderUpdate() const
   UpdateSlaveMessage::ResourceProviders* providers =
     message.mutable_resource_providers();
 
-  foreachvalue (ResourceProvider* resourceProvider, resourceProviders) {
+  for (auto [_, resourceProvider] : resourceProviders) {
     // If the resource provider has not updated its state we do not
     // need to and cannot include its information in an
     // `UpdateSlaveMessage` since it requires a resource version.
@@ -8803,7 +8803,7 @@ void Slave::handleResourceProviderMessage(
       // NOTE: We do not mutate operations statuses here; this would
       // be the responsibility of an operation status update handler.
       hashset<UUID> disappearedUuids = knownUuids - receivedUuids;
-      foreach (const UUID& uuid, disappearedUuids) {
+      for (const auto& uuid : disappearedUuids) {
         // TODO(bbannier): Instead of simply dropping an operation
         // with `removeOperation` here we should instead send a
         // `Reconcile` message with a failed state to the resource
@@ -8816,7 +8816,7 @@ void Slave::handleResourceProviderMessage(
       // the agent. This can happen if the agent failed over and the
       // resource provider reregistered.
       hashset<UUID> reappearedUuids = receivedUuids - knownUuids;
-      foreach (const UUID& uuid, reappearedUuids) {
+      for (const auto& uuid : reappearedUuids) {
         // Start tracking this operation.
         //
         // NOTE: We do not need to update total resources here as its
@@ -8836,7 +8836,7 @@ void Slave::handleResourceProviderMessage(
       // is not terminal yet here; its `statuses` would be updated by an
       // operation status update handler.
       hashset<UUID> matchedUuids = knownUuids - disappearedUuids;
-      foreach (const UUID& uuid, matchedUuids) {
+      for (const auto& uuid : matchedUuids) {
         const Operation& operation = updateState.operations.at(uuid);
         if (operation.has_latest_status() &&
             protobuf::isTerminalState(operation.latest_status().state())) {
@@ -9182,7 +9182,7 @@ void Slave::updateOperation(
   // if so, we do nothing.
   bool isRetry = false;
   if (status.has_uuid()) {
-    foreach (const OperationStatus& storedStatus, operation->statuses()) {
+    for (const auto& storedStatus : operation->statuses()) {
       if (storedStatus.has_uuid() && storedStatus.uuid() == status.uuid()) {
         isRetry = true;
         break;
@@ -9412,14 +9412,14 @@ Future<Nothing> Slave::publishResources(
     const ContainerID& containerId, const Resources& resources)
 {
   hashset<ResourceProviderID> resourceProviderIds;
-  foreach (const Resource& resource, resources) {
+  for (const Resource& resource : resources) {
     if (resource.has_provider_id()) {
       resourceProviderIds.insert(resource.provider_id());
     }
   }
 
   vector<Future<Nothing>> futures;
-  foreach (const ResourceProviderID& resourceProviderId, resourceProviderIds) {
+  for (const auto& resourceProviderId : resourceProviderIds) {
     auto hasResourceProviderId = [&](const Resource& resource) {
       return resource.has_provider_id() &&
              resource.provider_id() == resourceProviderId;
@@ -9431,8 +9431,8 @@ Future<Nothing> Slave::publishResources(
     // semantics, and always calculate the total resources to publish.
     Option<Resources> containerResources;
     Resources complementaryResources;
-    foreachvalue (const Framework* framework, frameworks) {
-      foreachvalue (const Executor* executor, framework->executors) {
+    for (const auto& [_, framework] : frameworks) {
+      for (const auto& [_, executor] : framework->executors) {
         if (executor->containerId == containerId) {
           containerResources = resources.filter(hasResourceProviderId);
         } else {
@@ -9510,7 +9510,7 @@ void Slave::_qosCorrections(const Future<list<QoSCorrection>>& future)
 
   VLOG(1) << "Received " << corrections.size() << " QoS corrections";
 
-  foreach (const QoSCorrection& correction, corrections) {
+  for (const auto& correction : corrections) {
     // TODO(nnielsen): Print correction, once the operator overload
     // for QoSCorrection has been implemented.
     if (correction.type() == QoSCorrection::KILL) {
@@ -9635,8 +9635,8 @@ Future<ResourceUsage> Slave::usage()
   Owned<ResourceUsage> usage(new ResourceUsage());
   vector<Future<ResourceStatistics>> futures;
 
-  foreachvalue (const Framework* framework, frameworks) {
-    foreachvalue (const Executor* executor, framework->executors) {
+  for (const auto& [_, framework] : frameworks) {
+    for (const auto& [_, executor] : framework->executors) {
       // No need to get statistics and status if we know that the
       // executor has already terminated.
       if (executor->state == Executor::TERMINATED) {
@@ -9649,7 +9649,7 @@ Future<ResourceUsage> Slave::usage()
       entry->mutable_container_id()->CopyFrom(executor->containerId);
 
       // We include non-terminal tasks in ResourceUsage.
-      foreachvalue (const Task* task, executor->launchedTasks) {
+      for (const auto& [_, task] : executor->launchedTasks) {
         ResourceUsage::Executor::Task* t = entry->add_tasks();
         t->set_name(task->name());
         t->mutable_id()->CopyFrom(task->task_id());
@@ -9674,7 +9674,7 @@ Future<ResourceUsage> Slave::usage()
         CHECK_EQ(futures.size(), (size_t) usage->executors_size());
 
         int i = 0;
-        foreach (const Future<ResourceStatistics>& future, futures) {
+        for (const auto& future : futures) {
           ResourceUsage::Executor* executor = usage->mutable_executors(i++);
 
           if (future.isReady()) {
@@ -9874,16 +9874,16 @@ void Slave::sendExitedExecutorMessage(
 double Slave::_tasks_staging()
 {
   double count = 0.0;
-  foreachvalue (Framework* framework, frameworks) {
+  for (auto [_, framework] : frameworks) {
     typedef hashmap<TaskID, TaskInfo> TaskMap;
-    foreachvalue (const TaskMap& tasks, framework->pendingTasks) {
+    for (const auto& [_, tasks] : framework->pendingTasks) {
       count += tasks.size();
     }
 
-    foreachvalue (Executor* executor, framework->executors) {
+    for (auto [_, executor] : framework->executors) {
       count += executor->queuedTasks.size();
 
-      foreachvalue (Task* task, executor->launchedTasks) {
+      for (auto [_, task] : executor->launchedTasks) {
         if (task->state() == TASK_STAGING) {
           count++;
         }
@@ -9897,9 +9897,9 @@ double Slave::_tasks_staging()
 double Slave::_tasks_starting()
 {
   double count = 0.0;
-  foreachvalue (Framework* framework, frameworks) {
-    foreachvalue (Executor* executor, framework->executors) {
-      foreachvalue (Task* task, executor->launchedTasks) {
+  for (auto [_, framework] : frameworks) {
+    for (auto [_, executor] : framework->executors) {
+      for (auto [_, task] : executor->launchedTasks) {
         if (task->state() == TASK_STARTING) {
           count++;
         }
@@ -9913,9 +9913,9 @@ double Slave::_tasks_starting()
 double Slave::_tasks_running()
 {
   double count = 0.0;
-  foreachvalue (Framework* framework, frameworks) {
-    foreachvalue (Executor* executor, framework->executors) {
-      foreachvalue (Task* task, executor->launchedTasks) {
+  for (auto [_, framework] : frameworks) {
+    for (auto [_, executor] : framework->executors) {
+      for (auto [_, task] : executor->launchedTasks) {
         if (task->state() == TASK_RUNNING) {
           count++;
         }
@@ -9929,9 +9929,9 @@ double Slave::_tasks_running()
 double Slave::_tasks_killing()
 {
   double count = 0.0;
-  foreachvalue (Framework* framework, frameworks) {
-    foreachvalue (Executor* executor, framework->executors) {
-      foreachvalue (Task* task, executor->launchedTasks) {
+  for (auto [_, framework] : frameworks) {
+    for (auto [_, executor] : framework->executors) {
+      for (auto [_, task] : executor->launchedTasks) {
         if (task->state() == TASK_KILLING) {
           count++;
         }
@@ -9945,8 +9945,8 @@ double Slave::_tasks_killing()
 double Slave::_executors_registering()
 {
   double count = 0.0;
-  foreachvalue (Framework* framework, frameworks) {
-    foreachvalue (Executor* executor, framework->executors) {
+  for (auto [_, framework] : frameworks) {
+    for (auto [_, executor] : framework->executors) {
       if (executor->state == Executor::REGISTERING) {
         count++;
       }
@@ -9959,8 +9959,8 @@ double Slave::_executors_registering()
 double Slave::_executors_running()
 {
   double count = 0.0;
-  foreachvalue (Framework* framework, frameworks) {
-    foreachvalue (Executor* executor, framework->executors) {
+  for (auto [_, framework] : frameworks) {
+    for (auto [_, executor] : framework->executors) {
       if (executor->state == Executor::RUNNING) {
         count++;
       }
@@ -9973,8 +9973,8 @@ double Slave::_executors_running()
 double Slave::_executors_terminating()
 {
   double count = 0.0;
-  foreachvalue (Framework* framework, frameworks) {
-    foreachvalue (Executor* executor, framework->executors) {
+  for (auto [_, framework] : frameworks) {
+    for (auto [_, executor] : framework->executors) {
       if (executor->state == Executor::TERMINATING) {
         count++;
       }
@@ -9994,7 +9994,7 @@ double Slave::_resources_total(const string& name)
 {
   double total = 0.0;
 
-  foreach (const Resource& resource, info.resources()) {
+  for (const Resource& resource : info.resources()) {
     if (resource.name() == name && resource.type() == Value::SCALAR) {
       total += resource.scalar().value();
     }
@@ -10010,7 +10010,7 @@ double Slave::_resources_used(const string& name)
   // `+=` operator de-duplicates the same shared resources across executors.
   Resources used;
 
-  foreachvalue (Framework* framework, frameworks) {
+  for (auto [_, framework] : frameworks) {
     used += framework->allocatedResources().nonRevocable();
   }
 
@@ -10035,7 +10035,7 @@ double Slave::_resources_revocable_total(const string& name)
   double total = 0.0;
 
   if (oversubscribedResources.isSome()) {
-    foreach (const Resource& resource, oversubscribedResources.get()) {
+    for (const Resource& resource : oversubscribedResources.get()) {
       if (resource.name() == name && resource.type() == Value::SCALAR) {
         total += resource.scalar().value();
       }
@@ -10052,7 +10052,7 @@ double Slave::_resources_revocable_used(const string& name)
   // `+=` operator de-duplicates the same shared resources across executors.
   Resources used;
 
-  foreachvalue (Framework* framework, frameworks) {
+  for (auto [_, framework] : frameworks) {
     used += framework->allocatedResources().revocable();
   }
 
@@ -10121,7 +10121,7 @@ google::protobuf::Map<string, Value::Scalar> Slave::computeExecutorLimits(
 {
   Option<Value::Scalar> executorCpuLimit, executorMemLimit;
   Value::Scalar cpuRequest, memRequest;
-  foreach (const TaskInfo& taskInfo, taskInfos) {
+  for (const auto& taskInfo : taskInfos) {
     // Count the task's CPU limit into the executor's CPU limit.
     if (taskInfo.limits().count("cpus")) {
       setLimit(executorCpuLimit, taskInfo.limits().at("cpus"));
@@ -10147,7 +10147,7 @@ google::protobuf::Map<string, Value::Scalar> Slave::computeExecutorLimits(
     }
   }
 
-  foreach (const Task* task, tasks) {
+  for (const auto* task : tasks) {
     CHECK_NOTNULL(task);
 
     // Count the task's CPU limit into the executor's CPU limit.
@@ -10281,7 +10281,7 @@ Framework::Framework(
 Framework::~Framework()
 {
   // We own the non-completed executor pointers, so they need to be deleted.
-  foreachvalue (Executor* executor, executors) {
+  for (auto [_, executor] : executors) {
     delete executor;
   }
 }
@@ -10325,7 +10325,7 @@ Try<Executor*> Framework::addExecutor(
   // Verify that Resource.AllocationInfo is set, if coming
   // from a MULTI_ROLE master this will be set, otherwise
   // the agent will inject it when receiving the executor.
-  foreach (const Resource& resource, executorInfo.resources()) {
+  for (const Resource& resource : executorInfo.resources()) {
     CHECK(resource.has_allocation_info());
   }
 
@@ -10474,7 +10474,7 @@ Executor* Framework::getExecutor(const ExecutorID& executorId) const
 
 Executor* Framework::getExecutor(const TaskID& taskId) const
 {
-  foreachvalue (Executor* executor, executors) {
+  for (auto [_, executor] : executors) {
     if (executor->queuedTasks.contains(taskId) ||
         executor->launchedTasks.contains(taskId) ||
         executor->terminatedTasks.contains(taskId)) {
@@ -10530,7 +10530,7 @@ void Framework::recoverExecutor(
 
   // Verify that Resource.AllocationInfo is set, this should
   // be injected by the agent when recovering.
-  foreach (const Resource& resource, state.info->resources()) {
+  for (const Resource& resource : state.info->resources()) {
     CHECK(resource.has_allocation_info());
   }
 
@@ -10540,7 +10540,7 @@ void Framework::recoverExecutor(
   // directories for GC here, because they will be scheduled when
   // the latest executor run terminates.
   const ContainerID& latest = state.latest.get();
-  foreachvalue (const RunState& run, state.runs) {
+  for (const auto& [_, run] : state.runs) {
     CHECK_SOME(run.id);
     const ContainerID& runId = run.id.get();
     if (latest != runId) {
@@ -10600,7 +10600,7 @@ void Framework::recoverExecutor(
   }
 
   // And finally recover all the executor's tasks.
-  foreachvalue (const TaskState& taskState, run->tasks) {
+  for (const auto& [_, taskState] : run->tasks) {
     executor->recoverTask(
         taskState,
         tasksToRecheckpoint.contains(taskState.id));
@@ -10699,15 +10699,15 @@ void Framework::recoverExecutor(
     vector<Task> defaultExecutorTasks;
     if (executor->info.has_type() &&
         executor->info.type() == ExecutorInfo::DEFAULT) {
-      foreachvalue (const Task* task, executor->launchedTasks) {
+      for (const auto& [_, task] : executor->launchedTasks) {
         defaultExecutorTasks.push_back(*task);
       }
 
-      foreachvalue (const Task* task, executor->terminatedTasks) {
+      for (const auto& [_, task] : executor->terminatedTasks) {
         defaultExecutorTasks.push_back(*task);
       }
 
-      foreach (const shared_ptr<Task>& task, executor->completedTasks) {
+      for (const auto& task : executor->completedTasks) {
         defaultExecutorTasks.push_back(*task);
       }
     }
@@ -10765,7 +10765,7 @@ void Framework::addPendingTaskGroup(
     const ExecutorID& executorId,
     const TaskGroupInfo& taskGroup)
 {
-  foreach (const TaskInfo& task, taskGroup.tasks()) {
+  for (const auto& task : taskGroup.tasks()) {
     pendingTasks[executorId][task.task_id()] = task;
   }
 
@@ -10781,7 +10781,7 @@ bool Framework::hasTask(const TaskID& taskId) const
     }
   }
 
-  foreachvalue (Executor* executor, executors) {
+  for (auto [_, executor] : executors) {
     if (executor->queuedTasks.contains(taskId) ||
         executor->launchedTasks.contains(taskId) ||
         executor->terminatedTasks.contains(taskId)) {
@@ -10808,8 +10808,8 @@ bool Framework::isPending(const TaskID& taskId) const
 Option<TaskGroupInfo> Framework::getTaskGroupForPendingTask(
     const TaskID& taskId)
 {
-  foreach (const TaskGroupInfo& taskGroup, pendingTaskGroups) {
-    foreach (const TaskInfo& taskInfo, taskGroup.tasks()) {
+  for (const auto& taskGroup : pendingTaskGroups) {
+    for (const auto& taskInfo : taskGroup.tasks()) {
       if (taskInfo.task_id() == taskId) {
         return taskGroup;
       }
@@ -10841,13 +10841,13 @@ bool Framework::removePendingTask(const TaskID& taskId)
   for (auto it = pendingTaskGroups.begin();
        it != pendingTaskGroups.end();
        ++it) {
-    foreach (const TaskInfo& t, it->tasks()) {
+    for (const auto& t : it->tasks()) {
       if (t.task_id() == taskId) {
         // Found its task group, check if all tasks within
         // the group have been removed.
         bool allRemoved = true;
 
-        foreach (const TaskInfo& t_, it->tasks()) {
+        for (const auto& t_ : it->tasks()) {
           if (hasTask(t_.task_id())) {
             allRemoved = false;
             break;
@@ -10884,15 +10884,15 @@ Resources Framework::allocatedResources() const
 {
   Resources allocated;
 
-  foreachvalue (const Executor* executor, executors) {
+  for (const auto& [_, executor] : executors) {
     allocated += executor->allocatedResources();
   }
 
   hashset<ExecutorID> pendingExecutors;
 
   typedef hashmap<TaskID, TaskInfo> TaskMap;
-  foreachvalue (const TaskMap& pendingTasks, pendingTasks) {
-    foreachvalue (const TaskInfo& task, pendingTasks) {
+  for (const auto& [_, pendingTasks] : pendingTasks) {
+    for (const auto& [_, task] : pendingTasks) {
       allocated += task.resources();
 
       ExecutorInfo executorInfo = slave->getExecutorInfo(info, task);
@@ -10957,10 +10957,10 @@ Executor::~Executor()
   }
 
   // Delete the tasks.
-  foreachvalue (Task* task, launchedTasks) {
+  for (auto [_, task] : launchedTasks) {
     delete task;
   }
-  foreachvalue (Task* task, terminatedTasks) {
+  for (auto [_, task] : terminatedTasks) {
     delete task;
   }
 }
@@ -10974,7 +10974,7 @@ void Executor::enqueueTask(const TaskInfo& task)
 
 void Executor::enqueueTaskGroup(const TaskGroupInfo& taskGroup)
 {
-  foreach (const TaskInfo& task, taskGroup.tasks()) {
+  for (const auto& task : taskGroup.tasks()) {
     queuedTasks[task.task_id()] = task;
   }
 
@@ -10990,13 +10990,13 @@ Option<TaskInfo> Executor::dequeueTask(const TaskID& taskId)
 
   // Remove the task group if all of its tasks have been dequeued.
   for (auto it = queuedTaskGroups.begin(); it != queuedTaskGroups.end(); ++it) {
-    foreach (const TaskInfo& t, it->tasks()) {
+    for (const auto& t : it->tasks()) {
       if (t.task_id() == taskId) {
         // Found its task group, check if all tasks within
         // the group have been removed.
         bool allRemoved = true;
 
-        foreach (const TaskInfo& t_, it->tasks()) {
+        for (const auto& t_ : it->tasks()) {
           if (queuedTasks.contains(t_.task_id())) {
             allRemoved = false;
             break;
@@ -11029,7 +11029,7 @@ Task* Executor::addLaunchedTask(const TaskInfo& task)
   // Verify that Resource.AllocationInfo is set, if coming
   // from a MULTI_ROLE master this will be set, otherwise
   // the agent will inject it when receiving the task.
-  foreach (const Resource& resource, task.resources()) {
+  for (const Resource& resource : task.resources()) {
     CHECK(resource.has_allocation_info());
   }
 
@@ -11146,7 +11146,7 @@ void Executor::recoverTask(const TaskState& state, bool recheckpointTask)
 
   // Verify that Resource.AllocationInfo is set, the agent
   // should inject it during recovery.
-  foreach (const Resource& resource, state.info->resources()) {
+  for (const Resource& resource : state.info->resources()) {
     CHECK(resource.has_allocation_info());
   }
 
@@ -11162,7 +11162,7 @@ void Executor::recoverTask(const TaskState& state, bool recheckpointTask)
   }
 
   // Read updates to get the latest state of the task.
-  foreach (const StatusUpdate& update, state.updates) {
+  for (const auto& update : state.updates) {
     Try<Nothing> updated = updateTaskState(update.status());
 
     // TODO(bmahler): We only log this error because we used to
@@ -11317,16 +11317,16 @@ bool Executor::everSentTask() const
     return true;
   }
 
-  foreachvalue (Task* task, terminatedTasks) {
-    foreach (const TaskStatus& status, task->statuses()) {
+  for (auto [_, task] : terminatedTasks) {
+    for (const auto& status : task->statuses()) {
       if (status.source() == TaskStatus::SOURCE_EXECUTOR) {
         return true;
       }
     }
   }
 
-  foreach (const shared_ptr<Task>& task, completedTasks) {
-    foreach (const TaskStatus& status, task->statuses()) {
+  for (const auto& task : completedTasks) {
+    for (const auto& status : task->statuses()) {
       if (status.source() == TaskStatus::SOURCE_EXECUTOR) {
         return true;
       }
@@ -11357,8 +11357,8 @@ void Executor::closeHttpConnection()
 
 Option<TaskGroupInfo> Executor::getQueuedTaskGroup(const TaskID& taskId)
 {
-  foreach (const TaskGroupInfo& taskGroup, queuedTaskGroups) {
-    foreach (const TaskInfo& taskInfo, taskGroup.tasks()) {
+  for (const auto& taskGroup : queuedTaskGroups) {
+    for (const auto& taskInfo : taskGroup.tasks()) {
       if (taskInfo.task_id() == taskId) {
         return taskGroup;
       }
@@ -11373,11 +11373,11 @@ Resources Executor::allocatedResources() const
 {
   Resources allocatedResources = info.resources();
 
-  foreachvalue (const TaskInfo& task, queuedTasks) {
+  for (const auto& [_, task] : queuedTasks) {
     allocatedResources += task.resources();
   }
 
-  foreachvalue (const Task* task, launchedTasks) {
+  for (const auto& [_, task] : launchedTasks) {
     allocatedResources += task->resources();
   }
 
@@ -11599,7 +11599,7 @@ static string taskOrTaskGroup(
     CHECK_SOME(taskGroup);
 
     vector<TaskID> taskIds;
-    foreach (const TaskInfo& task, taskGroup->tasks()) {
+    for (const auto& task : taskGroup->tasks()) {
       taskIds.push_back(task.task_id());
     }
     out << "task group containing tasks " << taskIds;

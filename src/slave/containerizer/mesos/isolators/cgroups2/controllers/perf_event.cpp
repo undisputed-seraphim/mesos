@@ -59,7 +59,7 @@ Try<process::Owned<ControllerProcess>> PerfEventControllerProcess::create(
   }
 
   set<string> events;
-  foreach (const string& event, strings::tokenize(*flags.perf_events, ",")) {
+  for (const auto& event : strings::tokenize(*flags.perf_events, ",")) {
     events.insert(event);
   }
 
@@ -166,7 +166,7 @@ void PerfEventControllerProcess::sample()
   // fail if the cgroup is destroyed before running perf.
   set<string> cgroups;
 
-  foreachvalue (const Owned<Info>& info, infos) {
+  for (const auto& [_, info] : infos) {
     cgroups.insert(info->cgroup);
   }
 
@@ -204,7 +204,7 @@ void PerfEventControllerProcess::_sample(
   } else {
     // Store the latest statistics, note that cgroups added in the
     // interim will be picked up by the next sample.
-    foreachvalue (const Owned<Info>& info, infos) {
+    for (const auto& [_, info] : infos) {
       if (statistics->contains(info->cgroup)) {
         info->statistics = statistics->get(info->cgroup).get();
       }

@@ -45,7 +45,7 @@ public:
       const std::vector<mesos::slave::ContainerState>& state,
       const hashset<ContainerID>& orphans) override
   {
-    foreach (const mesos::slave::ContainerState& run, state) {
+    for (const auto& run : state) {
       // This should (almost) never occur: see comment in
       // SubprocessLauncher::recover().
       if (pids.contains(run.container_id())) {

@@ -160,12 +160,12 @@ protected:
     Call::Subscribe* subscribe = call.mutable_subscribe();
 
     // Send all unacknowledged updates.
-    foreachvalue (const Call::Update& update, updates) {
+    for (const auto& [_, update] : updates) {
       subscribe->add_unacknowledged_updates()->MergeFrom(update);
     }
 
     // Send all unacknowledged tasks.
-    foreachvalue (const TaskInfo& task, tasks) {
+    for (const auto& [_, task] : tasks) {
       subscribe->add_unacknowledged_tasks()->MergeFrom(task);
     }
 

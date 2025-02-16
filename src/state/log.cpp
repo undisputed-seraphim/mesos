@@ -311,7 +311,7 @@ Future<Nothing> LogStorageProcess::apply(const list<Log::Entry>& entries)
   VLOG(2) << "Applying operations (" << entries.size() << " entries)";
 
   // Only read and apply entries past our index.
-  foreach (const Log::Entry& entry, entries) {
+  for (const auto& entry : entries) {
     if (index.isNone() || index.get() < entry.position) {
       // Parse the Operation from the Log::Entry.
       Operation operation;
@@ -395,7 +395,7 @@ Future<Nothing> LogStorageProcess::_truncate()
   // Determine the minimum necessary position for all the snapshots.
   Option<Log::Position> minimum = None();
 
-  foreachvalue (const Snapshot& snapshot, snapshots) {
+  for (const auto& [_, snapshot] : snapshots) {
     minimum = min(minimum, snapshot.position);
   }
 

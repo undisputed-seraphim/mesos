@@ -111,7 +111,7 @@ DeviceManager::NonWildcardEntry asDeviceEntry(const Gpu& gpu)
 vector<DeviceManager::NonWildcardEntry> asDeviceEntries(const set<Gpu>& gpus)
 {
   vector<DeviceManager::NonWildcardEntry> device_entries;
-  foreach (const Gpu& gpu, gpus) {
+  for (const auto& gpu : gpus) {
     device_entries.push_back(asDeviceEntry(gpu));
   }
   return device_entries;
@@ -316,7 +316,7 @@ Future<Nothing> NvidiaGpuIsolatorProcess::_recover(
 {
   vector<Future<Nothing>> futures;
 
-  foreach (const ContainerState& state, states) {
+  for (const auto& state : states) {
     const ContainerID& containerId = state.container_id();
 
     // If we are a nested container, we skip the recover because our
@@ -357,7 +357,7 @@ Future<Nothing> NvidiaGpuIsolatorProcess::_recover(
 
       const DeviceManager::CgroupDeviceAccess& device_access =
         cgroup_states.at(cgroup);
-      foreach (const Gpu& gpu, available) {
+      for (const auto& gpu : available) {
         if (device_access.is_access_granted(asDeviceEntry(gpu))) {
           containerGpus.insert(gpu);
         }
@@ -369,8 +369,8 @@ Future<Nothing> NvidiaGpuIsolatorProcess::_recover(
                        " '" + cgroup + "': " + entries.error());
       }
 
-      foreach (const Entry& entry, entries.get()) {
-        foreach (const Gpu& gpu, available) {
+      for (const auto& entry : entries.get()) {
+        for (const auto& gpu : available) {
           if (entry.selector.major == gpu.major &&
               entry.selector.minor == gpu.minor) {
             containerGpus.insert(gpu);
@@ -453,7 +453,7 @@ Future<Option<ContainerLaunchInfo>> NvidiaGpuIsolatorProcess::prepare(
   }
 
   // Cgroups v1:
-  foreachpair (const string& devicePath, const Entry& device, controlDevices) {
+  for (const auto& [devicePath, device] : controlDevices) {
     Try<Nothing> allow = cgroups::devices::allow(
         hierarchy, infos[containerId]->cgroup, device);
 
@@ -545,7 +545,7 @@ Future<Option<ContainerLaunchInfo>> NvidiaGpuIsolatorProcess::_prepare(
     return Failure("Failed to glob /dev/nvidia*: " + nvidia.error());
   }
 
-  foreach (const string& device, nvidia.get()) {
+  for (const auto& device : nvidia.get()) {
     // The directory `/dev/nvidia-caps` was introduced in CUDA 11.0, just
     // ignore it since we only care about the Nvidia GPU device files.
     //
@@ -693,7 +693,7 @@ Future<Nothing> NvidiaGpuIsolatorProcess::_update(
   }
 
   // Cgroups v1:
-  foreach (const Gpu& gpu, allocation) {
+  for (const auto& gpu : allocation) {
     cgroups::devices::Entry entry;
     entry.selector.type = Entry::Selector::Type::CHARACTER;
     entry.selector.major = gpu.major;

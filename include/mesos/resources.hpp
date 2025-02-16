@@ -593,7 +593,7 @@ public:
   {
     Resources result = *this;
 
-    foreach (const auto& t, iterable) {
+    for (const auto& t : iterable) {
       Try<Resources> converted = result.apply(t);
       if (converted.isError()) {
         return Error(converted.error());

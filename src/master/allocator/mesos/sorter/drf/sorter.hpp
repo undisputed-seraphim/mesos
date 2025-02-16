@@ -210,7 +210,7 @@ struct DRFSorter::Node
 
   ~Node()
   {
-    foreach (Node* child, children) {
+    for (auto* child : children) {
       delete child;
     }
   }

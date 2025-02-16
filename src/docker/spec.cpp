@@ -176,7 +176,7 @@ Try<hashmap<string, Config::Auth>> parseAuthConfig(
 
   hashmap<string, Config::Auth> result;
 
-  foreachpair (const string& key, const JSON::Value& value, config.values) {
+  for (const auto& [key, value] : config.values) {
     if (!value.is<JSON::Object>()) {
       return Error("Invalid JSON object '" + stringify(value) + "'");
     }
@@ -283,7 +283,7 @@ Option<Error> validate(const ImageManifest& manifest)
   }
 
   // Verify 'fsLayers' field.
-  foreach (const ImageManifest::FsLayer& fslayer, manifest.fslayers()) {
+  for (const auto& fslayer : manifest.fslayers()) {
     const string& blobSum = fslayer.blobsum();
     if (!strings::contains(blobSum, ":")) {
       return Error("Incorrect 'blobSum' format: " + blobSum);

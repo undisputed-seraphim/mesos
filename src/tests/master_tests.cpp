@@ -5106,7 +5106,7 @@ TEST_F(MasterTest, StateEndpointFrameworkInfo)
     FrameworkInfo::Capability::RESERVATION_REFINEMENT,
   };
 
-  foreach (FrameworkInfo::Capability::Type capability, capabilities) {
+  for (auto capability : capabilities) {
     frameworkInfo.add_capabilities()->set_type(capability);
   }
 
@@ -6823,7 +6823,7 @@ TEST_F(MasterTest, MaxCompletedFrameworksFlag)
 
   const string ROLE = "foo";
 
-  foreach (const size_t maxFrameworks, maxFrameworksArray) {
+  for (const auto maxFrameworks : maxFrameworksArray) {
     master::Flags masterFlags = CreateMasterFlags();
     masterFlags.max_completed_frameworks = maxFrameworks;
 
@@ -6921,7 +6921,7 @@ TEST_F(MasterTest, MaxCompletedTasksPerFrameworkFlag)
 
   Clock::pause();
 
-  foreach (const size_t maxTasksPerFramework, maxTasksPerFrameworkArray) {
+  for (const auto maxTasksPerFramework : maxTasksPerFrameworkArray) {
     master::Flags masterFlags = CreateMasterFlags();
     masterFlags.max_completed_tasks_per_framework = maxTasksPerFramework;
 
@@ -9375,7 +9375,7 @@ TEST_F(MasterTest, OperationUpdateDuringFailover)
 
   Option<Resource> rawDisk;
 
-  foreach (const Resource& resource, offer.resources()) {
+  for (const Resource& resource : offer.resources()) {
     if (resource.has_provider_id() &&
         resource.has_disk() &&
         resource.disk().has_source() &&
@@ -9638,7 +9638,7 @@ TEST_F(MasterTest, OperationUpdateCompletedFramework)
   // an operation status update manager we could work with just agent resources
   // in this test.
   Option<v1::Resource> disk = None();
-  foreach(const v1::Resource& resource, offer.resources()) {
+  for (const Resource& resource : offer.resources()) {
     if (resource.has_provider_id()) {
       disk = resource;
       break;

@@ -167,7 +167,7 @@ Future<Nothing> DockerVolumeIsolatorProcess::recover(
     return Nothing();
   }
 
-  foreach (const ContainerState& state, states) {
+  for (const auto& state : states) {
     const ContainerID& containerId = state.container_id();
 
     Try<Nothing> recover = _recover(containerId);
@@ -181,7 +181,7 @@ Future<Nothing> DockerVolumeIsolatorProcess::recover(
   // Recover any orphan containers that we might have check pointed.
   // These orphan containers will be destroyed by the containerizer
   // through the regular cleanup path. See MESOS-2367 for details.
-  foreach (const ContainerID& containerId, orphans) {
+  for (const auto& containerId : orphans) {
     Try<Nothing> recover = _recover(containerId);
     if (recover.isError()) {
       return Failure(
@@ -199,7 +199,7 @@ Future<Nothing> DockerVolumeIsolatorProcess::recover(
         rootDir + "': " + entries.error());
   }
 
-  foreach (const string& entry, entries.get()) {
+  for (const auto& entry : entries.get()) {
     ContainerID containerId;
     containerId.set_value(Path(entry).basename());
 
@@ -316,7 +316,7 @@ Try<Nothing> DockerVolumeIsolatorProcess::_recover(
 
   hashset<DockerVolume> volumes;
 
-  foreach (const DockerVolume& volume, parse->volumes()) {
+  for (const auto& volume : parse->volumes()) {
     VLOG(1) << "Recovering docker volume with driver '"
             << volume.driver() << "' and name '" << volume.name()
             << "' for container " << containerId;
@@ -371,7 +371,7 @@ Future<Option<ContainerLaunchInfo>> DockerVolumeIsolatorProcess::prepare(
 
   vector<Volume::Mode> volumeModes;
 
-  foreach (const Volume& _volume, containerConfig.container_info().volumes()) {
+  for (const auto& _volume : containerConfig.container_info().volumes()) {
     if (!_volume.has_source()) {
       continue;
     }
@@ -500,7 +500,7 @@ Future<Option<ContainerLaunchInfo>> DockerVolumeIsolatorProcess::prepare(
 
   // Create DockerVolumes protobuf message to checkpoint.
   DockerVolumes state;
-  foreach (const DockerVolume& volume, volumeSet) {
+  for (const auto& volume : volumeSet) {
     state.add_volumes()->CopyFrom(volume);
   }
 
@@ -524,7 +524,7 @@ Future<Option<ContainerLaunchInfo>> DockerVolumeIsolatorProcess::prepare(
   // Invoke driver client to create the mount.
   vector<Future<string>> futures;
   futures.reserve(mounts.size());
-  foreach (const Mount& mount, mounts) {
+  for (const auto& mount : mounts) {
     futures.push_back(this->mount(
         mount.volume.driver(),
         mount.volume.name(),
@@ -560,7 +560,7 @@ Future<Option<ContainerLaunchInfo>> DockerVolumeIsolatorProcess::_prepare(
 
   vector<string> messages;
   vector<string> sources;
-  foreach (const Future<string>& future, futures) {
+  for (const auto& future : futures) {
     if (!future.isReady()) {
       messages.push_back(future.isFailed() ? future.failure() : "discarded");
       continue;
@@ -629,8 +629,8 @@ Future<Nothing> DockerVolumeIsolatorProcess::cleanup(
   }
 
   hashmap<DockerVolume, int> references;
-  foreachvalue (const Owned<Info>& info, infos) {
-    foreach (const DockerVolume& volume, info->volumes) {
+  for (const auto& [_, info] : infos) {
+    for (const auto& volume : info->volumes) {
       if (!references.contains(volume)) {
         references[volume] = 1;
       } else {
@@ -641,7 +641,7 @@ Future<Nothing> DockerVolumeIsolatorProcess::cleanup(
 
   vector<Future<Nothing>> futures;
 
-  foreach (const DockerVolume& volume, infos[containerId]->volumes) {
+  for (const auto& volume : infos[containerId]->volumes) {
     if (references.contains(volume) && references[volume] > 1) {
       VLOG(1) << "Cannot unmount the volume with driver '"
               << volume.driver() << "' and name '" << volume.name()
@@ -679,7 +679,7 @@ Future<Nothing> DockerVolumeIsolatorProcess::_cleanup(
     const vector<Future<Nothing>>& futures)
 {
   vector<string> messages;
-  foreach (const Future<Nothing>& future, futures) {
+  for (const auto& future : futures) {
     if (!future.isReady()) {
       messages.push_back(future.isFailed() ? future.failure() : "discarded");
     }

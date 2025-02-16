@@ -398,7 +398,7 @@ protected:
     Call::Subscribe* subscribe = call.mutable_subscribe();
 
     // Send all unacknowledged updates.
-    foreachvalue (const Call::Update& update, unacknowledgedUpdates) {
+    for (const auto& [_, update] : unacknowledgedUpdates) {
       subscribe->add_unacknowledged_updates()->MergeFrom(update);
     }
 
@@ -505,7 +505,7 @@ protected:
     }
 
     if (taskSupplementaryGroups.isSome()) {
-      foreach (gid_t gid, taskSupplementaryGroups.get()) {
+      for (auto gid : taskSupplementaryGroups.get()) {
         launchInfo.add_supplementary_groups(gid);
       }
     }
@@ -650,7 +650,7 @@ protected:
     // cause duplicate keys in the resulting environment.
     hashmap<string, Environment::Variable> environment;
 
-    foreachpair (const string& name, const string& value, os::environment()) {
+    for (const auto& [name, value] : os::environment()) {
       Environment::Variable variable;
       variable.set_name(name);
       variable.set_type(Environment::Variable::VALUE);
@@ -700,7 +700,7 @@ protected:
     environment["MESOS_ALLOCATION_ROLE"] = variable;
 
     Environment launchEnvironment;
-    foreachvalue (const Environment::Variable& variable, environment) {
+    for (const auto& [_, variable] : environment) {
       launchEnvironment.add_variables()->CopyFrom(variable);
     }
 
@@ -1386,7 +1386,7 @@ int main(int argc, char** argv)
   mesos::internal::logging::initialize(argv[0], true, flags); // Catch signals.
 
   // Log any flag warnings (after logging is initialized).
-  foreach (const flags::Warning& warning, load->warnings) {
+  for (const auto& warning : load->warnings) {
     LOG(WARNING) << warning.message;
   }
 

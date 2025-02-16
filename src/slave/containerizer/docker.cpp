@@ -386,7 +386,7 @@ DockerContainerizerProcess::Container::create(
 
     // Stringify the flags as arguments.
     // This minimizes the need for escaping flag values.
-    foreachvalue (const flags::Flag& flag, dockerExecutorFlags) {
+    for (const auto& [_, flag] : dockerExecutorFlags) {
       Option<string> value = flag.stringify(dockerExecutorFlags);
       if (value.isSome()) {
         newCommandInfo.add_arguments(
@@ -467,7 +467,7 @@ Try<Nothing> DockerContainerizerProcess::updatePersistentVolumes(
   // Docker Containerizer currently is only expected to run on Linux.
 #ifdef __linux__
   // Unmount all persistent volumes that are no longer present.
-  foreach (const Resource& resource, current.persistentVolumes()) {
+  for (const Resource& resource : current.persistentVolumes()) {
     // This is enforced by the master.
     CHECK(resource.disk().has_volume());
 
@@ -510,7 +510,7 @@ Try<Nothing> DockerContainerizerProcess::updatePersistentVolumes(
   const gid_t gid = s.st_gid;
 
   // Mount all new persistent volumes added.
-  foreach (const Resource& resource, updated.persistentVolumes()) {
+  for (const Resource& resource : updated.persistentVolumes()) {
     // This is enforced by the master.
     CHECK(resource.disk().has_volume());
 
@@ -729,7 +729,7 @@ Future<Nothing> DockerContainerizerProcess::_allocateNvidiaGpus(
     return nvidia->allocator.deallocate(allocated);
   }
 
-  foreach (const Gpu& gpu, allocated) {
+  for (const auto& gpu : allocated) {
     containers_.at(containerId)->gpus.insert(gpu);
   }
 
@@ -759,7 +759,7 @@ Future<Nothing> DockerContainerizerProcess::_deallocateNvidiaGpus(
     const set<Gpu>& deallocated)
 {
   if (containers_.contains(containerId)) {
-    foreach (const Gpu& gpu, deallocated) {
+    for (const auto& gpu : deallocated) {
       containers_.at(containerId)->gpus.erase(gpu);
     }
   }
@@ -922,7 +922,7 @@ Future<Nothing> DockerContainerizerProcess::_recover(
     // a docker container.
     hashset<ContainerID> executorContainers;
 
-    foreach (const Docker::Container& container, _containers) {
+    for (const auto& container : _containers) {
       Option<ContainerID> id = parse(container);
       if (id.isSome()) {
         // NOTE: The container name returned by `docker inspect` may
@@ -938,8 +938,8 @@ Future<Nothing> DockerContainerizerProcess::_recover(
       }
     }
 
-    foreachvalue (const FrameworkState& framework, state->frameworks) {
-      foreachvalue (const ExecutorState& executor, framework.executors) {
+    for (const auto& [_, framework] : state->frameworks) {
+      for (const auto& [_, executor] : framework.executors) {
         if (executor.info.isNone()) {
           LOG(WARNING) << "Skipping recovery of executor '" << executor.id
                        << "' of framework " << framework.id
@@ -1083,7 +1083,7 @@ Future<Nothing> DockerContainerizerProcess::__recover(
 {
   vector<ContainerID> containerIds;
   vector<Future<Nothing>> futures;
-  foreach (const Docker::Container& container, _containers) {
+  for (const auto& container : _containers) {
     VLOG(1) << "Checking if Docker container named '"
             << container.name << "' was started by Mesos";
 
@@ -1116,7 +1116,7 @@ Future<Nothing> DockerContainerizerProcess::__recover(
 
   return collect(futures)
     .then(defer(self(), [=]() -> Future<Nothing> {
-      foreach (const ContainerID& containerId, containerIds) {
+      for (const auto& containerId : containerIds) {
         Try<Nothing> unmount = unmountPersistentVolumes(containerId);
         if (unmount.isError()) {
           return Failure("Unable to unmount volumes for Docker container '" +
@@ -1890,7 +1890,7 @@ Future<Nothing> DockerContainerizerProcess::__update(
   Option<Bytes> memRequest = resourceRequests.mem();
 
   Option<double> cpuLimit, memLimit;
-  foreach (auto&& limit, resourceLimits) {
+  for (auto& limit : resourceLimits) {
     if (limit.first == "cpus") {
       cpuLimit = limit.second.value();
     } else if (limit.first == "mem") {
@@ -2108,7 +2108,7 @@ Future<ResourceStatistics> DockerContainerizerProcess::usage(
       }
     }
 
-    foreach (auto&& limit, container->resourceLimits) {
+    for (auto& limit : container->resourceLimits) {
       if (limit.first == "cpus") {
         if (container->generatedForCommandTask &&
             !std::isinf(limit.second.value())) {

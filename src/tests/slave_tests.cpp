@@ -10054,7 +10054,7 @@ TEST_F(SlaveTest, MaxCompletedExecutorsPerFrameworkFlag)
     Future<hashset<ContainerID>> containerIds = containerizer.containers();
     AWAIT_READY(containerIds);
 
-    foreach (const ContainerID& containerId, containerIds.get()) {
+    for (const auto& containerId : containerIds.get()) {
       Future<Nothing> executorLost;
       EXPECT_CALL(sched, executorLost(_, _, _, _))
         .WillOnce(FutureSatisfy(&executorLost));
@@ -11268,7 +11268,7 @@ TEST_F(SlaveTest, RemoveResourceProvider)
   const v1::Offer& offer = offers->offers(0);
 
   Option<v1::Resource> rawDisk;
-  foreach (const v1::Resource& resource, offer.resources()) {
+  for (const Resource& resource : offer.resources()) {
     if (resource.has_provider_id() && resource.has_disk() &&
         resource.disk().has_source() &&
         resource.disk().source().type() ==
@@ -11728,7 +11728,7 @@ TEST_F(SlaveTest, ResourceProviderReconciliation)
     AWAIT_READY(resourceProviderId);
 
     v1::Resources resourceProviderResources_;
-    foreach (v1::Resource resource, resourceProviderResources) {
+    for (auto resource : resourceProviderResources) {
       resource.mutable_provider_id()->CopyFrom(resourceProviderId.get());
 
       resourceProviderResources_ += resource;
@@ -11877,7 +11877,7 @@ TEST_F(SlaveTest, RunTaskResourceVersions)
     AWAIT_READY(resourceProviderId);
 
     v1::Resources resourceProviderResources_;
-    foreach (v1::Resource resource, resourceProviderResources) {
+    for (auto resource : resourceProviderResources) {
       resource.mutable_provider_id()->CopyFrom(resourceProviderId.get());
 
       resourceProviderResources_ += resource;

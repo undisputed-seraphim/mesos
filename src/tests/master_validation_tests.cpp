@@ -132,7 +132,7 @@ TEST(MasterCallValidationTest, UpdateQuota)
     -> Map<string, Value::Scalar> {
     Map<string, Value::Scalar> result;
 
-    foreachpair (const string& name, double value, vector) {
+    for (const auto& [name, value] : vector) {
       Value::Scalar scalar;
       scalar.set_value(value);
       result[name] = scalar;

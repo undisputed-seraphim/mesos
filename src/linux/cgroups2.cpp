@@ -138,7 +138,7 @@ struct State
   // unknown will fail when writing it back out.
   void enable(const set<string>& controllers)
   {
-    foreach (const string& controller, controllers) {
+    for (const auto& controller : controllers) {
       enable(controller);
     }
   }
@@ -161,7 +161,7 @@ struct State
 
   void disable(const set<string>& controllers)
   {
-    foreach (const string& controller, controllers) {
+    for (const auto& controller : controllers) {
       disable(controller);
     }
   }
@@ -199,10 +199,10 @@ private:
 
 std::ostream& operator<<(std::ostream& stream, const State& state)
 {
-  foreach (const string& system, state.enabled()) {
+  for (const auto& system : state.enabled()) {
     stream << "+" << system << " ";
   }
-  foreach (const string& system, state.disabled()) {
+  for (const auto& system : state.disabled()) {
     stream << "-" << system << " ";
   }
   return stream;
@@ -280,7 +280,7 @@ Try<bool> mounted()
     return Error("Failed to read /proc/mounts: " + mountTable.error());
   }
 
-  foreach (MountTable::Entry entry, mountTable->entries) {
+  for (auto entry : mountTable->entries) {
     if (entry.type == cgroups2::FILE_SYSTEM) {
       if (entry.dir == MOUNT_POINT) {
         return true;
@@ -423,7 +423,7 @@ Future<Nothing> destroy(const string& cgroup)
       cgroups->insert(cgroup);
 
       // Remove the cgroups in bottom-up order.
-      foreach (const string& cgroup, adaptor::reverse(*cgroups)) {
+      for (const auto& cgroup : adaptor::reverse(*cgroups)) {
         const string path = cgroups2::path(cgroup);
 
         // Remove the cgroup's directory. If the directory does not exist,
@@ -511,7 +511,7 @@ Try<set<pid_t>> processes(const string& cgroup, bool recursive)
 
   set<pid_t> pids;
 
-  foreach (const string& cgroup, cgroups) {
+  for (const auto& cgroup : cgroups) {
     Try<string> contents = cgroups2::read<string>(cgroup, control::PROCESSES);
 
     if (contents.isError() && !exists(cgroup)) {
@@ -523,7 +523,7 @@ Try<set<pid_t>> processes(const string& cgroup, bool recursive)
                    + contents.error());
     }
 
-    foreach (const string& line, strings::split(*contents, "\n")) {
+    for (const auto& line : strings::split(*contents, "\n")) {
       if (line.empty()) continue;
 
       Try<pid_t> pid = numify<pid_t>(line);
@@ -548,7 +548,7 @@ Try<set<pid_t>> threads(const string& cgroup)
   }
 
   set<pid_t> tids;
-  foreach (const string& line, strings::split(*contents, "\n")) {
+  for (const auto& line : strings::split(*contents, "\n")) {
     if (line.empty()) continue;
 
     Try<pid_t> tid = numify<pid_t>(line);
@@ -701,7 +701,7 @@ Try<Stats> parse(const string& content)
   const vector<string> lines = strings::split(content, "\n");
   cpu::Stats stats;
 
-  foreach (const string& line, lines) {
+  for (const auto& line : lines) {
     if (line.empty()) {
       continue;
     }
@@ -870,7 +870,7 @@ Try<Stats> parse(const string& content)
   Stats stats;
 
   bool kernel_found = false;
-  foreach (const string& line, strings::split(content, "\n")) {
+  for (const auto& line : strings::split(content, "\n")) {
     if (line.empty()) {
       continue;
     }
@@ -927,7 +927,7 @@ Try<Events> parse(const string& content)
 {
   Events events;
 
-  foreach (const string& line, strings::split(content, "\n")) {
+  for (const auto& line : strings::split(content, "\n")) {
     if (line.empty()) {
       continue;
     }
@@ -1076,7 +1076,7 @@ public:
 
   void fail(const string& reason)
   {
-    foreachvalue (Promise<Nothing>& promise, ooms) {
+    for (auto& [_, promise] : ooms) {
       promise.fail(reason);
     }
     ooms.clear();
@@ -1346,7 +1346,7 @@ public:
     program.append({BPF_MOV64_IMM(BPF_REG_0, DENY_ACCESS)});
 
     // Special case 2. We deny access and exit if there's a catch-all in deny.
-    foreach (const Entry& entry, deny) {
+    for (const auto& entry : deny) {
       if (entry.is_catch_all()) {
         program.append({BPF_EXIT_INSN()});
         return program;
@@ -1376,7 +1376,7 @@ public:
     };
 
     bool allow_catch_all = [&allow]() {
-      foreach (const Entry& entry, allow) {
+      for (const auto& entry : allow) {
         if (entry.is_catch_all()) {
           return true;
         }
@@ -1396,7 +1396,7 @@ public:
       vector<vector<bpf_insn>> allow_device_check_blocks = {};
       short allow_block_trailer_size = allow_block_trailer(0).size();
 
-      foreach (const Entry& entry, allow) {
+      for (const auto& entry : allow) {
         vector<bpf_insn> allow_block = add_device_checks(
             entry, allow_block_trailer_size, DeviceCheckType::ALLOW);
         allow_device_check_blocks.push_back(allow_block);
@@ -1404,7 +1404,7 @@ public:
         start_of_deny_jmp_size += allow_block.size() + allow_block_trailer_size;
       }
 
-      foreach (vector<bpf_insn>& allow_block, allow_device_check_blocks) {
+      for (auto& allow_block : allow_device_check_blocks) {
         start_of_deny_jmp_size -=
           (allow_block.size() + allow_block_trailer_size);
         program.append(std::move(allow_block));
@@ -1419,7 +1419,7 @@ public:
     // Get the deny block device check code.
     // We are either following the normal code flow or special case 1 (see
     // diagram above) if we reached this section.
-    foreach (const Entry& entry, deny) {
+    for (const auto& entry : deny) {
       program.append(add_device_checks(
           entry, deny_block_trailer().size(), DeviceCheckType::DENY));
       program.append(deny_block_trailer());
@@ -1562,7 +1562,7 @@ private:
     if (check_major) {
       vector<bpf_insn> insert_instructions =
         check_major_instructions(nxt_blk_jmp_size, (int)selector.major.get());
-      foreach (const bpf_insn& insn, insert_instructions) {
+      for (const auto& insn : insert_instructions) {
         device_check_block.push_back(insn);
       }
       nxt_blk_jmp_size -= insert_instructions.size();
@@ -1572,7 +1572,7 @@ private:
     if (check_minor) {
       vector<bpf_insn> insert_instructions =
         check_minor_instructions(nxt_blk_jmp_size, (int)selector.minor.get());
-      foreach (const bpf_insn& insn, insert_instructions) {
+      for (const auto& insn : insert_instructions) {
         device_check_block.push_back(insn);
       }
       nxt_blk_jmp_size -= insert_instructions.size();
@@ -1582,7 +1582,7 @@ private:
     if (check_type) {
       vector<bpf_insn> insert_instructions =
         check_type_instructions(nxt_blk_jmp_size, selector);
-      foreach (const bpf_insn& insn, insert_instructions) {
+      for (const auto& insn : insert_instructions) {
         device_check_block.push_back(insn);
       }
       nxt_blk_jmp_size -= insert_instructions.size();
@@ -1594,7 +1594,7 @@ private:
         device_check_type == DeviceCheckType::ALLOW
           ? check_allow_access_instructions(nxt_blk_jmp_size, access)
           : check_deny_access_instructions(nxt_blk_jmp_size, access);
-      foreach (const bpf_insn& insn, insert_instructions) {
+      for (const auto& insn : insert_instructions) {
         device_check_block.push_back(insn);
       }
     }
@@ -1639,7 +1639,7 @@ Try<Nothing> configure(
 bool normalized(const vector<Entry>& query)
 {
   auto has_empties = [](const vector<Entry>& entries) {
-    foreach (const Entry& entry, entries) {
+    for (const auto& entry : entries) {
       if (entry.access.none()) {
         return true;
       }
@@ -1653,7 +1653,7 @@ bool normalized(const vector<Entry>& query)
 
   auto has_duplicate_selectors = [](const vector<Entry>& entries) {
     hashset<string> selectors;
-    foreach (const Entry& entry, entries) {
+    for (const auto& entry : entries) {
       selectors.insert(stringify(entry.selector));
     }
     return selectors.size() != entries.size();
@@ -1664,8 +1664,8 @@ bool normalized(const vector<Entry>& query)
   }
 
   auto has_encompassed_entries = [](const vector<Entry>& entries) {
-    foreach (const Entry& entry, entries) {
-      foreach (const Entry& other, entries) {
+    for (const auto& entry : entries) {
+      for (const auto& other : entries) {
         if ((!cgroups::devices::operator==(entry, other))
             && entry.encompasses(other)) {
           return true;
@@ -1687,7 +1687,7 @@ vector<Entry> normalize(const vector<Entry>& to_normalize)
 {
   auto strip_empties = [](const vector<Entry>& entries) {
     vector<Entry> stripped = {};
-    foreach (const Entry& entry, entries) {
+    for (const auto& entry : entries) {
       if (!entry.access.none()) {
         stripped.push_back(entry);
       }
@@ -1697,7 +1697,7 @@ vector<Entry> normalize(const vector<Entry>& to_normalize)
 
   auto deduplicate = [](const vector<Entry>& entries) {
     LinkedHashMap<string, Entry> deduplicated;
-    foreach (const Entry& entry, entries) {
+    for (const auto& entry : entries) {
       if (!deduplicated.contains(stringify(entry.selector))) {
         deduplicated[stringify(entry.selector)] = entry;
       }
@@ -1713,9 +1713,9 @@ vector<Entry> normalize(const vector<Entry>& to_normalize)
 
   auto strip_encompassed = [](const vector<Entry>& entries) {
     vector<Entry> result = {};
-    foreach (const Entry& entry, entries) {
+    for (const auto& entry : entries) {
       bool is_encompassed = [&]() {
-        foreach (const Entry& other, entries) {
+        for (const auto& other : entries) {
           if (!cgroups::devices::operator==(entry.selector, other.selector)
               && other.encompasses(entry)) {
             return true;

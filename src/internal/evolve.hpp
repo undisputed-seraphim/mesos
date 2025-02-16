@@ -109,7 +109,7 @@ google::protobuf::RepeatedPtrField<T1> evolve(
   google::protobuf::RepeatedPtrField<T1> t1s;
   t1s.Reserve(t2s.size());
 
-  foreach (const T2& t2, t2s) {
+  for (const auto& t2 : t2s) {
     *t1s.Add() = evolve(t2);
   }
 

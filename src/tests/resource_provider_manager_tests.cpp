@@ -347,7 +347,7 @@ TEST_P(ResourceProviderManagerHttpApiTest, UpdateState)
   {
     std::vector<v1::Resource> resources =
       v1::Resources::fromString("disk:4").get();
-    foreach (v1::Resource& resource, resources) {
+    for (Resource& resource : resources) {
       resource.mutable_provider_id()->CopyFrom(resourceProviderId.get());
     }
 
@@ -563,7 +563,7 @@ TEST_P(ResourceProviderManagerHttpApiTest, PublishResourcesSuccess)
   {
     vector<v1::Resource> resources =
       v1::Resources::fromString("disk:4").get();
-    foreach (v1::Resource& resource, resources) {
+    for (Resource& resource : resources) {
       resource.mutable_provider_id()->CopyFrom(resourceProviderId.get());
     }
 
@@ -670,7 +670,7 @@ TEST_P(ResourceProviderManagerHttpApiTest, PublishResourcesFailure)
   {
     vector<v1::Resource> resources =
       v1::Resources::fromString("disk:4").get();
-    foreach (v1::Resource& resource, resources) {
+    for (Resource& resource : resources) {
       resource.mutable_provider_id()->CopyFrom(resourceProviderId.get());
     }
 
@@ -770,7 +770,7 @@ TEST_P(ResourceProviderManagerHttpApiTest, PublishResourcesDisconnected)
   {
     vector<v1::Resource> resources =
       v1::Resources::fromString("disk:4").get();
-    foreach (v1::Resource& resource, resources) {
+    for (Resource& resource : resources) {
       resource.mutable_provider_id()->CopyFrom(resourceProviderId.get());
     }
 
@@ -1155,7 +1155,7 @@ TEST_P(ResourceProviderManagerHttpApiTest, ConvertResources)
   const v1::Offer& offer2 = offers2->offers(0);
 
   Option<v1::Resource> mountDisk;
-  foreach (const v1::Resource& resource, offer2.resources()) {
+  for (const Resource& resource : offer2.resources()) {
     if (resource.has_provider_id()) {
       mountDisk = resource;
     }

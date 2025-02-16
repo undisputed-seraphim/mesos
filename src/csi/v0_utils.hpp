@@ -40,7 +40,7 @@ struct PluginCapabilities
   template <typename Iterable>
   PluginCapabilities(const Iterable& capabilities)
   {
-    foreach (const auto& capability, capabilities) {
+    for (const auto& capability : capabilities) {
       if (capability.has_service() &&
           PluginCapability::Service::Type_IsValid(
               capability.service().type())) {
@@ -73,7 +73,7 @@ struct ControllerCapabilities
   template <typename Iterable>
   ControllerCapabilities(const Iterable& capabilities)
   {
-    foreach (const auto& capability, capabilities) {
+    for (const auto& capability : capabilities) {
       if (capability.has_rpc() &&
           ControllerServiceCapability::RPC::Type_IsValid(
               capability.rpc().type())) {
@@ -118,7 +118,7 @@ struct NodeCapabilities
   template <typename Iterable>
   NodeCapabilities(const Iterable& capabilities)
   {
-    foreach (const auto& capability, capabilities) {
+    for (const auto& capability : capabilities) {
       if (capability.has_rpc() &&
           NodeServiceCapability::RPC::Type_IsValid(capability.rpc().type())) {
         switch (capability.rpc().type()) {

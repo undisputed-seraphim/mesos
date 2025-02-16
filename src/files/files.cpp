@@ -414,7 +414,7 @@ Future<http::Response> FilesProcess::_browse(
       }
 
       JSON::Array listing;
-      foreach (const FileInfo& fileInfo, result.get()) {
+      for (const auto& fileInfo : result.get()) {
         listing.values.push_back(model(fileInfo));
       }
 
@@ -450,7 +450,7 @@ Future<Try<list<FileInfo>, FilesError>> FilesProcess::browse(
       map<string, FileInfo> files;
       Try<list<string>> entries = os::ls(resolvedPath.get());
       if (entries.isSome()) {
-        foreach (const string& entry, entries.get()) {
+        for (const auto& entry : entries.get()) {
           struct stat s;
           string fullPath = path::join(resolvedPath.get(), entry);
 
@@ -465,7 +465,7 @@ Future<Try<list<FileInfo>, FilesError>> FilesProcess::browse(
       }
 
       list<FileInfo> listing;
-      foreachvalue (const FileInfo& fileInfo, files) {
+      for (const auto& [_, fileInfo] : files) {
         listing.push_back(fileInfo);
       }
 
@@ -811,7 +811,7 @@ Future<http::Response> FilesProcess::debug(
     const Option<Principal>& principal)
 {
   JSON::Object object;
-  foreachpair (const string& virtualPath, const string& path, paths) {
+  for (const auto& [virtualPath, path] : paths) {
     object.values[virtualPath] = path;
   }
 

@@ -129,7 +129,7 @@ static vector<WeightInfo> getWeightInfos(
     const hashmap<string, double>& weights) {
   vector<WeightInfo> weightInfos;
 
-  foreachpair (const string& role, double weight, weights) {
+  for (const auto& [role, weight] : weights) {
     WeightInfo weightInfo;
     weightInfo.set_role(role);
     weightInfo.set_weight(weight);
@@ -1426,14 +1426,14 @@ TEST_F(RegistrarTest, UpdateQuota)
     google::protobuf::Map<string, Value::Scalar> guarantees_;
     ResourceQuantities quantities =
       CHECK_NOTERROR(ResourceQuantities::fromString(quantitiesString));
-    foreachpair (const string& name, const Value::Scalar& scalar, quantities) {
+    for (const auto& [name, scalar] : quantities) {
       guarantees_[name] = scalar;
     }
 
     google::protobuf::Map<string, Value::Scalar> limits_;
     ResourceLimits limits =
       CHECK_NOTERROR(ResourceLimits::fromString(limitsString));
-    foreachpair (const string& name, const Value::Scalar& scalar, limits) {
+    for (const auto& [name, scalar] : limits) {
       limits_[name] = scalar;
     }
 
@@ -1719,7 +1719,7 @@ TEST_F(RegistrarTest, UpdateQuotaInvalid)
     -> Map<string, Value::Scalar> {
     Map<string, Value::Scalar> result;
 
-    foreachpair (const string& name, double value, vector) {
+    for (const auto& [name, value] : vector) {
       Value::Scalar scalar;
       scalar.set_value(value);
       result[name] = scalar;
@@ -2029,7 +2029,7 @@ TEST_P(Registrar_BENCHMARK_Test, Performance)
   Stopwatch watch;
   watch.start();
   Future<bool> result;
-  foreach (const SlaveInfo& info, infos) {
+  for (const auto& info : infos) {
     result = registrar.apply(Owned<RegistryOperation>(new AdmitSlave(info)));
   }
   AWAIT_READY_FOR(result, Minutes(5));
@@ -2043,7 +2043,7 @@ TEST_P(Registrar_BENCHMARK_Test, Performance)
   // over, and then the previously registered agents reregistering
   // with the new master.
   watch.start();
-  foreach (const SlaveInfo& info, infos) {
+  for (const auto& info : infos) {
     result = registrar.apply(Owned<RegistryOperation>(
         new MarkSlaveReachable(info)));
   }
@@ -2069,7 +2069,7 @@ TEST_P(Registrar_BENCHMARK_Test, Performance)
 
   // Remove slaves.
   watch.start();
-  foreach (const SlaveInfo& info, infos) {
+  for (const auto& info : infos) {
     result = registrar2.apply(Owned<RegistryOperation>(new RemoveSlave(info)));
   }
   AWAIT_READY_FOR(result, Minutes(5));
@@ -2108,7 +2108,7 @@ TEST_P(Registrar_BENCHMARK_Test, MarkUnreachableThenReachable)
   Stopwatch watch;
   watch.start();
   Future<bool> result;
-  foreach (const SlaveInfo& info, infos) {
+  for (const auto& info : infos) {
     result = registrar.apply(Owned<RegistryOperation>(new AdmitSlave(info)));
   }
   AWAIT_READY_FOR(result, Minutes(5));
@@ -2122,7 +2122,7 @@ TEST_P(Registrar_BENCHMARK_Test, MarkUnreachableThenReachable)
   TimeInfo unreachableTime = protobuf::getCurrentTime();
 
   watch.start();
-  foreach (const SlaveInfo& info, infos) {
+  for (const auto& info : infos) {
     result = registrar.apply(Owned<RegistryOperation>(
         new MarkSlaveUnreachable(info, unreachableTime)));
   }
@@ -2136,7 +2136,7 @@ TEST_P(Registrar_BENCHMARK_Test, MarkUnreachableThenReachable)
 
   // Mark all slaves reachable.
   watch.start();
-  foreach (const SlaveInfo& info, infos) {
+  for (const auto& info : infos) {
     result = registrar.apply(Owned<RegistryOperation>(
         new MarkSlaveReachable(info)));
   }
@@ -2177,7 +2177,7 @@ TEST_P(Registrar_BENCHMARK_Test, GcManyAgents)
   Stopwatch watch;
   watch.start();
   Future<bool> result;
-  foreach (const SlaveInfo& info, infos) {
+  for (const auto& info : infos) {
     result = registrar.apply(Owned<RegistryOperation>(new AdmitSlave(info)));
   }
   AWAIT_READY_FOR(result, Minutes(5));
@@ -2191,7 +2191,7 @@ TEST_P(Registrar_BENCHMARK_Test, GcManyAgents)
   TimeInfo unreachableTime = protobuf::getCurrentTime();
 
   watch.start();
-  foreach (const SlaveInfo& info, infos) {
+  for (const auto& info : infos) {
     result = registrar.apply(Owned<RegistryOperation>(
         new MarkSlaveUnreachable(info, unreachableTime)));
   }

@@ -71,7 +71,7 @@ const Option<Subject> createSubject(const Option<Principal>& principal)
       subject.set_value(principal->value.get());
     }
 
-    foreachpair (const string& key, const string& value, principal->claims) {
+    for (const auto& [key, value] : principal->claims) {
       Label* claim = subject.mutable_claims()->mutable_labels()->Add();
       claim->set_key(key);
       claim->set_value(value);

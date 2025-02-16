@@ -223,7 +223,7 @@ struct RandomSorter::Node
 
   ~Node()
   {
-    foreach (Node* child, children) {
+    for (auto* child : children) {
       delete child;
     }
   }

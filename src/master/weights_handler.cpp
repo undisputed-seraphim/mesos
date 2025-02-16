@@ -70,7 +70,7 @@ Future<http::Response> Master::WeightsHandler::get(
       -> Future<http::Response> {
       RepeatedPtrField<WeightInfo> filteredWeightInfos;
 
-      foreach (const WeightInfo& weightInfo, weightInfos) {
+      for (const auto& weightInfo : weightInfos) {
         filteredWeightInfos.Add()->CopyFrom(weightInfo);
       }
 
@@ -93,7 +93,7 @@ Future<http::Response> Master::WeightsHandler::get(
       mesos::master::Response response;
       response.set_type(mesos::master::Response::GET_WEIGHTS);
 
-      foreach(const WeightInfo& weightInfo, weightInfos) {
+      for (const auto& weightInfo : weightInfos) {
         response.mutable_get_weights()->add_weight_infos()->CopyFrom(
             weightInfo);
       }
@@ -110,7 +110,7 @@ Future<vector<WeightInfo>> Master::WeightsHandler::_getWeights(
   vector<WeightInfo> weightInfos;
   weightInfos.reserve(master->weights.size());
 
-  foreachpair (const string& role, double weight, master->weights) {
+  for (const auto& [role, weight] : master->weights) {
     WeightInfo weightInfo;
     weightInfo.set_role(role);
     weightInfo.set_weight(weight);
@@ -121,7 +121,7 @@ Future<vector<WeightInfo>> Master::WeightsHandler::_getWeights(
   // TODO(alexr): Batch these actions once we have BatchRequest in authorizer.
   vector<Future<bool>> roleAuthorizations;
   roleAuthorizations.reserve(weightInfos.size());
-  foreach (const WeightInfo& info, weightInfos) {
+  for (const auto& info : weightInfos) {
     roleAuthorizations.push_back(authorizeGetWeight(principal, info));
   }
 
@@ -146,7 +146,7 @@ Future<vector<WeightInfo>> Master::WeightsHandler::_filterWeights(
   // Create an entry (including role and resources) for each weight,
   // except those filtered out based on the authorizer's response.
   auto weightInfoIt = weightInfos.begin();
-  foreach (bool authorized, roleAuthorizations) {
+  for (auto authorized : roleAuthorizations) {
     if (authorized) {
       filteredWeightInfos.push_back(*weightInfoIt);
     }
@@ -205,7 +205,7 @@ Future<http::Response> Master::WeightsHandler::_updateWeights(
   vector<WeightInfo> validatedWeightInfos;
   vector<string> roles;
 
-  foreach (WeightInfo weightInfo, weightInfos) {
+  for (auto weightInfo : weightInfos) {
     string role = strings::trim(weightInfo.role());
 
     Option<Error> roleError = roles::validate(role);
@@ -255,7 +255,7 @@ Future<http::Response> Master::WeightsHandler::__updateWeights(
       CHECK(result);
 
       // Update weights.
-      foreach (const WeightInfo& weightInfo, weightInfos) {
+      for (const auto& weightInfo : weightInfos) {
         master->weights[weightInfo.role()] = weightInfo.weight();
       }
 
@@ -286,7 +286,7 @@ void Master::WeightsHandler::rescindOffers(
 {
   bool rescind = false;
 
-  foreach (const WeightInfo& weightInfo, weightInfos) {
+  for (const auto& weightInfo : weightInfos) {
     const string& role = weightInfo.role();
 
     // This should have been validated earlier.
@@ -301,8 +301,8 @@ void Master::WeightsHandler::rescindOffers(
   }
 
   if (rescind) {
-    foreachvalue (const Slave* slave, master->slaves.registered) {
-      foreach (Offer* offer, utils::copy(slave->offers)) {
+    for (const auto& [_, slave] : master->slaves.registered) {
+      for (auto* offer : utils::copy(slave->offers)) {
         master->rescindOffer(offer);
       }
     }
@@ -332,7 +332,7 @@ Future<bool> Master::WeightsHandler::authorizeUpdateWeights(
 
   vector<Future<bool>> authorizations;
   authorizations.reserve(roles.size());
-  foreach (const string& role, roles) {
+  for (const auto& role : roles) {
     request.mutable_object()->set_value(role);
     authorizations.push_back(master->authorizer.get()->authorized(request));
   }

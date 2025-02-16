@@ -905,7 +905,7 @@ TEST_P(
 
   Option<Resource> source;
   Option<ResourceProviderID> resourceProviderId;
-  foreach (const Resource& resource, offer.resources()) {
+  for (const Resource& resource : offer.resources()) {
     if (isRaw(resource)) {
       source = resource;
 

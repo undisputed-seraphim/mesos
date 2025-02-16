@@ -92,7 +92,7 @@ Try<vector<DeviceManager::NonWildcardEntry>>
 {
   vector<DeviceManager::NonWildcardEntry> non_wildcards = {};
 
-  foreach (const cgroups::devices::Entry& entry, entries) {
+  for (const auto& entry : entries) {
     if (entry.selector.has_wildcard()) {
       return Error("Entry cannot have wildcard");
     }
@@ -139,8 +139,8 @@ public:
                      " the input allow or deny list is not normalized");
     }
 
-    foreach (const Entry& allow_entry, allow_list) {
-      foreach (const Entry& deny_entry, deny_list) {
+    for (const auto& allow_entry : allow_list) {
+      for (const auto& deny_entry : deny_list) {
         if (deny_entry.encompasses(allow_entry)) {
           return Failure(
               "Failed to configure allow and deny devices:"
@@ -176,8 +176,8 @@ public:
   {
     vector<Entry> additions = convert_to_entries(non_wildcard_additions);
     vector<Entry> removals = convert_to_entries(non_wildcard_removals);
-    foreach (const Entry& addition, additions) {
-      foreach (const Entry& removal, removals) {
+    for (const auto& addition : additions) {
+      for (const auto& removal : removals) {
         if (removal.encompasses(addition)) {
           return Failure(
               "Failed to configure allow and deny devices:"
@@ -235,7 +235,7 @@ public:
   Future<Nothing> recover(const vector<ContainerState>& states)
   {
     hashset<string> cgroups_to_recover;
-    foreach(const ContainerState& state, states) {
+    for (const auto& state : states) {
       cgroups_to_recover.insert(containerizer::paths::cgroups2::container(
           cgroups_root, state.container_id(), false));
     }
@@ -259,7 +259,7 @@ public:
     CHECK_SOME(device_states);
 
     vector<string> recovered_cgroups = {};
-    foreach (const auto& entry, device_states->device_access_per_cgroup()) {
+    for (const auto& entry : device_states->device_access_per_cgroup()) {
       const string& cgroup = entry.first;
       const CgroupDeviceAccessState& state = entry.second;
 
@@ -275,7 +275,7 @@ public:
           -> Try<vector<Entry>>
       {
         vector<Entry> parsed_entries;
-        foreach (const string& entry, list) {
+        for (const auto& entry : list) {
           Try<Entry> parsed_entry = Entry::parse(entry);
           if (parsed_entry.isError()) {
             return Error("Failed to parse entry " + entry + " during recover"
@@ -308,7 +308,7 @@ public:
       recovered_cgroups.push_back(cgroup);
     }
 
-    foreach (const string& cgroup, recovered_cgroups) {
+    for (const auto& cgroup : recovered_cgroups) {
       // Commit with checkpoint = false, since there's no need to re-checkpoint.
       Try<Nothing> commit = commit_device_access_changes(cgroup, false);
       if (commit.isError()) {
@@ -330,7 +330,7 @@ public:
           "Failed to checkpoint device access state: " + status.error());
     }
 
-    foreach(const string& cgroup, cgroups_to_recover) {
+    for (const auto& cgroup : cgroups_to_recover) {
       if (!device_access_per_cgroup.contains(cgroup)) {
         LOG(WARNING)
           << "Unable to recover state for cgroup '" + cgroup + "' as requested"
@@ -358,10 +358,10 @@ private:
                  device_access_per_cgroup) {
       CgroupDeviceAccessState* state = &(*(states.mutable_device_access_per_cgroup()))[cgroup];
 
-      foreach (const Entry& entry, access.allow_list) {
+      for (const auto& entry : access.allow_list) {
         state->add_allow_list(stringify(entry));
       }
-      foreach (const Entry& entry, access.deny_list) {
+      for (const auto& entry : access.deny_list) {
         state->add_deny_list(stringify(entry));
       }
     }
@@ -497,25 +497,25 @@ DeviceManager::CgroupDeviceAccess DeviceManager::apply_diff(
   vector<Entry> additions = convert_to_entries(non_wildcard_additions);
   vector<Entry> removals = convert_to_entries(non_wildcard_removals);
 
-  foreach (const Entry& addition, additions) {
+  for (const auto& addition : additions) {
     // Go over each entry in deny list, find any entries that match the new
     // addition's major & minor numbers, remove any accesses they specify
     // that the addition also specifies.
     // Invariant: No device wildcards are allowed in the deny list.
-    foreach (Entry& deny_entry, new_state.deny_list) {
+    for (auto& deny_entry : new_state.deny_list) {
       revoke_accesses(&deny_entry, addition);
     }
 
     new_state.allow_list.push_back(addition);
   }
 
-  foreach (const Entry& removal, removals) {
+  for (const auto& removal : removals) {
     Entry::Access accesses_by_matching_wildcards;
     accesses_by_matching_wildcards.read = false;
     accesses_by_matching_wildcards.write = false;
     accesses_by_matching_wildcards.mknod = false;
 
-    foreach (Entry& allow_entry, new_state.allow_list) {
+    for (auto& allow_entry : new_state.allow_list) {
       // Matching against wildcard - we cannot revoke wildcard privileges
       // so we will insert a deny entry replicating whatever privileges we
       // need to deny which the wildcard grants.
@@ -567,7 +567,7 @@ bool DeviceManager::CgroupDeviceAccess::is_access_granted(
   CHECK(cgroups2::devices::normalized(deny_list));
 
   auto allowed = [&]() {
-    foreach (const Entry& allow, allow_list) {
+    for (const auto& allow : allow_list) {
       if (allow.encompasses(query)) {
         return true;
       }
@@ -576,7 +576,7 @@ bool DeviceManager::CgroupDeviceAccess::is_access_granted(
   };
 
   auto denied = [&]() {
-    foreach (const Entry& deny, deny_list) {
+    for (const auto& deny : deny_list) {
       if (deny.selector.encompasses(query.selector)
           && deny.access.overlaps(query.access)) {
         return true;

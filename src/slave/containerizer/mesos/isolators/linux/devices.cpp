@@ -162,7 +162,7 @@ Future<Option<ContainerLaunchInfo>> LinuxDevicesIsolatorProcess::prepare(
   }
 
   // Import the whitelisted devices to all containers.
-  foreachpair (const string& path, const Device& dev, whitelistedDevices) {
+  for (const auto& [path, dev] : whitelistedDevices) {
     const string devicePath = path::join(devicesDir, path);
 
     Try<Nothing> mkdir = os::mkdir(Path(devicePath).dirname());

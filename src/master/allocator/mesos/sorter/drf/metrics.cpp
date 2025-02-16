@@ -48,7 +48,7 @@ Metrics::Metrics(
 
 Metrics::~Metrics()
 {
-  foreachvalue (const PullGauge& gauge, dominantShares) {
+  for (const auto& [_, gauge] : dominantShares) {
     process::metrics::remove(gauge);
   }
 }

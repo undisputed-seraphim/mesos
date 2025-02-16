@@ -235,7 +235,7 @@ struct ExecutorWriter
     }
 
     writer->field("tasks", [this](JSON::ArrayWriter* writer) {
-      foreachvalue (Task* task, executor_->launchedTasks) {
+      for (auto [_, task] : executor_->launchedTasks) {
         if (!approvers_->approved<VIEW_TASK>(*task, framework_->info)) {
           continue;
         }
@@ -245,7 +245,7 @@ struct ExecutorWriter
     });
 
     writer->field("queued_tasks", [this](JSON::ArrayWriter* writer) {
-      foreachvalue (const TaskInfo& task, executor_->queuedTasks) {
+      for (const auto& [_, task] : executor_->queuedTasks) {
         if (!approvers_->approved<VIEW_TASK>(task, framework_->info)) {
           continue;
         }
@@ -255,7 +255,7 @@ struct ExecutorWriter
     });
 
     writer->field("completed_tasks", [this](JSON::ArrayWriter* writer) {
-      foreach (const std::shared_ptr<Task>& task, executor_->completedTasks) {
+      for (const auto& task : executor_->completedTasks) {
         if (!approvers_->approved<VIEW_TASK>(*task, framework_->info)) {
           continue;
         }
@@ -265,7 +265,7 @@ struct ExecutorWriter
 
       // NOTE: We add 'terminatedTasks' to 'completed_tasks' for
       // simplicity.
-      foreachvalue (Task* task, executor_->terminatedTasks) {
+      for (auto [_, task] : executor_->terminatedTasks) {
         if (!approvers_->approved<VIEW_TASK>(*task, framework_->info)) {
           continue;
         }
@@ -316,7 +316,7 @@ struct FrameworkWriter
     }
 
     writer->field("executors", [this](JSON::ArrayWriter* writer) {
-      foreachvalue (Executor* executor, framework_->executors) {
+      for (auto [_, executor] : framework_->executors) {
         if (!approvers_->approved<VIEW_EXECUTOR>(
                 executor->info, framework_->info)) {
           continue;
@@ -962,7 +962,7 @@ JSON::Object Http::_flags() const
 
   {
     JSON::Object flags;
-    foreachvalue (const flags::Flag& flag, slave->flags) {
+    for (const auto& [_, flag] : slave->flags) {
       Option<string> value = flag.stringify(slave->flags);
       if (value.isSome()) {
         flags.values[flag.effective_name().value] = value.get();
@@ -1216,7 +1216,7 @@ Future<Response> Http::listFiles(
       mesos::agent::Response::ListFiles* listFiles =
         response.mutable_list_files();
 
-      foreach (const FileInfo& fileInfo, result.get()) {
+      for (const auto& fileInfo : result.get()) {
         listFiles->add_file_infos()->CopyFrom(fileInfo);
       }
 
@@ -1421,7 +1421,7 @@ Future<Response> Http::state(
                       writer->field(
                           role,
                           [&resources](JSON::ArrayWriter* writer) {
-                            foreach (Resource resource, resources) {
+                            for (Resource resource : resources) {
                               convertResourceFormat(&resource, ENDPOINT);
                               writer->element(JSON::Protobuf(resource));
                             }
@@ -1433,7 +1433,7 @@ Future<Response> Http::state(
             writer->field(
                 "unreserved_resources_full",
                 [&totalResources](JSON::ArrayWriter* writer) {
-                  foreach (Resource resource, totalResources.unreserved()) {
+                  for (Resource resource : totalResources.unreserved()) {
                     convertResourceFormat(&resource, ENDPOINT);
                     writer->element(JSON::Protobuf(resource));
                   }
@@ -1443,7 +1443,7 @@ Future<Response> Http::state(
             // Slave struct rather than computing it here each time.
             Resources allocatedResources;
 
-            foreachvalue (const Framework* framework, slave->frameworks) {
+            for (const auto& [_, framework] : slave->frameworks) {
               allocatedResources += framework->allocatedResources();
             }
 
@@ -1508,7 +1508,7 @@ Future<Response> Http::state(
               }
 
               writer->field("flags", [this](JSON::ObjectWriter* writer) {
-                  foreachvalue (const flags::Flag& flag, slave->flags) {
+                  for (const auto& [_, flag] : slave->flags) {
                     Option<string> value = flag.stringify(slave->flags);
                     if (value.isSome()) {
                       writer->field(flag.effective_name().value, value.get());
@@ -1521,7 +1521,7 @@ Future<Response> Http::state(
             writer->field(
                 "frameworks",
                 [this, &approvers](JSON::ArrayWriter* writer) {
-                  foreachvalue (Framework* framework, slave->frameworks) {
+                  for (auto [_, framework] : slave->frameworks) {
                     // Skip unauthorized frameworks.
                     if (!approvers->approved<VIEW_FRAMEWORK>(framework->info)) {
                       continue;
@@ -1671,7 +1671,7 @@ function<void(JSON::ObjectWriter*)> Http::jsonifyGetFrameworks(
     writer->field(
         descriptor->FindFieldByNumber(field)->name(),
         [&](JSON::ArrayWriter* writer) {
-          foreachvalue (const Framework* f, slave->frameworks) {
+          for (const auto& [_, f] : slave->frameworks) {
             if (approvers->approved<VIEW_FRAMEWORK>(f->info)) {
               writer->element(jsonifyGetFramework(f->info));
             }
@@ -1682,7 +1682,7 @@ function<void(JSON::ObjectWriter*)> Http::jsonifyGetFrameworks(
     writer->field(
         descriptor->FindFieldByNumber(field)->name(),
         [&](JSON::ArrayWriter* writer) {
-          foreachvalue (const Owned<Framework>& f, slave->completedFrameworks) {
+          for (const auto& [_, f] : slave->completedFrameworks) {
             if (approvers->approved<VIEW_FRAMEWORK>(f->info)) {
               writer->element(jsonifyGetFramework(f->info));
             }
@@ -1736,7 +1736,7 @@ string Http::serializeGetFrameworks(
   google::protobuf::io::StringOutputStream stream(&output);
   google::protobuf::io::CodedOutputStream writer(&stream);
 
-  foreachvalue (const Framework* f, slave->frameworks) {
+  for (const auto& [_, f] : slave->frameworks) {
     if (approvers->approved<VIEW_FRAMEWORK>(f->info)) {
       WireFormatLite::WriteBytes(
           v1::agent::Response::GetFrameworks::kFrameworksFieldNumber,
@@ -1745,7 +1745,7 @@ string Http::serializeGetFrameworks(
     }
   }
 
-  foreachvalue (const Owned<Framework>& f, slave->completedFrameworks) {
+  for (const auto& [_, f] : slave->completedFrameworks) {
     if (approvers->approved<VIEW_FRAMEWORK>(f->info)) {
       WireFormatLite::WriteBytes(
           v1::agent::Response::GetFrameworks::kCompletedFrameworksFieldNumber,
@@ -1848,12 +1848,12 @@ function<void(JSON::ObjectWriter*)> Http::jsonifyGetExecutors(
   return [=](JSON::ObjectWriter* writer) {
     // Construct framework list with both active and completed frameworks.
     vector<const Framework*> frameworks;
-    foreachvalue (const Framework* f, slave->frameworks) {
+    for (const auto& [_, f] : slave->frameworks) {
       if (approvers->approved<VIEW_FRAMEWORK>(f->info)) {
         frameworks.push_back(f);
       }
     }
-    foreachvalue (const Owned<Framework>& f, slave->completedFrameworks) {
+    for (const auto& [_, f] : slave->completedFrameworks) {
       if (approvers->approved<VIEW_FRAMEWORK>(f->info)) {
         frameworks.push_back(f.get());
       }
@@ -1895,8 +1895,8 @@ function<void(JSON::ObjectWriter*)> Http::jsonifyGetExecutors(
     writer->field(
         descriptor->FindFieldByNumber(field)->name(),
         [&](JSON::ArrayWriter* writer) {
-          foreach (const Framework* f, frameworks) {
-            foreachvalue (const Executor* e, f->executors) {
+          for (const auto* f : frameworks) {
+            for (const auto& [_, e] : f->executors) {
               if (approvers->approved<VIEW_EXECUTOR>(e->info, f->info)) {
                 writer->element(jsonifyGetExecutor(e->info));
               }
@@ -1908,8 +1908,8 @@ function<void(JSON::ObjectWriter*)> Http::jsonifyGetExecutors(
     writer->field(
         descriptor->FindFieldByNumber(field)->name(),
         [&](JSON::ArrayWriter* writer) {
-          foreach (const Framework* f, frameworks) {
-            foreach (const Owned<Executor>& e, f->completedExecutors) {
+          for (const auto* f : frameworks) {
+            for (const auto& e : f->completedExecutors) {
               if (approvers->approved<VIEW_EXECUTOR>(e->info, f->info)) {
                 writer->element(jsonifyGetExecutor(e->info));
               }
@@ -1925,12 +1925,12 @@ string Http::serializeGetExecutors(
 {
   // Construct framework list with both active and completed frameworks.
   vector<const Framework*> frameworks;
-  foreachvalue (Framework* f, slave->frameworks) {
+  for (auto [_, f] : slave->frameworks) {
     if (approvers->approved<VIEW_FRAMEWORK>(f->info)) {
       frameworks.push_back(f);
     }
   }
-  foreachvalue (const Owned<Framework>& f, slave->completedFrameworks) {
+  for (const auto& [_, f] : slave->completedFrameworks) {
     if (approvers->approved<VIEW_FRAMEWORK>(f->info)) {
       frameworks.push_back(f.get());
     }
@@ -1972,8 +1972,8 @@ string Http::serializeGetExecutors(
   google::protobuf::io::StringOutputStream stream(&output);
   google::protobuf::io::CodedOutputStream writer(&stream);
 
-  foreach (const Framework* framework, frameworks) {
-    foreachvalue (Executor* executor, framework->executors) {
+  for (const auto* framework : frameworks) {
+    for (auto [_, executor] : framework->executors) {
       if (approvers->approved<VIEW_EXECUTOR>(executor->info, framework->info)) {
         WireFormatLite::WriteBytes(
             v1::agent::Response::GetExecutors::kExecutorsFieldNumber,
@@ -1982,7 +1982,7 @@ string Http::serializeGetExecutors(
       }
     }
 
-    foreach (const Owned<Executor>& executor, framework->completedExecutors) {
+    for (const auto& executor : framework->completedExecutors) {
       if (approvers->approved<VIEW_EXECUTOR>(executor->info, framework->info)) {
         WireFormatLite::WriteBytes(
             v1::agent::Response::GetExecutors::kCompletedExecutorsFieldNumber,
@@ -2031,7 +2031,7 @@ Future<Response> Http::getOperations(
               return false;
             }
 
-            foreach (const Resource& resource, consumedResources.get()) {
+            for (const Resource& resource : consumedResources.get()) {
               if (!approvers->approved<VIEW_ROLE>(resource)) {
                 return false;
               }
@@ -2046,7 +2046,7 @@ Future<Response> Http::getOperations(
           agent::Response::GetOperations* operations =
             response.mutable_get_operations();
 
-          foreachvalue (Operation* operation, slave->operations) {
+          for (auto [_, operation] : slave->operations) {
             if (approved(*operation)) {
               operations->add_operations()->CopyFrom(*operation);
             }
@@ -2141,12 +2141,12 @@ function<void(JSON::ObjectWriter*)> Http::jsonifyGetTasks(
   return [=](JSON::ObjectWriter* writer) {
     // Construct framework list with both active and completed frameworks.
     vector<const Framework*> frameworks;
-    foreachvalue (Framework* f, slave->frameworks) {
+    for (auto [_, f] : slave->frameworks) {
       if (approvers->approved<VIEW_FRAMEWORK>(f->info)) {
         frameworks.push_back(f);
       }
     }
-    foreachvalue (const Owned<Framework>& f, slave->completedFrameworks) {
+    for (const auto& [_, f] : slave->completedFrameworks) {
       if (approvers->approved<VIEW_FRAMEWORK>(f->info)) {
         frameworks.push_back(f.get());
       }
@@ -2154,13 +2154,13 @@ function<void(JSON::ObjectWriter*)> Http::jsonifyGetTasks(
 
     // Construct executor list with both active and completed executors.
     hashmap<const Executor*, const Framework*> executors;
-    foreach (const Framework* f, frameworks) {
-      foreachvalue (const Executor* e, f->executors) {
+    for (const auto* f : frameworks) {
+      for (const auto& [_, e] : f->executors) {
         if (approvers->approved<VIEW_EXECUTOR>(e->info, f->info)) {
           executors.put(e, f);
         }
       }
-      foreach (const Owned<Executor>& e, f->completedExecutors) {
+      for (const auto& e : f->completedExecutors) {
         if (approvers->approved<VIEW_EXECUTOR>(e->info, f->info)) {
           executors.put(e.get(), f);
         }
@@ -2192,10 +2192,10 @@ function<void(JSON::ObjectWriter*)> Http::jsonifyGetTasks(
     writer->field(
         descriptor->FindFieldByNumber(field)->name(),
         [&](JSON::ArrayWriter* writer) {
-          foreach (const Framework* framework, frameworks) {
+          for (const auto* framework : frameworks) {
             typedef hashmap<TaskID, TaskInfo> TaskMap;
-            foreachvalue (const TaskMap& taskInfos, framework->pendingTasks) {
-              foreachvalue (const TaskInfo& t, taskInfos) {
+            for (const auto& [_, taskInfos] : framework->pendingTasks) {
+              for (const auto& [_, t] : taskInfos) {
                 if (approvers->approved<VIEW_TASK>(t, framework->info)) {
                   // TODO(bmahler): Consider not constructing the temporary task
                   // object and instead jsonify directly. Since we don't
@@ -2219,7 +2219,7 @@ function<void(JSON::ObjectWriter*)> Http::jsonifyGetTasks(
           foreachpair (const Executor* executor,
                        const Framework* framework,
                        executors) {
-            foreachvalue (const TaskInfo& taskInfo, executor->queuedTasks) {
+            for (const auto& [_, taskInfo] : executor->queuedTasks) {
               if (approvers->approved<VIEW_TASK>(taskInfo, framework->info)) {
                 // TODO(bmahler): Consider not constructing the temporary task
                 // object and instead serialize directly. Since we don't expect
@@ -2242,7 +2242,7 @@ function<void(JSON::ObjectWriter*)> Http::jsonifyGetTasks(
           foreachpair (const Executor* executor,
                        const Framework* framework,
                        executors) {
-            foreachvalue (Task* task, executor->launchedTasks) {
+            for (auto [_, task] : executor->launchedTasks) {
               if (approvers->approved<VIEW_TASK>(*task, framework->info)) {
                 writer->element(asV1Protobuf(*task));
               }
@@ -2258,7 +2258,7 @@ function<void(JSON::ObjectWriter*)> Http::jsonifyGetTasks(
           foreachpair (const Executor* executor,
                        const Framework* framework,
                        executors) {
-            foreachvalue (Task* task, executor->terminatedTasks) {
+            for (auto [_, task] : executor->terminatedTasks) {
               if (approvers->approved<VIEW_TASK>(*task, framework->info)) {
                 writer->element(asV1Protobuf(*task));
               }
@@ -2274,7 +2274,7 @@ function<void(JSON::ObjectWriter*)> Http::jsonifyGetTasks(
           foreachpair (const Executor* executor,
                        const Framework* framework,
                        executors) {
-            foreach (const std::shared_ptr<Task>& t, executor->completedTasks) {
+            for (const auto& t : executor->completedTasks) {
               if (approvers->approved<VIEW_TASK>(*t.get(), framework->info)) {
                 writer->element(asV1Protobuf(*t));
               }
@@ -2290,12 +2290,12 @@ string Http::serializeGetTasks(
 {
   // Construct framework list with both active and completed frameworks.
   vector<const Framework*> frameworks;
-  foreachvalue (Framework* f, slave->frameworks) {
+  for (auto [_, f] : slave->frameworks) {
     if (approvers->approved<VIEW_FRAMEWORK>(f->info)) {
       frameworks.push_back(f);
     }
   }
-  foreachvalue (const Owned<Framework>& f, slave->completedFrameworks) {
+  for (const auto& [_, f] : slave->completedFrameworks) {
     if (approvers->approved<VIEW_FRAMEWORK>(f->info)) {
       frameworks.push_back(f.get());
     }
@@ -2303,13 +2303,13 @@ string Http::serializeGetTasks(
 
   // Construct executor list with both active and completed executors.
   hashmap<const Executor*, const Framework*> executors;
-  foreach (const Framework* f, frameworks) {
-    foreachvalue (Executor* e, f->executors) {
+  for (const auto* f : frameworks) {
+    for (auto [_, e] : f->executors) {
       if (approvers->approved<VIEW_EXECUTOR>(e->info, f->info)) {
         executors.put(e, f);
       }
     }
-    foreach (const Owned<Executor>& e, f->completedExecutors) {
+    for (const auto& e : f->completedExecutors) {
       if (approvers->approved<VIEW_EXECUTOR>(e->info, f->info)) {
         executors.put(e.get(), f);
       }
@@ -2335,11 +2335,11 @@ string Http::serializeGetTasks(
   google::protobuf::io::StringOutputStream stream(&output);
   google::protobuf::io::CodedOutputStream writer(&stream);
 
-  foreach (const Framework* framework, frameworks) {
+  for (const auto* framework : frameworks) {
     // Pending tasks.
     typedef hashmap<TaskID, TaskInfo> TaskMap;
-    foreachvalue (const TaskMap& taskInfos, framework->pendingTasks) {
-      foreachvalue (const TaskInfo& taskInfo, taskInfos) {
+    for (const auto& [_, taskInfos] : framework->pendingTasks) {
+      for (const auto& [_, taskInfo] : taskInfos) {
         if (approvers->approved<VIEW_TASK>(taskInfo, framework->info)) {
           // TODO(bmahler): Consider not constructing the temporary task
           // object and instead serialize directly. Since we don't expect
@@ -2358,7 +2358,7 @@ string Http::serializeGetTasks(
                const Framework* framework,
                executors) {
     // Queued tasks.
-    foreachvalue (const TaskInfo& taskInfo, executor->queuedTasks) {
+    for (const auto& [_, taskInfo] : executor->queuedTasks) {
       if (approvers->approved<VIEW_TASK>(taskInfo, framework->info)) {
         // TODO(bmahler): Consider not constructing the temporary task
         // object and instead serialize directly. Since we don't expect
@@ -2372,7 +2372,7 @@ string Http::serializeGetTasks(
     }
 
     // Launched tasks.
-    foreachvalue (Task* task, executor->launchedTasks) {
+    for (auto [_, task] : executor->launchedTasks) {
       if (approvers->approved<VIEW_TASK>(*task, framework->info)) {
         WireFormatLite2::WriteMessageWithoutCachedSizes(
             v1::agent::Response::GetTasks::kLaunchedTasksFieldNumber,
@@ -2382,7 +2382,7 @@ string Http::serializeGetTasks(
     }
 
     // Terminated tasks.
-    foreachvalue (Task* task, executor->terminatedTasks) {
+    for (auto [_, task] : executor->terminatedTasks) {
       if (approvers->approved<VIEW_TASK>(*task, framework->info)) {
         WireFormatLite2::WriteMessageWithoutCachedSizes(
             v1::agent::Response::GetTasks::kTerminatedTasksFieldNumber,
@@ -2392,7 +2392,7 @@ string Http::serializeGetTasks(
     }
 
     // Completed tasks.
-    foreach (const std::shared_ptr<Task>& task, executor->completedTasks) {
+    for (const auto& task : executor->completedTasks) {
       if (approvers->approved<VIEW_TASK>(*task.get(), framework->info)) {
         WireFormatLite2::WriteMessageWithoutCachedSizes(
             v1::agent::Response::GetTasks::kCompletedTasksFieldNumber,
@@ -2720,7 +2720,7 @@ Response Http::_statistics(
 {
   JSON::Array result;
 
-  foreach (const ResourceUsage::Executor& executor, usage.executors()) {
+  for (const auto& executor : usage.executors()) {
     if (executor.has_statistics()) {
       const ExecutorInfo& info = executor.executor_info();
 
@@ -2909,12 +2909,12 @@ Future<JSON::Array> Http::__containers(
       hashset<ContainerID> executorContainerIds;
       hashset<ContainerID> authorizedExecutorContainerIds;
 
-      foreachvalue (const Framework* framework, slave->frameworks) {
+      for (const auto& [_, framework] : slave->frameworks) {
         if (selectFrameworkId.isSome() && !selectFrameworkId->accept(framework->id())) {
           continue;
         }
 
-        foreachvalue (const Executor* executor, framework->executors) {
+        for (const auto& [_, executor] : framework->executors) {
           // No need to get statistics and status if we know that the
           // executor has already terminated.
           if (executor->state == Executor::TERMINATED) {
@@ -2948,7 +2948,7 @@ Future<JSON::Array> Http::__containers(
         }
       }
 
-      foreach (const ContainerID& containerId, containerIds) {
+      for (const auto& containerId : containerIds) {
         if (executorContainerIds.contains(containerId)) {
           continue;
         }
@@ -3142,13 +3142,13 @@ Future<JSON::Object> Http::_containerizerDebug() const
         JSON::Object result;
 
         JSON::Array futures;
-        foreach (const FutureMetadata& metadata, pending) {
+        for (const auto& metadata : pending) {
           if (metadata.component != COMPONENT_NAME_CONTAINERIZER) {
             continue;
           }
 
           JSON::Object args;
-          foreachpair (const string& key, const string& value, metadata.args) {
+          for (const auto& [key, value] : metadata.args) {
             args.values[key] = JSON::String(value);
           }
 

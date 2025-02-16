@@ -169,7 +169,7 @@ void PerfEventSubsystemProcess::sample()
   // fail if the cgroup is destroyed before running perf.
   set<string> cgroups;
 
-  foreachvalue (const Owned<Info>& info, infos) {
+  for (const auto& [_, info] : infos) {
     cgroups.insert(info->cgroup);
   }
 
@@ -208,7 +208,7 @@ void PerfEventSubsystemProcess::_sample(
   } else {
     // Store the latest statistics, note that cgroups added in the
     // interim will be picked up by the next sample.
-    foreachvalue (const Owned<Info>& info, infos) {
+    for (const auto& [_, info] : infos) {
       if (statistics->contains(info->cgroup)) {
         info->statistics = statistics->get(info->cgroup).get();
       }

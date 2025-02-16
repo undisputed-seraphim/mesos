@@ -1259,7 +1259,7 @@ TEST_P(MasterAPITest, GetOperations)
 
   Option<Resource> rawDisk;
 
-  foreach (const Resource& resource, offer.resources()) {
+  for (const Resource& resource : offer.resources()) {
     if (resource.has_provider_id() &&
         resource.has_disk() &&
         resource.disk().has_source() &&
@@ -2265,8 +2265,8 @@ TEST_P(MasterAPITest, GetAgentsFiltering)
     };
 
     bool hasReservedResources = false;
-    foreach (const RepeatedPtrField<v1::Resource>& resources, resourceFields) {
-      foreach (const v1::Resource& resource, resources) {
+    for (const Resource& resources : resourceFields) {
+      for (const Resource& resource : resources) {
         EXPECT_TRUE(resource.has_role());
         EXPECT_TRUE(roleSuperhero == resource.role() || "*" == resource.role());
 
@@ -2336,8 +2336,8 @@ TEST_P(MasterAPITest, GetAgentsFiltering)
     };
 
     bool hasReservedResources = false;
-    foreach (const RepeatedPtrField<v1::Resource>& resources, resourceFields) {
-      foreach (const v1::Resource& resource, resources) {
+    for (const Resource& resources : resourceFields) {
+      for (const Resource& resource : resources) {
         EXPECT_TRUE(resource.has_role());
         EXPECT_TRUE(roleMuggle == resource.role() || "*" == resource.role());
 
@@ -7574,7 +7574,7 @@ TEST_P_TEMP_DISABLED_ON_WINDOWS(
     outputs.emplace_back(std::move(output));
   }
 
-  foreach (Option<http::Pipe::Reader>& output, outputs) {
+  for (auto& output : outputs) {
     // Read the output from the LAUNCH_NESTED_CONTAINER_SESSION.
     ASSERT_SOME(output);
 
@@ -8939,7 +8939,7 @@ TEST_P(AgentAPITest, GetOperations)
 
   Option<Resource> rawDisk;
 
-  foreach (const Resource& resource, offer.resources()) {
+  for (const Resource& resource : offer.resources()) {
     if (resource.has_provider_id() &&
         resource.has_disk() &&
         resource.disk().has_source() &&

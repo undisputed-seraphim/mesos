@@ -351,7 +351,7 @@ Future<hashset<ContainerID>> LinuxLauncherProcess::recover(
   // destroy as well as be able to determine orphans below.
   hashset<ContainerID> expected = {};
 
-  foreach (const ContainerState& state, states) {
+  for (const auto& state : states) {
     expected.insert(state.container_id());
 
     if (!containers.contains(state.container_id())) {
@@ -393,7 +393,7 @@ Future<hashset<ContainerID>> LinuxLauncherProcess::recover(
     // the systemd hierarhcy). We need a flag to support the upgrade
     // path.
     if (cgroupsInfo.systemdHierarchy.isSome()) {
-      foreachvalue (const Container& container, containers) {
+      for (const auto& [_, container] : containers) {
         if (container.pid.isNone()) {
           continue;
         }
@@ -437,7 +437,7 @@ Future<hashset<ContainerID>> LinuxLauncherProcess::recover(
   // recovery.
   hashset<ContainerID> orphans = {};
 
-  foreachvalue (const Container& container, containers) {
+  for (const auto& [_, container] : containers) {
     if (!expected.contains(container.id)) {
       LOG(INFO) << container.id << " is a known orphaned container";
       orphans.insert(container.id);
@@ -465,7 +465,7 @@ Try<Nothing> LinuxLauncherProcess::recoverContainersFromCgroups()
         + ": " + freezerCgroups.error());
   }
 
-  foreach (const string& cgroup, freezerCgroups.get()) {
+  for (const auto& cgroup : freezerCgroups.get()) {
     cgroups.insert(cgroup);
   }
 
@@ -480,12 +480,12 @@ Try<Nothing> LinuxLauncherProcess::recoverContainersFromCgroups()
           ": " + systemdCgroups.error());
     }
 
-    foreach (const string& cgroup, systemdCgroups.get()) {
+    for (const auto& cgroup : systemdCgroups.get()) {
       cgroups.insert(cgroup);
     }
   }
 
-  foreach (const string& cgroup, cgroups) {
+  for (const auto& cgroup : cgroups) {
     // Need to parse the cgroup to see if it's one we created (i.e.,
     // matches our separator structure) or one that someone else
     // created (e.g., in the future we might have nested containers
@@ -521,7 +521,7 @@ Try<Nothing> LinuxLauncherProcess::recoverContainersFromCgroups2()
     return Error("Failed to get cgroups: " + cgroups.error());
   }
 
-  foreach (const string& cgroup, *cgroups) {
+  for (const auto& cgroup : *cgroups) {
     // Parse the cgroups to see if we created them. Add the container ids
     // of the cgroups that parse to `containers` so that on `destroy` they
     // get properly disposed.

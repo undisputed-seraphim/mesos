@@ -33,7 +33,7 @@ class TestModuleImpl : public TestModule
 public:
   Try<Nothing> initialize(const mesos::Parameters& parameters) override
   {
-    foreach (const mesos::Parameter& parameter, parameters.parameter()) {
+    for (const auto& parameter : parameters.parameter()) {
       if (parameter.has_key() && parameter.has_value()) {
         flags[parameter.key()] = parameter.value();
       } else {
@@ -75,7 +75,7 @@ public:
   {
     mesos::Parameters parameters;
 
-    foreachpair (const std::string& key, const std::string& value, flags) {
+    for (const auto& [key, value] : flags) {
       mesos::Parameter* parameter = parameters.add_parameter();
       parameter->set_key(key);
       parameter->set_value(value);

@@ -50,7 +50,7 @@ Future<Secret> JWTSecretGenerator::generate(const Principal& principal)
 
   JSON::Object payload;
 
-  foreachpair (const string& key, const string& value, principal.claims) {
+  for (const auto& [key, value] : principal.claims) {
     payload.values[key] = value;
   }
 

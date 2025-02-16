@@ -339,7 +339,7 @@ Result<CommandInfo> DockerRuntimeIsolatorProcess::getLaunchCommand(
     // set by user. The logic below is the case that no argument is
     // set by user.
     if (command.arguments_size() == config.entrypoint_size()) {
-      foreach (const string& cmd, config.cmd()) {
+      for (const auto& cmd : config.cmd()) {
         command.add_arguments(cmd);
       }
     }

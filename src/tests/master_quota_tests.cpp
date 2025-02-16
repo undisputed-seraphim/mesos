@@ -101,11 +101,11 @@ static QuotaConfig createQuotaConfig(
   ResourceLimits limits =
     CHECK_NOTERROR(ResourceLimits::fromString(limitsString));
 
-  foreachpair (const string& name, const Value::Scalar& scalar, guarantees) {
+  for (const auto& [name, scalar] : guarantees) {
     (*config.mutable_guarantees())[name] = scalar;
   }
 
-  foreachpair (const string& name, const Value::Scalar& scalar, limits) {
+  for (const auto& [name, scalar] : limits) {
     (*config.mutable_limits())[name] = scalar;
   }
 
@@ -132,7 +132,7 @@ static string createUpdateQuotaRequestBody(
   mesos::master::Call call;
   call.set_type(mesos::master::Call::UPDATE_QUOTA);
   call.mutable_update_quota()->set_force(force);
-  foreach (const QuotaConfig& config, configs) {
+  for (const auto& config : configs) {
     *call.mutable_update_quota()->mutable_quota_configs()->Add() = config;
   }
 

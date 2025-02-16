@@ -268,7 +268,7 @@ TEST(ProtobufUtilTest, FrameworkCapabilities)
       const set<FrameworkInfo::Capability::Type>& capabilitiesTypes) {
     vector<FrameworkInfo::Capability> result;
 
-    foreach (FrameworkInfo::Capability::Type type, capabilitiesTypes) {
+    for (auto type : capabilitiesTypes) {
       FrameworkInfo::Capability capability;
       capability.set_type(type);
 

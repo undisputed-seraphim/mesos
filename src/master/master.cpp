@@ -639,7 +639,7 @@ void Master::initialize()
 
   if (flags.rate_limits.isSome()) {
     // Add framework rate limiters.
-    foreach (const RateLimit& limit_, flags.rate_limits->limits()) {
+    for (const auto& limit_ : flags.rate_limits->limits()) {
       if (frameworks.limiters.contains(limit_.principal())) {
         EXIT(EXIT_FAILURE)
           << "Duplicate principal " << limit_.principal()
@@ -707,7 +707,7 @@ void Master::initialize()
     }
 
     roleWhitelist = hashset<string>();
-    foreach (const string& role, roles.get()) {
+    for (const auto& role : roles.get()) {
       roleWhitelist->insert(role);
     }
 
@@ -723,7 +723,7 @@ void Master::initialize()
   if (flags.weights.isSome()) {
     vector<string> tokens = strings::tokenize(flags.weights.get(), ",");
 
-    foreach (const string& token, tokens) {
+    for (const auto& token : tokens) {
       vector<string> pair = strings::tokenize(token, "=");
       if (pair.size() != 2) {
         EXIT(EXIT_FAILURE)
@@ -1157,13 +1157,13 @@ void Master::finalize()
   // interface to return a stream of offer events.
 
   // Remove the slaves.
-  foreachvalue (Slave* slave, slaves.registered) {
+  for (auto [_, slave] : slaves.registered) {
     // We first remove the slave from the allocator so that any
     // recovered resources below are not reoffered.
     allocator->removeSlave(slave->id);
 
     foreachkey (const FrameworkID& frameworkId, utils::copy(slave->tasks)) {
-      foreachvalue (Task* task, utils::copy(slave->tasks[frameworkId])) {
+      for (auto [_, task] : utils::copy(slave->tasks[frameworkId])) {
         removeTask(task);
       }
     }
@@ -1176,12 +1176,12 @@ void Master::finalize()
       }
     }
 
-    foreach (Offer* offer, utils::copy(slave->offers)) {
+    for (auto* offer : utils::copy(slave->offers)) {
       discardOffer(offer);
     }
 
     // Remove inverse offers.
-    foreach (InverseOffer* inverseOffer, utils::copy(slave->inverseOffers)) {
+    for (auto* inverseOffer : utils::copy(slave->inverseOffers)) {
       // We don't need to update the allocator because the slave has already
       // been removed.
       removeInverseOffer(inverseOffer);
@@ -1200,7 +1200,7 @@ void Master::finalize()
   // Note we are not deleting the pointers to the frameworks from the
   // roles because it is unnecessary bookkeeping at this point since
   // we are shutting down.
-  foreachvalue (Framework* framework, frameworks.registered) {
+  for (auto [_, framework] : frameworks.registered) {
     allocator->removeFramework(framework->id());
 
     // No tasks/executors/offers should remain since the slaves
@@ -1217,7 +1217,7 @@ void Master::finalize()
   CHECK(offers.empty());
   CHECK(inverseOffers.empty());
 
-  foreachvalue (Future<Option<string>> future, authenticating) {
+  for (auto& [_, future] : authenticating) {
     // NOTE: This is necessary during tests because a copy of
     // this future is used to setup authentication timeout. If a
     // test doesn't discard this future, authentication timeout might
@@ -1229,7 +1229,7 @@ void Master::finalize()
     future.discard();
   }
 
-  foreachvalue (Role* role, roles) {
+  for (auto [_, role] : roles) {
     delete role;
   }
   roles.clear();
@@ -1262,7 +1262,7 @@ void Master::exited(
     const FrameworkID& frameworkId,
     const StreamingHttpConnection<v1::scheduler::Event>& http)
 {
-  foreachvalue (Framework* framework, frameworks.registered) {
+  for (auto [_, framework] : frameworks.registered) {
     if (framework->http().isSome() &&
         framework->http()->writer == http.writer) {
       CHECK_EQ(frameworkId, framework->id());
@@ -1284,7 +1284,7 @@ void Master::exited(
 
 void Master::exited(const UPID& pid)
 {
-  foreachvalue (Framework* framework, frameworks.registered) {
+  for (auto [_, framework] : frameworks.registered) {
     if (framework->pid() == pid) {
       // See comments in `receive()` on why we send an error message
       // to the framework upon detecting a disconnection.
@@ -1317,7 +1317,7 @@ void Master::exited(const UPID& pid)
       hashset<FrameworkID> frameworkIds =
         slave->tasks.keys() | slave->executors.keys();
 
-      foreach (const FrameworkID& frameworkId, frameworkIds) {
+      for (const auto& frameworkId : frameworkIds) {
         Framework* framework = getFramework(frameworkId);
         CHECK_NOTNULL(framework);
 
@@ -1691,7 +1691,7 @@ Future<Nothing> Master::_recover(const Registry& registry)
     EXIT(EXIT_FAILURE);
   }
 
-  foreach (const Registry::Slave& slave, registry.slaves().slaves()) {
+  for (const auto& slave : registry.slaves().slaves()) {
     SlaveInfo slaveInfo = slave.info();
 
     // We store the `SlaveInfo`'s resources in the `pre-reservation-refinement`
@@ -1743,24 +1743,24 @@ Future<Nothing> Master::_recover(const Registry& registry)
           registry);
 
   // Save the maintenance schedule.
-  foreach (const mesos::maintenance::Schedule& schedule, registry.schedules()) {
+  for (const auto& schedule : registry.schedules()) {
     maintenance.schedules.push_back(schedule);
   }
 
   // Save the machine info for each machine.
-  foreach (const Registry::Machine& machine, registry.machines().machines()) {
+  for (const auto& machine : registry.machines().machines()) {
     machines[machine.info().id()] = Machine(machine.info());
   }
 
   // Save the quotas for each role.
 
   // First recover from the legacy quota entries.
-  foreach (const Registry::Quota& quota, registry.quotas()) {
+  for (const auto& quota : registry.quotas()) {
     quotas[quota.info().role()] = Quota{quota.info()};
   }
 
   // Then the new ones.
-  foreach (const quota::QuotaConfig& config, registry.quota_configs()) {
+  for (const auto& config : registry.quota_configs()) {
     CHECK_NOT_CONTAINS(quotas, config.role());
     quotas[config.role()] = Quota{config};
   }
@@ -1798,7 +1798,7 @@ Future<Nothing> Master::_recover(const Registry& registry)
       weights.clear();
     }
 
-    foreach (const Registry::Weight& weight, registry.weights()) {
+    for (const auto& weight : registry.weights()) {
       WeightInfo weightInfo;
       weightInfo.set_role(weight.info().role());
       weightInfo.set_weight(weight.info().weight());
@@ -1807,7 +1807,7 @@ Future<Nothing> Master::_recover(const Registry& registry)
       weights[weight.info().role()] = weight.info().weight();
     }
   } else if (!weights.empty()) {
-    foreachpair (const string& role, double weight, weights) {
+    for (const auto& [role, weight] : weights) {
       WeightInfo weightInfo;
       weightInfo.set_role(role);
       weightInfo.set_weight(weight);
@@ -1937,7 +1937,7 @@ void Master::_doRegistryGc(
   // operation, but there isn't an easy way to do that.
 
   size_t numRemovedUnreachable = 0;
-  foreach (const SlaveID& slaveId, toRemoveUnreachable) {
+  for (const auto& slaveId : toRemoveUnreachable) {
     if (!slaves.unreachable.contains(slaveId)) {
       LOG(WARNING) << "Failed to garbage collect " << slaveId
                    << " from the unreachable list";
@@ -1971,7 +1971,7 @@ void Master::_doRegistryGc(
   }
 
   size_t numRemovedGone = 0;
-  foreach (const SlaveID& slaveId, toRemoveGone) {
+  for (const auto& slaveId : toRemoveGone) {
     if (!slaves.gone.contains(slaveId)) {
       LOG(WARNING) << "Failed to garbage collect " << slaveId
                    << " from the gone list";
@@ -2025,7 +2025,7 @@ void Master::recoveredSlavesTimeout(const Registry& registry)
 
   // Remove the slaves in a rate limited manner, similar to how the
   // SlaveObserver removes slaves.
-  foreach (const Registry::Slave& slave, registry.slaves().slaves()) {
+  for (const auto& slave : registry.slaves().slaves()) {
     // The slave is removed from `recovered` when it completes the
     // re-registration process. If the slave is in `reregistering`, it
     // has started but not yet finished reregistering. In either
@@ -2083,7 +2083,7 @@ void Master::recoveredSlavesTimeout(const Registry& registry)
 
 void Master::sendSlaveLost(const SlaveInfo& slaveInfo)
 {
-  foreachvalue (Framework* framework, frameworks.registered) {
+  for (auto [_, framework] : frameworks.registered) {
     if (!framework->connected()) {
       continue;
     }
@@ -2566,7 +2566,7 @@ Option<Error> Master::validateFramework(
   if (protobuf::frameworkHasCapability(
           frameworkInfo,
           FrameworkInfo::Capability::MULTI_ROLE)) {
-    foreach (const string& role, frameworkInfo.roles()) {
+    for (const auto& role : frameworkInfo.roles()) {
       if (!isWhitelistedRole(role)) {
         invalidRoles.insert(role);
       }
@@ -2891,7 +2891,7 @@ void Master::sendFrameworkUpdates(const Framework& framework)
   // Broadcast the new framework info and pid to all the slaves. We have to do
   // this upon frameworkInfo/pid updates because an executor might be running
   // on a slave but it currently isn't running any tasks.
-  foreachvalue (Slave* slave, slaves.registered) {
+  for (auto [_, slave] : slaves.registered) {
     UpdateFrameworkMessage message;
     message.mutable_framework_id()->CopyFrom(framework.id());
 
@@ -3061,7 +3061,7 @@ void Master::_subscribe(
   if (!frameworkInfo.has_id() || frameworkInfo.id().value().empty()) {
     // If we are here the framework is subscribing for the first time.
     // Check if this framework is already subscribed (because it retries).
-    foreachvalue (Framework* framework, frameworks.registered) {
+    for (auto [_, framework] : frameworks.registered) {
       if (framework->pid() == from) {
         LOG(INFO) << "Framework " << *framework
                   << " already subscribed, resending acknowledgement";
@@ -3109,7 +3109,7 @@ void Master::_subscribe(
   // a framework that is already connected. Note that we don't send an error
   // response because that would go to the framework that is already connected.
   if (frameworks.principals.contains(from)) {
-    foreachvalue (Framework* framework, frameworks.registered) {
+    for (auto [_, framework] : frameworks.registered) {
       if (framework->pid() == from && framework->id() != frameworkInfo.id()) {
         LOG(ERROR) << "Dropping SUBSCRIBE call for framework '"
                    << frameworkInfo.name() << "': " << *framework
@@ -3200,7 +3200,7 @@ void Master::_subscribe(
       // NOTE: We need to do this because the scheduler might have
       // replied to the offers but the driver might have dropped
       // those messages since it wasn't connected to the master.
-      foreach (Offer* offer, utils::copy(framework->offers)) {
+      for (auto* offer : utils::copy(framework->offers)) {
         rescindOffer(offer);
       }
 
@@ -3433,7 +3433,7 @@ void Master::deactivate(Framework* framework, bool rescind)
   allocator->deactivateFramework(framework->id());
 
   // Remove the framework's offers.
-  foreach (Offer* offer, utils::copy(framework->offers)) {
+  for (auto* offer : utils::copy(framework->offers)) {
     if (rescind) {
       rescindOffer(offer);
     } else {
@@ -3442,7 +3442,7 @@ void Master::deactivate(Framework* framework, bool rescind)
   }
 
   // Remove the framework's inverse offers.
-  foreach (InverseOffer* inverseOffer, utils::copy(framework->inverseOffers)) {
+  for (auto* inverseOffer : utils::copy(framework->inverseOffers)) {
     allocator->updateInverseOffer(
         inverseOffer->slave_id(),
         inverseOffer->framework_id(),
@@ -3485,12 +3485,12 @@ void Master::deactivate(Slave* slave)
 
   allocator->deactivateSlave(slave->id);
 
-  foreach (Offer* offer, utils::copy(slave->offers)) {
+  for (auto* offer : utils::copy(slave->offers)) {
     rescindOffer(offer);
   }
 
   // Remove and rescind inverse offers.
-  foreach (InverseOffer* inverseOffer, utils::copy(slave->inverseOffers)) {
+  for (auto* inverseOffer : utils::copy(slave->inverseOffers)) {
     allocator->updateInverseOffer(
         slave->id,
         inverseOffer->framework_id(),
@@ -3528,7 +3528,7 @@ void Master::resourceRequest(
   }
 
   scheduler::Call::Request call;
-  foreach (const Request& request, requests) {
+  for (const auto& request : requests) {
     call.add_requests()->CopyFrom(request);
   }
 
@@ -3568,7 +3568,7 @@ void Master::suppress(
   // roles is valid and also contained within the framework roles.
   // Note that if a single role is invalid, we drop the entire
   // call and do not suppress the valid roles.
-  foreach (const string& role, suppress.roles()) {
+  for (const auto& role : suppress.roles()) {
     Option<Error> roleError = roles::validate(role);
     if (roleError.isSome()) {
       drop(framework,
@@ -3599,7 +3599,7 @@ vector<string> Master::knownRoles() const
   set<string> roleList;
 
   auto insertAncestors = [&roleList](const string& role) {
-    foreach (const string& ancestor, roles::ancestors(role)) {
+    for (const auto& ancestor : roles::ancestors(role)) {
       bool inserted = roleList.insert(ancestor).second;
 
       // We can break here as an optimization since the ancestor
@@ -3609,7 +3609,7 @@ vector<string> Master::knownRoles() const
   };
 
   if (roleWhitelist.isSome()) {
-    foreach (const string& role, *this->roleWhitelist) {
+    for (const auto& role : *this->roleWhitelist) {
       roleList.insert(role);
       insertAncestors(role);
     }
@@ -3626,7 +3626,7 @@ vector<string> Master::knownRoles() const
       insertAncestors(role);
     }
 
-    foreachvalue (Slave* slave, this->slaves.registered) {
+    for (auto [_, slave] : this->slaves.registered) {
       foreachkey (const string& role, slave->totalResources.reservations()) {
         roleList.insert(role);
         insertAncestors(role);
@@ -3662,7 +3662,7 @@ ResourceQuantities Master::RoleResourceBreakdown::offered() const
 {
   ResourceQuantities result;
 
-  foreachvalue (Framework* framework, master->frameworks.registered) {
+  for (auto [_, framework] : master->frameworks.registered) {
     result += ResourceQuantities::fromResources(
         framework->totalOfferedResources.allocatedToRoleSubtree(role));
   }
@@ -3675,7 +3675,7 @@ ResourceQuantities Master::RoleResourceBreakdown::allocated() const
 {
   ResourceQuantities result;
 
-  foreachvalue (Framework* framework, master->frameworks.registered) {
+  for (auto [_, framework] : master->frameworks.registered) {
     result += ResourceQuantities::fromResources(
         framework->totalUsedResources.allocatedToRoleSubtree(role));
   }
@@ -3688,7 +3688,7 @@ ResourceQuantities Master::RoleResourceBreakdown::reserved() const
 {
   ResourceQuantities result;
 
-  foreachvalue (Slave* slave, master->slaves.registered) {
+  for (auto [_, slave] : master->slaves.registered) {
     result += ResourceQuantities::fromResources(
         slave->totalResources.reservedToRoleSubtree(role));
   }
@@ -3701,12 +3701,12 @@ ResourceQuantities Master::RoleResourceBreakdown::consumedQuota() const
 {
   ResourceQuantities unallocatedReservation;
 
-  foreachvalue (Slave* slave, master->slaves.registered) {
+  for (auto [_, slave] : master->slaves.registered) {
     ResourceQuantities totalReservation = ResourceQuantities::fromResources(
         slave->totalResources.reservedToRoleSubtree(role));
 
     ResourceQuantities usedReservation;
-    foreachvalue (const Resources& r, slave->usedResources) {
+    for (const auto& [_, r] : slave->usedResources) {
       usedReservation += ResourceQuantities::fromResources(
           r.reservedToRoleSubtree(role));
     }
@@ -3918,7 +3918,7 @@ void Master::accept(
   CHECK_NOTNULL(framework);
 
   // Bump metrics.
-  foreach (const Offer::Operation& operation, accept.operations()) {
+  for (const auto& operation : accept.operations()) {
     if (operation.type() == Offer::Operation::LAUNCH) {
       if (operation.launch().task_infos().size() > 0) {
         ++metrics->messages_launch_tasks;
@@ -3950,7 +3950,7 @@ void Master::accept(
     // notifications.
 
     // Discard existing offers.
-    foreach (const OfferID& offerId, accept.offer_ids()) {
+    for (const auto& offerId : accept.offer_ids()) {
       Offer* offer = getOffer(offerId);
       if (offer != nullptr) {
         discardOffer(offer);
@@ -3968,7 +3968,7 @@ void Master::accept(
     const TaskState newTaskState =
       framework->capabilities.partitionAware ? TASK_DROPPED : TASK_LOST;
 
-    foreach (const Offer::Operation& operation, accept.operations()) {
+    for (const auto& operation : accept.operations()) {
       // Send OPERATION_ERROR for non-LAUNCH operations
       if (operation.type() != Offer::Operation::LAUNCH &&
           operation.type() != Offer::Operation::LAUNCH_GROUP) {
@@ -3988,7 +3988,7 @@ void Master::accept(
         UNREACHABLE();
       }();
 
-      foreach (const TaskInfo& task, tasks) {
+      for (const auto& task : tasks) {
         const StatusUpdate& update = protobuf::createStatusUpdate(
             framework->id(),
             task.slave_id(),
@@ -4079,7 +4079,7 @@ void Master::accept(
         const RepeatedPtrField<TaskInfo>& tasks,
         TaskStatus::Reason reason,
         const string& message) {
-      foreach (const TaskInfo& task, tasks) {
+      for (const auto& task : tasks) {
         const StatusUpdate& update = protobuf::createStatusUpdate(
             framework->id(),
             task.slave_id(),
@@ -4104,7 +4104,7 @@ void Master::accept(
     RepeatedPtrField<Offer::Operation> operations = accept.operations();
     accept.clear_operations();
 
-    foreach (Offer::Operation& operation, operations) {
+    for (auto& operation : operations) {
       Option<Error> error = validateAndUpgradeResources(&operation);
 
       // Additional operation-specific validation.
@@ -4261,7 +4261,7 @@ void Master::accept(
   // We make various adjustments to the `Offer::Operation`s,
   // typically for backward/forward compatibility.
   // TODO(mpark): Pull this out to a master normalization utility.
-  foreach (Offer::Operation& operation, *accept.mutable_operations()) {
+  for (auto& operation : *accept.mutable_operations()) {
     // With the addition of the MULTI_ROLE capability, the resources
     // within an offer now contain an `AllocationInfo`. We therefore
     // inject the offer's allocation info into the operation's
@@ -4333,7 +4333,7 @@ void Master::accept(
         // Mutate `TaskInfo` to include `ExecutorInfo` to make it easy
         // for operator API and WebUI to get access to the corresponding
         // executor for tasks in the task group.
-        foreach (TaskInfo& task, *taskGroup->mutable_tasks()) {
+        for (auto& task : *taskGroup->mutable_tasks()) {
           if (!task.has_executor()) {
             task.mutable_executor()->CopyFrom(executor);
           }
@@ -4402,7 +4402,7 @@ void Master::_accept(
       newTaskState = TASK_LOST;
     }
 
-    foreach (const Offer::Operation& operation, accept.operations()) {
+    for (const auto& operation : accept.operations()) {
       if (operation.type() != Offer::Operation::LAUNCH &&
           operation.type() != Offer::Operation::LAUNCH_GROUP) {
         continue;
@@ -4417,7 +4417,7 @@ void Master::_accept(
         }
       }();
 
-      foreach (const TaskInfo& task, tasks) {
+      for (const auto& task : tasks) {
         const TaskStatus::Reason reason =
             slave == nullptr ? TaskStatus::REASON_SLAVE_REMOVED
                              : TaskStatus::REASON_SLAVE_DISCONNECTED;
@@ -4455,7 +4455,7 @@ void Master::_accept(
   Resources offeredResources;
   size_t offersAccepted = 0;
 
-  foreach (const OfferID& offerId, accept.offer_ids()) {
+  for (const auto& offerId : accept.offer_ids()) {
     Offer* offer = getOffer(offerId);
     if (offer == nullptr) {
       LOG(WARNING) << "Ignoring accept of offer " << offerId
@@ -4506,7 +4506,7 @@ void Master::_accept(
   // The order of the conversions is important and preserved.
   vector<ResourceConversion> conversions;
 
-  foreach (const Offer::Operation& operation, accept.operations()) {
+  for (const auto& operation : accept.operations()) {
     auto authorized_ =
       [&framework, &operation](const ActionObject& actionObject)
         -> Option<Error> {
@@ -4711,10 +4711,10 @@ void Master::_accept(
         // If any offer from this slave contains a volume that needs
         // to be destroyed, we should process it, but we should also
         // rescind those offers.
-        foreach (Offer* offer, utils::copy(slave->offers)) {
+        for (auto* offer : utils::copy(slave->offers)) {
           const Resources& offered = offer->resources();
 
-          foreach (const Resource& volume, operation.destroy().volumes()) {
+          for (const auto& volume : operation.destroy().volumes()) {
             if (offered.contains(volume)) {
               rescindOffer(offer);
 
@@ -4875,7 +4875,7 @@ void Master::_accept(
       }
 
       case Offer::Operation::LAUNCH: {
-        foreach (const TaskInfo& task, operation.launch().task_infos()) {
+        for (const auto& task : operation.launch().task_infos()) {
           const Option<Error> authorizationError =
             authorized(ActionObject::taskLaunch(task, framework->info));
 
@@ -4971,7 +4971,7 @@ void Master::_accept(
             // Check that offered resources contain at least one copy
             // of each consumed shared resource (guaranteed by master
             // validation).
-            foreach (const Resource& resource, consumedShared) {
+            for (const Resource& resource : consumedShared) {
               CHECK(remainingSharedResources.contains(resource));
             }
 
@@ -5073,7 +5073,7 @@ void Master::_accept(
         Option<Error> error;
         Option<TaskStatus::Reason> reason;
 
-        foreach (const TaskInfo& task, taskGroup.tasks()) {
+        for (const auto& task : taskGroup.tasks()) {
           const ActionObject actionObject =
             ActionObject::taskLaunch(task, framework->info);
 
@@ -5102,7 +5102,7 @@ void Master::_accept(
 
         if (error.isSome()) {
           CHECK_SOME(reason);
-          foreach (const TaskInfo& task, taskGroup.tasks()) {
+          for (const auto& task : taskGroup.tasks()) {
             const StatusUpdate& update = protobuf::createStatusUpdate(
                 framework->id(),
                 task.slave_id(),
@@ -5391,7 +5391,7 @@ void Master::acceptInverseOffers(
     // Update each inverse offer in the allocator with the accept and
     // filter.
     // TODO(anand): Notify the framework if some of the offers were invalid.
-    foreach (const OfferID& offerId, accept.inverse_offer_ids()) {
+    for (const auto& offerId : accept.inverse_offer_ids()) {
       InverseOffer* inverseOffer = getInverseOffer(offerId);
       if (inverseOffer != nullptr) {
         mesos::allocator::InverseOfferStatus status;
@@ -5440,7 +5440,7 @@ void Master::decline(
 
   size_t offersDeclined = 0;
 
-  foreach (const OfferID& offerId, decline.offer_ids()) {
+  for (const auto& offerId : decline.offer_ids()) {
     Offer* offer = getOffer(offerId);
     if (offer != nullptr) {
       discardOffer(offer, decline.filters());
@@ -5469,7 +5469,7 @@ void Master::declineInverseOffers(
 
   // Update each inverse offer in the allocator with the decline and
   // filter.
-  foreach (const OfferID& offerId, decline.inverse_offer_ids()) {
+  for (const auto& offerId : decline.inverse_offer_ids()) {
     // Try it as an inverse offer. If this fails then the offer is no
     // longer valid.
     InverseOffer* inverseOffer = getInverseOffer(offerId);
@@ -5516,7 +5516,7 @@ void Master::checkAndTransitionDrainingAgent(Slave* slave)
   if (!slave->tasks.empty() ||
       !slave->operations.empty()) {
     size_t numTasks = 0u;
-    foreachvalue (const auto& frameworkTasks, slave->tasks) {
+    for (const auto& [_, frameworkTasks] : slave->tasks) {
       numTasks += frameworkTasks.size();
     }
 
@@ -5606,7 +5606,7 @@ void Master::reviveOffers(
   }
 
   scheduler::Call::Revive call;
-  foreach (const string& role, roles) {
+  for (const auto& role : roles) {
     call.add_roles(role);
   }
 
@@ -5630,7 +5630,7 @@ void Master::revive(
   // roles is valid and also contained within the framework roles.
   // Note that if a single role is invalid, we drop the entire
   // call and do not suppress the valid roles.
-  foreach (const string& role, revive.roles()) {
+  for (const auto& role : revive.roles()) {
     Option<Error> roleError = roles::validate(role);
     if (roleError.isSome()) {
       drop(framework,
@@ -6834,7 +6834,7 @@ void Master::_reregisterSlave(
 
     if (!slaveCapabilities.agentOperationFeedback &&
         slave->capabilities.agentOperationFeedback) {
-      foreachvalue (Operation* operation, utils::copy(slave->operations)) {
+      for (auto [_, operation] : utils::copy(slave->operations)) {
         if (!operation->latest_status().has_resource_provider_id() &&
             operation->info().has_id() &&
             protobuf::isTerminalState(operation->latest_status().state())) {
@@ -6955,7 +6955,7 @@ void Master::__reregisterSlave(
   {
     set<string> roles = protobuf::framework::getRoles(frameworkInfo);
 
-    foreach (Resource& resource, *resources) {
+    for (Resource& resource : *resources) {
       if (!resource.has_allocation_info()) {
         if (roles.size() != 1) {
           LOG(FATAL) << "Missing 'Resource.AllocationInfo' for resources"
@@ -6984,7 +6984,7 @@ void Master::__reregisterSlave(
       frameworks.emplace(framework.id(), framework);
     }
 
-    foreach (Task& task, *reregisterSlaveMessage.mutable_tasks()) {
+    for (auto& task : *reregisterSlaveMessage.mutable_tasks()) {
       CHECK(frameworks.contains(task.framework_id()));
 
       injectAllocationInfo(
@@ -7022,7 +7022,7 @@ void Master::__reregisterSlave(
   // master (those tasks were previously marked "unreachable", so they
   // should be removed from that collection).
   vector<Task> recoveredTasks;
-  foreach (Task& task, *reregisterSlaveMessage.mutable_tasks()) {
+  for (auto& task : *reregisterSlaveMessage.mutable_tasks()) {
     const FrameworkID& frameworkId = task.framework_id();
 
     // Don't re-add tasks whose framework has been shutdown at the
@@ -7434,7 +7434,7 @@ void Master::updateSlaveFrameworks(
   CHECK_NOTNULL(slave);
 
   // Send the latest framework pids to the slave.
-  foreach (const FrameworkInfo& frameworkInfo, frameworks) {
+  for (const auto& frameworkInfo : frameworks) {
     CHECK(frameworkInfo.has_id());
     Framework* framework = getFramework(frameworkInfo.id());
 
@@ -7516,7 +7516,7 @@ void Master::updateFramework(
 
   // Rescind offers allocated to the roles that were removed.
   const set<string> newRoles = protobuf::framework::getRoles(frameworkInfo);
-  foreach (Offer* offer, utils::copy(framework->offers)) {
+  for (auto* offer : utils::copy(framework->offers)) {
     if (newRoles.count(offer->allocation_info().role()) == 0) {
       rescindOffer(offer);
     }
@@ -7615,7 +7615,7 @@ void Master::updateSlave(UpdateSlaveMessage&& message)
     // compare them against the operations known to the master.
     hashset<UUID> receivedOperations;
 
-    foreach (const Operation& operation, message.operations().operations()) {
+    for (const auto& operation : message.operations().operations()) {
       if (!slave->operations.contains(operation.uuid())) {
         updated = true;
         break;
@@ -7766,7 +7766,7 @@ void Master::updateSlave(UpdateSlaveMessage&& message)
 
   // Reconcile operations on agent-default resources.
   hashset<UUID> newOperations;
-  foreach (const Operation& operation, message.operations().operations()) {
+  for (const auto& operation : message.operations().operations()) {
     newOperations.insert(operation.uuid());
   }
 
@@ -7786,7 +7786,7 @@ void Master::updateSlave(UpdateSlaveMessage&& message)
 
   // Add new operations reported by the agent which the master isn't aware of.
   // This could happen, for example, in the case of master failover.
-  foreach (const Operation& operation, message.operations().operations()) {
+  for (const auto& operation : message.operations().operations()) {
     if (!slave->operations.contains(operation.uuid())) {
       Framework* framework = nullptr;
       if (operation.has_framework_id()) {
@@ -8030,7 +8030,7 @@ void Master::updateSlave(UpdateSlaveMessage&& message)
 
   // Then rescind outstanding offers affected by the update.
   // NOTE: Need a copy of offers because the offers are removed inside the loop.
-  foreach (Offer* offer, utils::copy(slave->offers)) {
+  for (auto* offer : utils::copy(slave->offers)) {
     const Resources& offered = offer->resources();
     // Since updates of the agent's oversubscribed resources are sent at regular
     // intervals, we only rescind offers containing revocable resources to
@@ -8085,7 +8085,7 @@ void Master::updateUnavailability(
   // unavailability has actually changed.
   if (machines.contains(machineId)) {
     // For every slave on this machine, update the allocator.
-    foreach (const SlaveID& slaveId, machines[machineId].slaves) {
+    for (const auto& slaveId : machines[machineId].slaves) {
       // The slave should not be in the machines mapping if it is removed.
       CHECK(slaves.removed.get(slaveId).isNone());
 
@@ -8105,13 +8105,13 @@ void Master::updateUnavailability(
 
       // Rescind offers since we want to inform frameworks of the
       // unavailability change as soon as possible.
-      foreach (Offer* offer, utils::copy(slave->offers)) {
+      for (auto* offer : utils::copy(slave->offers)) {
         rescindOffer(offer);
       }
 
       // Remove and rescind inverse offers since the allocator will send new
       // inverse offers for the updated unavailability.
-      foreach (InverseOffer* inverseOffer, utils::copy(slave->inverseOffers)) {
+      for (auto* inverseOffer : utils::copy(slave->inverseOffers)) {
         allocator->updateInverseOffer(
             slave->id,
             inverseOffer->framework_id(),
@@ -8877,7 +8877,7 @@ void Master::sendBulkOperationFeedback(
     operations.insert(provider.operations.begin(), provider.operations.end());
   }
 
-  foreachvalue (const Operation* operation, operations) {
+  for (const auto& [_, operation] : operations) {
     // Frameworks signal that they want to receive feedback
     // on the operation status by setting the `id` field.
     if (!operation->info().has_id()) {
@@ -8949,7 +8949,7 @@ void Master::reconcileTasks(
   scheduler::Call::Reconcile message;
   message.mutable_tasks()->Reserve(reconcileTasksMessage.statuses_size());
 
-  foreach (TaskStatus& status, *reconcileTasksMessage.mutable_statuses()) {
+  for (auto& status : *reconcileTasksMessage.mutable_statuses()) {
     scheduler::Call::Reconcile::Task* t = message.add_tasks();
 
     *t->mutable_task_id() = std::move(status.task_id());
@@ -8976,7 +8976,7 @@ void Master::reconcile(
     LOG(INFO) << "Performing implicit task state reconciliation"
                  " for framework " << *framework;
 
-    foreachvalue (Task* task, framework->tasks) {
+    for (auto [_, task] : framework->tasks) {
       const TaskState& state = task->has_status_update_state()
           ? task->status_update_state()
           : task->state();
@@ -9035,7 +9035,7 @@ void Master::reconcile(
   //
   // For cases (3), (4), (5) and (6) TASK_LOST is sent instead if the
   // framework has not opted-in to the PARTITION_AWARE capability.
-  foreach (const scheduler::Call::Reconcile::Task& t, reconcile.tasks()) {
+  for (const auto& t : reconcile.tasks()) {
     Option<SlaveID> slaveId = None();
     if (t.has_slave_id()) {
       slaveId = t.slave_id();
@@ -9204,7 +9204,7 @@ void Master::reconcileOperations(
     LOG(INFO) << "Performing implicit operation state reconciliation"
                  " for framework " << *framework;
 
-    foreachvalue (Operation* operation, framework->operations) {
+    for (auto [_, operation] : framework->operations) {
       OperationStatus status;
       if (operation->statuses().empty()) {
         // This can happen if the operation is pending.
@@ -9421,7 +9421,7 @@ void Master::offer(
   }
 
   size_t offersEstimate = 0u;
-  foreachvalue (const auto& agents, resources) {
+  for (const auto& [_, agents] : resources) {
     offersEstimate += agents.size();
   }
 
@@ -9576,7 +9576,7 @@ void Master::offer(
       if (!framework->capabilities.multiRole) {
         offer_.clear_allocation_info();
 
-        foreach (Resource& resource, *offer_.mutable_resources()) {
+        for (Resource& resource : *offer_.mutable_resources()) {
           resource.clear_allocation_info();
         }
       }
@@ -9713,7 +9713,7 @@ void Master::inverseOffer(
   }
 
   vector<OfferID> inverseOfferIds;
-  foreach (const InverseOffer& inverseOffer, message.inverse_offers()) {
+  for (const auto& inverseOffer : message.inverse_offers()) {
     inverseOfferIds.push_back(inverseOffer.id());
   }
 
@@ -9870,7 +9870,7 @@ void Master::reconcileKnownSlave(
 
   // We convert the 'tasks' into a map for easier lookup below.
   multihashmap<FrameworkID, TaskID> slaveTasks;
-  foreach (const Task& task, tasks) {
+  for (const auto& task : tasks) {
     slaveTasks.put(task.framework_id(), task.task_id());
   }
 
@@ -9894,7 +9894,7 @@ void Master::reconcileKnownSlave(
   foreachkey (const FrameworkID& frameworkId, slave->tasks) {
     ReconcileTasksMessage reconcile;
 
-    foreachvalue (Task* task, slave->tasks[frameworkId]) {
+    for (auto [_, task] : slave->tasks[frameworkId]) {
       if (!slaveTasks.contains(task->framework_id(), task->task_id())) {
         LOG(WARNING) << "Task " << task->task_id()
                      << " of framework " << task->framework_id()
@@ -9945,7 +9945,7 @@ void Master::reconcileKnownSlave(
   // not present in the slave must be removed to correctly account
   // for resources. First we index the executors for fast lookup below.
   multihashmap<FrameworkID, ExecutorID> slaveExecutors;
-  foreach (const ExecutorInfo& executor, executors) {
+  for (const auto& executor : executors) {
     // Master validates that `framework_id` is set during task launch.
     CHECK(executor.has_framework_id());
     slaveExecutors.put(executor.framework_id(), executor.executor_id());
@@ -9976,7 +9976,7 @@ void Master::reconcileKnownSlave(
   // still alive on the slave. This could happen if the slave
   // did not receive KillTaskMessage because of a partition or
   // disconnection.
-  foreach (const Task& task, tasks) {
+  for (const auto& task : tasks) {
     if (!protobuf::isTerminalState(task.state()) &&
         slave->killedTasks.contains(task.framework_id(), task.task_id())) {
       LOG(WARNING) << " Agent " << *slave
@@ -10092,9 +10092,9 @@ void Master::recoverFramework(const FrameworkInfo& info)
   }
 
   // Add active operations, tasks, and executors to the framework.
-  foreachvalue (Slave* slave, slaves.registered) {
+  for (auto [_, slave] : slaves.registered) {
     if (slave->tasks.contains(framework->id())) {
-      foreachvalue (Task* task, slave->tasks.at(framework->id())) {
+      for (auto [_, task] : slave->tasks.at(framework->id())) {
         framework->addTask(task);
       }
     }
@@ -10111,12 +10111,12 @@ void Master::recoverFramework(const FrameworkInfo& info)
     vector<Operation*> allOperations = slave->operations.values();
     foreachvalue (const Slave::ResourceProvider& resourceProvider,
                   slave->resourceProviders) {
-      foreachvalue (Operation* operation, resourceProvider.operations) {
+      for (auto [_, operation] : resourceProvider.operations) {
         allOperations.push_back(operation);
       }
     }
 
-    foreach (Operation* operation, allOperations) {
+    for (auto* operation : allOperations) {
       if (operation->has_framework_id() &&
           operation->framework_id() == framework->id()) {
         framework->addOperation(operation);
@@ -10346,12 +10346,12 @@ void Master::failoverFramework(
 void Master::_failoverFramework(Framework* framework)
 {
   // Discard the framework's offers, if they weren't removed before.
-  foreach (Offer* offer, utils::copy(framework->offers)) {
+  for (auto* offer : utils::copy(framework->offers)) {
     discardOffer(offer);
   }
 
   // Also remove the inverse offers.
-  foreach (InverseOffer* inverseOffer, utils::copy(framework->inverseOffers)) {
+  for (auto* inverseOffer : utils::copy(framework->inverseOffers)) {
     allocator->updateInverseOffer(
         inverseOffer->slave_id(),
         inverseOffer->framework_id(),
@@ -10411,7 +10411,7 @@ void Master::removeFramework(Framework* framework)
   CHECK(framework->offers.empty());
   CHECK(framework->inverseOffers.empty());
 
-  foreachvalue (Slave* slave, slaves.registered) {
+  for (auto [_, slave] : slaves.registered) {
     // Tell slaves to shutdown the framework.
     ShutdownFrameworkMessage message;
     message.mutable_framework_id()->MergeFrom(framework->id());
@@ -10420,7 +10420,7 @@ void Master::removeFramework(Framework* framework)
 
   // Remove pointers to the framework's tasks in slaves and mark those
   // tasks as completed.
-  foreachvalue (Task* task, utils::copy(framework->tasks)) {
+  for (auto [_, task] : utils::copy(framework->tasks)) {
     Slave* slave = slaves.registered.get(task->slave_id());
 
     // Since we only find out about tasks when the slave reregisters,
@@ -10464,7 +10464,7 @@ void Master::removeFramework(Framework* framework)
   }
 
   // Mark the framework's unreachable tasks as completed.
-  foreach (const TaskID& taskId, framework->unreachableTasks.keys()) {
+  for (const auto& taskId : framework->unreachableTasks.keys()) {
     const Owned<Task>& task = framework->unreachableTasks.at(taskId);
 
     // TODO(neilc): Per comment above, using TASK_KILLED here is not
@@ -10511,7 +10511,7 @@ void Master::removeFramework(Framework* framework)
   }
 
   hashset<Slave*> slavesWithOrphanOperations;
-  foreachvalue (Operation* operation, utils::copy(framework->operations)) {
+  for (auto [_, operation] : utils::copy(framework->operations)) {
     // Non-speculative operations are considered "orphaned" once the
     // originating framework is removed. The resources used by the
     // operation will remain allocated until a terminal operation
@@ -10542,7 +10542,7 @@ void Master::removeFramework(Framework* framework)
 
   framework->unregisteredTime = Clock::now();
 
-  foreach (const string& role, framework->roles) {
+  for (const auto& role : framework->roles) {
     framework->untrackUnderRole(role);
   }
 
@@ -10577,7 +10577,7 @@ void Master::removeFramework(Framework* framework)
   // For any pending operations, we temporarily remove the operations'
   // resources from the allocator, because these resources are technically
   // still in use by the (now removed) framework.
-  foreach (Slave* slave, slavesWithOrphanOperations) {
+  for (auto* slave : slavesWithOrphanOperations) {
     allocator->updateSlave(slave->id, slave->info, slave->totalResources);
 
     // NOTE: Even though we are modifying the slave's total resources, we
@@ -10611,7 +10611,7 @@ void Master::removeFramework(Slave* slave, Framework* framework)
   // updates.
   if (slave->tasks.contains(framework->id())) {
     // NOTE: A copy is needed because removeTask modifies slave->tasks.
-    foreachvalue (Task* task, utils::copy(slave->tasks.at(framework->id()))) {
+    for (auto [_, task] : utils::copy(slave->tasks.at(framework->id()))) {
       // Remove tasks that belong to this framework.
       if (task->framework_id() == framework->id()) {
         // A framework might not actually exist because the master failed
@@ -10712,7 +10712,7 @@ void Master::addSlave(
       continue;
     }
 
-    foreachvalue (Task* task, slave->tasks[frameworkId]) {
+    for (auto [_, task] : slave->tasks[frameworkId]) {
       framework->addTask(task);
     }
   }
@@ -10726,11 +10726,11 @@ void Master::addSlave(
   //
   // TODO(vinod): Reconcile the notion of a completed framework across
   // the master and slave.
-  foreach (Archive::Framework& completedFramework, completedFrameworks) {
+  for (auto& completedFramework : completedFrameworks) {
     Framework* framework = getFramework(
         completedFramework.framework_info().id());
 
-    foreach (Task& task, *completedFramework.mutable_tasks()) {
+    for (auto& task : *completedFramework.mutable_tasks()) {
       if (framework != nullptr) {
         VLOG(2) << "Re-adding completed task " << task.task_id()
                 << " of framework " << *framework
@@ -10868,7 +10868,7 @@ void Master::_removeSlave(
       << "Framework " << frameworkId << " not found while removing agent "
       << *slave << "; agent tasks: " << slave->tasks;
 
-    foreachvalue (Task* task, utils::copy(slave->tasks.at(frameworkId))) {
+    for (auto [_, task] : utils::copy(slave->tasks.at(frameworkId))) {
       // TODO(bmahler): Differentiate between agent removal reasons
       // (e.g. unhealthy vs. unregistered for maintenance).
       const StatusUpdate& update = protobuf::createStatusUpdate(
@@ -10903,13 +10903,13 @@ void Master::_removeSlave(
     }
   }
 
-  foreach (Offer* offer, utils::copy(slave->offers)) {
+  for (auto* offer : utils::copy(slave->offers)) {
     rescindOffer(offer);
   }
 
   // Remove inverse offers because sending them for a slave that is
   // gone doesn't make sense.
-  foreach (InverseOffer* inverseOffer, utils::copy(slave->inverseOffers)) {
+  for (auto* inverseOffer : utils::copy(slave->inverseOffers)) {
     // We don't need to update the allocator because we've already called
     // `RemoveSlave()`.
     // Remove and rescind inverse offers.
@@ -10932,7 +10932,7 @@ void Master::_removeSlave(
   // TODO(bevers): The operations removed here are implicitly transitioned
   // to `OPERATION_UNKNOWN` state, but we don't have a corresponding metric
   // for that, nor is it the correct state.
-  foreachvalue (Operation* operation, utils::copy(slave->operations)) {
+  for (auto [_, operation] : utils::copy(slave->operations)) {
     removeOperation(operation);
   }
 
@@ -11013,7 +11013,7 @@ void Master::__removeSlave(
       newTaskReason = TaskStatus::REASON_SLAVE_REMOVED_BY_OPERATOR;
     }
 
-    foreachvalue (Task* task, utils::copy(slave->tasks.at(frameworkId))) {
+    for (auto [_, task] : utils::copy(slave->tasks.at(frameworkId))) {
       const StatusUpdate& update = protobuf::createStatusUpdate(
           task->framework_id(),
           task->slave_id(),
@@ -11052,13 +11052,13 @@ void Master::__removeSlave(
     }
   }
 
-  foreach (Offer* offer, utils::copy(slave->offers)) {
+  for (auto* offer : utils::copy(slave->offers)) {
     rescindOffer(offer);
   }
 
   // Remove inverse offers because sending them for a slave that is
   // unreachable doesn't make sense.
-  foreach (InverseOffer* inverseOffer, utils::copy(slave->inverseOffers)) {
+  for (auto* inverseOffer : utils::copy(slave->inverseOffers)) {
     // We don't need to update the allocator because we've already called
     // `RemoveSlave()`.
     // Remove and rescind inverse offers.
@@ -11081,7 +11081,7 @@ void Master::__removeSlave(
     OPERATION_UNREACHABLE :
     OPERATION_GONE_BY_OPERATOR;
 
-  foreachvalue (Operation* operation, utils::copy(slave->operations)) {
+  for (auto [_, operation] : utils::copy(slave->operations)) {
     metrics->incrementOperationState(
         operation->info().type(),
         transitionState);
@@ -12028,7 +12028,7 @@ SlaveID Master::newSlaveId()
 double Master::_const_slaves_connected() const
 {
   double count = 0.0;
-  foreachvalue (Slave* slave, slaves.registered) {
+  for (auto [_, slave] : slaves.registered) {
     if (slave->connected) {
       count++;
     }
@@ -12045,7 +12045,7 @@ double Master::_slaves_connected()
 double Master::_const_slaves_disconnected() const
 {
   double count = 0.0;
-  foreachvalue (Slave* slave, slaves.registered) {
+  for (auto [_, slave] : slaves.registered) {
     if (!slave->connected) {
       count++;
     }
@@ -12063,7 +12063,7 @@ double Master::_slaves_disconnected()
 double Master::_const_slaves_active() const
 {
   double count = 0.0;
-  foreachvalue (Slave* slave, slaves.registered) {
+  for (auto [_, slave] : slaves.registered) {
     if (slave->active) {
       count++;
     }
@@ -12081,7 +12081,7 @@ double Master::_slaves_active()
 double Master::_const_slaves_inactive() const
 {
   double count = 0.0;
-  foreachvalue (Slave* slave, slaves.registered) {
+  for (auto [_, slave] : slaves.registered) {
     if (!slave->active) {
       count++;
     }
@@ -12111,7 +12111,7 @@ double Master::_slaves_unreachable()
 double Master::_frameworks_connected()
 {
   double count = 0.0;
-  foreachvalue (Framework* framework, frameworks.registered) {
+  for (auto [_, framework] : frameworks.registered) {
     if (framework->connected()) {
       count++;
     }
@@ -12123,7 +12123,7 @@ double Master::_frameworks_connected()
 double Master::_frameworks_disconnected()
 {
   double count = 0.0;
-  foreachvalue (Framework* framework, frameworks.registered) {
+  for (auto [_, framework] : frameworks.registered) {
     if (!framework->connected()) {
       count++;
     }
@@ -12135,7 +12135,7 @@ double Master::_frameworks_disconnected()
 double Master::_frameworks_active()
 {
   double count = 0.0;
-  foreachvalue (Framework* framework, frameworks.registered) {
+  for (auto [_, framework] : frameworks.registered) {
     if (framework->active()) {
       count++;
     }
@@ -12147,7 +12147,7 @@ double Master::_frameworks_active()
 double Master::_frameworks_inactive()
 {
   double count = 0.0;
-  foreachvalue (Framework* framework, frameworks.registered) {
+  for (auto [_, framework] : frameworks.registered) {
     if (!framework->active()) {
       count++;
     }
@@ -12160,10 +12160,10 @@ double Master::_tasks_staging()
 {
   double count = 0.0;
 
-  foreachvalue (Slave* slave, slaves.registered) {
+  for (auto [_, slave] : slaves.registered) {
     typedef hashmap<TaskID, Task*> TaskMap;
-    foreachvalue (const TaskMap& tasks, slave->tasks) {
-      foreachvalue (const Task* task, tasks) {
+    for (const auto& [_, tasks] : slave->tasks) {
+      for (const auto& [_, task] : tasks) {
         if (task->state() == TASK_STAGING) {
           count++;
         }
@@ -12179,10 +12179,10 @@ double Master::_tasks_starting()
 {
   double count = 0.0;
 
-  foreachvalue (Slave* slave, slaves.registered) {
+  for (auto [_, slave] : slaves.registered) {
     typedef hashmap<TaskID, Task*> TaskMap;
-    foreachvalue (const TaskMap& tasks, slave->tasks) {
-      foreachvalue (const Task* task, tasks) {
+    for (const auto& [_, tasks] : slave->tasks) {
+      for (const auto& [_, task] : tasks) {
         if (task->state() == TASK_STARTING) {
           count++;
         }
@@ -12198,10 +12198,10 @@ double Master::_tasks_running()
 {
   double count = 0.0;
 
-  foreachvalue (Slave* slave, slaves.registered) {
+  for (auto [_, slave] : slaves.registered) {
     typedef hashmap<TaskID, Task*> TaskMap;
-    foreachvalue (const TaskMap& tasks, slave->tasks) {
-      foreachvalue (const Task* task, tasks) {
+    for (const auto& [_, tasks] : slave->tasks) {
+      for (const auto& [_, task] : tasks) {
         if (task->state() == TASK_RUNNING) {
           count++;
         }
@@ -12217,8 +12217,8 @@ double Master::_tasks_unreachable()
 {
   double count = 0.0;
 
-  foreachvalue (Framework* framework, frameworks.registered) {
-    foreachvalue (const Owned<Task>& task, framework->unreachableTasks) {
+  for (auto [_, framework] : frameworks.registered) {
+    for (const auto& [_, task] : framework->unreachableTasks) {
       if (task->state() == TASK_UNREACHABLE) {
         count++;
       }
@@ -12233,10 +12233,10 @@ double Master::_tasks_killing()
 {
   double count = 0.0;
 
-  foreachvalue (Slave* slave, slaves.registered) {
+  for (auto [_, slave] : slaves.registered) {
     typedef hashmap<TaskID, Task*> TaskMap;
-    foreachvalue (const TaskMap& tasks, slave->tasks) {
-      foreachvalue (const Task* task, tasks) {
+    for (const auto& [_, tasks] : slave->tasks) {
+      for (const auto& [_, task] : tasks) {
         if (task->state() == TASK_KILLING) {
           count++;
         }
@@ -12252,8 +12252,8 @@ double Master::_resources_total(const string& name)
 {
   double total = 0.0;
 
-  foreachvalue (Slave* slave, slaves.registered) {
-    foreach (const Resource& resource, slave->info.resources()) {
+  for (auto [_, slave] : slaves.registered) {
+    for (const Resource& resource : slave->info.resources()) {
       if (resource.name() == name && resource.type() == Value::SCALAR) {
         total += resource.scalar().value();
       }
@@ -12268,12 +12268,12 @@ double Master::_resources_used(const string& name)
 {
   double used = 0.0;
 
-  foreachvalue (Slave* slave, slaves.registered) {
+  for (auto [_, slave] : slaves.registered) {
     // We use `Resources` arithmetic to accummulate the resources since the
     // `+=` operator de-duplicates the same shared resources across frameworks.
     Resources slaveUsed;
 
-    foreachvalue (const Resources& resources, slave->usedResources) {
+    for (const auto& [_, resources] : slave->usedResources) {
       slaveUsed += resources.nonRevocable();
     }
 
@@ -12301,8 +12301,8 @@ double Master::_resources_revocable_total(const string& name)
 {
   double total = 0.0;
 
-  foreachvalue (Slave* slave, slaves.registered) {
-    foreach (const Resource& resource, slave->totalResources.revocable()) {
+  for (auto [_, slave] : slaves.registered) {
+    for (const Resource& resource : slave->totalResources.revocable()) {
       if (resource.name() == name && resource.type() == Value::SCALAR) {
         total += resource.scalar().value();
       }
@@ -12317,12 +12317,12 @@ double Master::_resources_revocable_used(const string& name)
 {
   double used = 0.0;
 
-  foreachvalue (Slave* slave, slaves.registered) {
+  for (auto [_, slave] : slaves.registered) {
     // We use `Resources` arithmetic to accummulate the resources since the
     // `+=` operator de-duplicates the same shared resources across frameworks.
     Resources slaveUsed;
 
-    foreachvalue (const Resources& resources, slave->usedResources) {
+    for (const auto& [_, resources] : slave->usedResources) {
       slaveUsed += resources.revocable();
     }
 
@@ -12354,7 +12354,7 @@ void Master::Subscribers::send(
   VLOG(1) << "Notifying all active subscribers about " << event.type()
           << " event";
 
-  foreachvalue (const Owned<Subscriber>& subscriber, subscribed) {
+  for (const auto& [_, subscriber] : subscribed) {
     subscriber->send(event, frameworkInfo, task);
   }
 }
@@ -12569,12 +12569,12 @@ Slave::Slave(
   CHECK_SOME(resources);
   totalResources = resources.get();
 
-  foreach (ExecutorInfo& executorInfo, executorInfos) {
+  for (auto& executorInfo : executorInfos) {
     CHECK(executorInfo.has_framework_id());
     addExecutor(executorInfo.framework_id(), std::move(executorInfo));
   }
 
-  foreach (Task& task, tasks) {
+  for (auto& task : tasks) {
     addTask(new Task(std::move(task)));
   }
 }
@@ -12607,7 +12607,7 @@ void Slave::addTask(Task* task)
 
   // Verify that Resource.AllocationInfo is set,
   // this should be guaranteed by the master.
-  foreach (const Resource& resource, task->resources()) {
+  for (const Resource& resource : task->resources()) {
     CHECK(resource.has_allocation_info());
   }
 
@@ -12864,7 +12864,7 @@ Operation* Slave::getOperation(const UUID& uuid) const
     return operations.at(uuid);
   }
 
-  foreachvalue (const ResourceProvider& resourceProvider, resourceProviders) {
+  for (const auto& [_, resourceProvider] : resourceProviders) {
     if (resourceProvider.operations.contains(uuid)) {
       return resourceProvider.operations.at(uuid);
     }
@@ -12927,7 +12927,7 @@ void Slave::addExecutor(const FrameworkID& frameworkId,
 
   // Verify that Resource.AllocationInfo is set,
   // this should be guaranteed by the master.
-  foreach (const Resource& resource, executorInfo.resources()) {
+  for (const Resource& resource : executorInfo.resources()) {
     CHECK(resource.has_allocation_info());
   }
 
@@ -12966,7 +12966,7 @@ void Slave::apply(const vector<ResourceConversion>& conversions)
 
   // Also apply the conversion to the explicitly maintained resource
   // provider resources.
-  foreach (const ResourceConversion& conversion, conversions) {
+  for (const auto& conversion : conversions) {
     Result<ResourceProviderID> providerId =
       getResourceProviderId(conversion.consumed);
 

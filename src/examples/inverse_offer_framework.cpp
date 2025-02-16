@@ -246,7 +246,7 @@ private:
     // with the least expected uptime (i.e. next to be maintained).
     // We'll see if we can migrate this sleep task.
     Option<AgentID> riskiestAgent;
-    foreachpair (const AgentID& agentId, const SleeperInfo& sleeper, sleepers) {
+    for (const auto& [agentId, sleeper] : sleepers) {
       if (riskiestAgent.isSome()) {
         if (sleeper.unavailability.nanoseconds() <
             sleepers[riskiestAgent.get()].unavailability.nanoseconds()) {
@@ -257,7 +257,7 @@ private:
       }
     }
 
-    foreach (const Offer& offer, offers) {
+    for (const auto& offer : offers) {
       const Resources taskResources = [this]() {
         Resources resources = Resources::parse(
             "cpus:" + stringify(CPUS_PER_TASK) +
@@ -372,7 +372,7 @@ private:
 
   void inverseOffers(const std::vector<InverseOffer>& offers)
   {
-    foreach (const InverseOffer& offer, offers) {
+    for (const auto& offer : offers) {
       if (!sleepers.contains(offer.agent_id())) {
         LOG(INFO) << "Inverse offer received for " << offer.agent_id()
                   << " which does not hold an active sleep task.";
@@ -590,7 +590,7 @@ int main(int argc, char** argv)
   mesos::internal::logging::initialize(argv[0], true, flags); // Catch signals.
 
   // Log any flag warnings.
-  foreach (const flags::Warning& warning, load->warnings) {
+  for (const auto& warning : load->warnings) {
     LOG(WARNING) << warning.message;
   }
 

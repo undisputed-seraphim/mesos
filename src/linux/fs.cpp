@@ -76,7 +76,7 @@ Try<bool> supported(const string& fsname)
   // Each line of /proc/filesystems is "nodev" + "\t" + "fsname", and the
   // field "nodev" is optional. For the details, check the kernel src code:
   // https://github.com/torvalds/linux/blob/2101ae42899a14fe7caa73114e2161e778328661/fs/filesystems.c#L222-L237 NOLINT(whitespace/line_length)
-  foreach (const string& line, strings::tokenize(lines.get(), "\n")) {
+  for (const auto& line : strings::tokenize(lines.get(), "\n")) {
     vector<string> tokens = strings::tokenize(line, "\t");
     if (tokens.size() != 1 && tokens.size() != 2) {
       return Error("Failed to parse /proc/filesystems: '" + line + "'");
@@ -179,7 +179,7 @@ Try<MountInfoTable> MountInfoTable::read(
 {
   MountInfoTable table;
 
-  foreach (const string& line, strings::tokenize(lines, "\n")) {
+  for (const auto& line : strings::tokenize(lines, "\n")) {
     Try<Entry> parse = MountInfoTable::Entry::parse(line);
     if (parse.isError()) {
       return Error("Failed to parse entry '" + line + "': " + parse.error());
@@ -269,7 +269,7 @@ Try<MountInfoTable::Entry> MountInfoTable::findByTarget(
   // achieve that by doing a reverse traverse of the mount table to
   // find the first entry whose target is a prefix of the specified
   // 'realTarget'.
-  foreach (const Entry& entry, adaptor::reverse(entries)) {
+  for (const auto& entry : adaptor::reverse(entries)) {
     if (entry.target == realTarget.get()) {
       return entry;
     }
@@ -365,7 +365,7 @@ Try<MountInfoTable::Entry> MountInfoTable::Entry::parse(const string& s)
 
 Option<int> MountInfoTable::Entry::shared() const
 {
-  foreach (const string& token, strings::tokenize(optionalFields, " ")) {
+  for (const auto& token : strings::tokenize(optionalFields, " ")) {
     if (strings::startsWith(token, "shared:")) {
       Try<int> id = numify<int>(
           strings::remove(token, "shared:", strings::PREFIX));
@@ -381,7 +381,7 @@ Option<int> MountInfoTable::Entry::shared() const
 
 Option<int> MountInfoTable::Entry::master() const
 {
-  foreach (const string& token, strings::tokenize(optionalFields, " ")) {
+  for (const auto& token : strings::tokenize(optionalFields, " ")) {
     if (strings::startsWith(token, "master:")) {
       Try<int> id = numify<int>(
           strings::remove(token, "master:", strings::PREFIX));
@@ -726,7 +726,7 @@ Try<Nothing> enter(const string& root)
   // The old root is now relative to chroot so remove the chroot path.
   const string relativeOld = strings::remove(old.get(), root, strings::PREFIX);
 
-  foreach (const fs::MountTable::Entry& entry, mountTable->entries) {
+  for (const auto& entry : mountTable->entries) {
     // TODO(idownes): sort the entries and remove depth first so we
     // don't rely on the lazy umount and can check the status.
     if (strings::startsWith(entry.dir, relativeOld)) {

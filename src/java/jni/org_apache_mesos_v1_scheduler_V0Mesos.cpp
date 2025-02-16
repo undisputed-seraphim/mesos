@@ -439,7 +439,7 @@ void V0ToV1AdapterProcess::resourceOffers(const vector<Offer>& _offers)
 
   Event::Offers* offers = event.mutable_offers();
 
-  foreach (const Offer& offer, _offers) {
+  for (const auto& offer : _offers) {
     offers->add_offers()->CopyFrom(evolve(offer));
   }
 
@@ -580,12 +580,12 @@ void V0ToV1AdapterProcess::send(SchedulerDriver* driver, const Call& _call)
 
     case scheduler::Call::ACCEPT: {
       vector<OfferID> offerIds;
-      foreach (const OfferID& offerId, call.accept().offer_ids()) {
+      for (const auto& offerId : call.accept().offer_ids()) {
         offerIds.emplace_back(offerId);
       }
 
       vector<Offer::Operation> operations;
-      foreach (const Offer::Operation& operation, call.accept().operations()) {
+      for (const auto& operation : call.accept().operations()) {
         operations.emplace_back(operation);
       }
 
@@ -608,7 +608,7 @@ void V0ToV1AdapterProcess::send(SchedulerDriver* driver, const Call& _call)
     }
 
     case scheduler::Call::DECLINE: {
-      foreach (const OfferID& offerId, call.decline().offer_ids()) {
+      for (const auto& offerId : call.decline().offer_ids()) {
         if (call.decline().has_filters()) {
           driver->declineOffer(offerId, call.decline().filters());
         } else {
@@ -672,7 +672,7 @@ void V0ToV1AdapterProcess::send(SchedulerDriver* driver, const Call& _call)
     case scheduler::Call::REQUEST: {
       vector<Request> requests;
 
-      foreach (const Request& request, call.request().requests()) {
+      for (const auto& request : call.request().requests()) {
         requests.emplace_back(request);
       }
 

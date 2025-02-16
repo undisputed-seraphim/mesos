@@ -297,12 +297,12 @@ protected:
     message.mutable_framework_id()->MergeFrom(frameworkId);
 
     // Send all unacknowledged updates.
-    foreachvalue (const StatusUpdate& update, updates) {
+    for (const auto& [_, update] : updates) {
       message.add_updates()->MergeFrom(update);
     }
 
     // Send all unacknowledged tasks.
-    foreachvalue (const TaskInfo& task, tasks) {
+    for (const auto& [_, task] : tasks) {
       message.add_tasks()->MergeFrom(task);
     }
 
@@ -689,7 +689,7 @@ MesosExecutorDriver::MesosExecutorDriver(
   // TODO(alexr): This should be supported by `FlagsBase`, see MESOS-9001.
   std::map<std::string, std::string> env;
 
-  foreachpair (const string& key, const string& value, environment) {
+  for (const auto& [key, value] : environment) {
     if (strings::startsWith(key, "MESOS_")) {
       env.emplace(key, value);
     }
@@ -717,7 +717,7 @@ MesosExecutorDriver::MesosExecutorDriver(
   }
 
   // Log any flag warnings (after logging is initialized).
-  foreach (const flags::Warning& warning, load->warnings) {
+  for (const auto& warning : load->warnings) {
     LOG(WARNING) << warning.message;
   }
 

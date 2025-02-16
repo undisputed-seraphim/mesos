@@ -165,7 +165,7 @@ Try<Nothing> CSIServerProcess::initializePlugin(const Option<string>& name)
   // initialize the plugin(s) based on the configuration(s) found.
   hashmap<string, CSIPluginInfo> pluginConfigs;
 
-  foreach (const string& entry, entries.get()) {
+  for (const auto& entry : entries.get()) {
     const string path = path::join(pluginConfigDir, entry);
 
     // Ignore directory entries.
@@ -217,7 +217,7 @@ Try<Nothing> CSIServerProcess::initializePlugin(const Option<string>& name)
         pluginConfigDir + "'");
   }
 
-  foreachpair (const string& _name, const CSIPluginInfo& info, pluginConfigs) {
+  for (const auto& [_name, info] : pluginConfigs) {
     // Default-construct the plugin struct so that we have a valid runtime
     // to pass into the service manager.
     plugins.put(_name, CSIPlugin(info, "csi_plugins/" + _name + "/"));
@@ -458,7 +458,7 @@ hashset<CSIPluginContainerInfo::Service> extractServices(
   hashset<CSIPluginContainerInfo::Service> result;
 
   if (plugin.containers_size() > 0) {
-    foreach (const CSIPluginContainerInfo& container, plugin.containers()) {
+    for (const auto& container : plugin.containers()) {
       for (int i = 0; i < container.services_size(); ++i) {
         result.insert(container.services(i));
       }
@@ -466,7 +466,7 @@ hashset<CSIPluginContainerInfo::Service> extractServices(
   } else {
     CHECK(plugin.endpoints_size() > 0);
 
-    foreach (const CSIPluginEndpoint& endpoint, plugin.endpoints()) {
+    for (const auto& endpoint : plugin.endpoints()) {
       result.insert(endpoint.csi_service());
     }
   }

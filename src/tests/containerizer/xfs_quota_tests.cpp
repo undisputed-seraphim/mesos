@@ -1359,7 +1359,7 @@ TEST_P(ROOT_XFS_QuotaEnforcement, ResourceStatistics)
 
     EXPECT_EQ(1, usage->disk_statistics().size());
 
-    foreach (const DiskStatistics& statistics, usage->disk_statistics()) {
+    for (const auto& statistics : usage->disk_statistics()) {
       ASSERT_TRUE(statistics.has_limit_bytes());
       ASSERT_TRUE(statistics.has_used_bytes());
 
@@ -1543,7 +1543,7 @@ TEST_P(ROOT_XFS_QuotaEnforcement, ResourceStatisticsNoEnforce)
 
     EXPECT_EQ(1, usage->disk_statistics().size());
 
-    foreach (const DiskStatistics& statistics, usage->disk_statistics()) {
+    for (const auto& statistics : usage->disk_statistics()) {
       ASSERT_TRUE(statistics.has_limit_bytes());
       ASSERT_TRUE(statistics.has_used_bytes());
 
@@ -1733,7 +1733,7 @@ TEST_P(ROOT_XFS_QuotaEnforcement, NoCheckpointRecovery)
 
   // Scan the remaining sandboxes and check that project ID is still
   // assigned and that the quota is set.
-  foreach (const string& sandbox, sandboxes.get()) {
+  for (const auto& sandbox : sandboxes.get()) {
     // Skip the "latest" symlink.
     if (os::stat::islink(sandbox)) {
       continue;
@@ -1764,7 +1764,7 @@ TEST_P(ROOT_XFS_QuotaEnforcement, NoCheckpointRecovery)
 
     ASSERT_SOME(dirs);
 
-    foreach (const string& dir, dirs.get()) {
+    for (const auto& dir : dirs.get()) {
       Result<prid_t> projectId = xfs::getProjectId(dir);
       ASSERT_FALSE(projectId.isError()) << projectId.error();
 
@@ -1924,7 +1924,7 @@ TEST_P(ROOT_XFS_QuotaEnforcement, CheckpointRecovery)
 
   // Scan the remaining sandboxes. We ought to still have project IDs
   // assigned to them all.
-  foreach (const string& sandbox, sandboxes.get()) {
+  for (const auto& sandbox : sandboxes.get()) {
     // Skip the "latest" symlink.
     if (os::stat::islink(sandbox)) {
       continue;
@@ -1954,7 +1954,7 @@ TEST_P(ROOT_XFS_QuotaEnforcement, CheckpointRecovery)
     ASSERT_SOME(dirs);
     EXPECT_FALSE(dirs->empty());
 
-    foreach (const string& dir, dirs.get()) {
+    for (const auto& dir : dirs.get()) {
       Result<prid_t> projectId = xfs::getProjectId(dir);
       ASSERT_FALSE(projectId.isError()) << projectId.error();
 
@@ -2338,7 +2338,7 @@ TEST_P(ROOT_XFS_QuotaEnforcement, ProjectIdReclaiming)
   // assigned and the quota is set.
   Option<prid_t> usedProjectId;
 
-  foreach (const string& sandbox, sandboxes.get()) {
+  for (const auto& sandbox : sandboxes.get()) {
     if (!os::stat::islink(sandbox)) {
       Result<prid_t> projectId = xfs::getProjectId(sandbox);
       ASSERT_SOME(projectId);
@@ -2406,7 +2406,7 @@ TEST_P(ROOT_XFS_QuotaEnforcement, ProjectIdReclaiming)
   sandboxes = getSandboxes();
   ASSERT_SOME(sandboxes);
   EXPECT_EQ(2u, sandboxes->size());
-  foreach (const string& sandbox, sandboxes.get()) {
+  for (const auto& sandbox : sandboxes.get()) {
     // Skip the "latest" symlink.
     if (!os::stat::islink(sandbox)) {
       EXPECT_SOME_EQ(usedProjectId.get(), xfs::getProjectId(sandbox));

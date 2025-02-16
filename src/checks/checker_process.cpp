@@ -107,7 +107,7 @@ static pid_t cloneWithSetns(
 {
   auto child = [=]() -> int {
     if (taskPid.isSome()) {
-      foreach (const string& ns, namespaces) {
+      for (const auto& ns : namespaces) {
         Try<Nothing> setns = ns::setns(taskPid.get(), ns);
         if (setns.isError()) {
           // This effectively aborts the check.
@@ -586,7 +586,7 @@ Future<int> CheckerProcess::dockerCommandCheck(
   dockerCmd.set_shell(false);
   dockerCmd.set_value(commandArguments[0]);
   dockerCmd.clear_arguments();
-  foreach (const string& argument, commandArguments) {
+  for (const auto& argument : commandArguments) {
     dockerCmd.add_arguments(argument);
   }
 

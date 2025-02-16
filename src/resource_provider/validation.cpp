@@ -92,7 +92,7 @@ Option<Error> validate(
       }
 
       if (resourceProviderInfo.isSome() && resourceProviderInfo->has_id()) {
-        foreach (const Resource& resource, call.update_state().resources()) {
+        for (const Resource& resource : call.update_state().resources()) {
           if (!resource.has_provider_id() ||
               resource.provider_id() != resourceProviderInfo->id()) {
             return Error("Inconsistent resource provider ID in 'update_state'");

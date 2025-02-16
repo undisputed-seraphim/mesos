@@ -138,7 +138,7 @@ static Future<http::Response> curl(
   }
 
   // Add additional headers.
-  foreachpair (const string& key, const string& value, headers) {
+  for (const auto& [key, value] : headers) {
     argv.push_back("-H");
     argv.push_back(key + ": " + value);
   }
@@ -267,7 +267,7 @@ static Future<int> download(
   };
 
   // Add additional headers.
-  foreachpair (const string& key, const string& value, headers) {
+  for (const auto& [key, value] : headers) {
     argv.push_back("-H");
     argv.push_back(key + ": " + value);
   }
@@ -404,7 +404,7 @@ static http::Headers getAuthHeaderBasic(
     ? uri.host() + ":" + stringify(uri.port())
     : uri.host();
 
-  foreachpair (const string& key, const spec::Config::Auth& value, auths) {
+  for (const auto& [key, value] : auths) {
     // Handle domains including 'docker.io' as a special case,
     // because the url is set differently for different version
     // of docker default registry, but all of them should depend
@@ -956,7 +956,7 @@ Future<Nothing> DockerFetcherPluginProcess::fetchBlobs(
 {
   vector<Future<Nothing>> futures;
 
-  foreach (const string& digest, digests) {
+  for (const auto& digest : digests) {
     URI blob = uri::docker::blob(
         uri.path(),                         // The 'repository'.
         digest,                             // The 'digest'.

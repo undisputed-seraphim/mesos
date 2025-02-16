@@ -166,7 +166,7 @@ Try<Nothing> Fetcher::validateOutputFile(const string& path)
 
 static Try<Nothing> validateUris(const CommandInfo& commandInfo)
 {
-  foreach (const CommandInfo::URI& uri, commandInfo.uris()) {
+  for (const auto& uri : commandInfo.uris()) {
     Try<Nothing> uriValidation = Fetcher::validateUri(uri.value());
     if (uriValidation.isError()) {
       return Error(uriValidation.error());
@@ -413,7 +413,7 @@ Future<Nothing> FetcherProcess::fetch(
   // times, then we simply add references the initial entry.
   hashmap<string, shared_ptr<Cache::Entry>> newEntries;
 
-  foreach (const CommandInfo::URI& uri, commandInfo.uris()) {
+  for (const auto& uri : commandInfo.uris()) {
     if (!uri.cache()) {
       entries[uri] = None();
       continue;
@@ -584,7 +584,7 @@ Future<Nothing> FetcherProcess::__fetch(
 
       LOG(ERROR) << "Failed to run mesos-fetcher: " << future.failure();
 
-      foreachvalue (const Option<shared_ptr<Cache::Entry>>& entry, entries) {
+      for (const auto& [_, entry] : entries) {
         if (entry.isSome()) {
           entry.get()->unreference();
 
@@ -605,7 +605,7 @@ Future<Nothing> FetcherProcess::__fetch(
     .then(defer(self(), [=]() {
       ++metrics.task_fetches_succeeded;
 
-      foreachvalue (const Option<shared_ptr<Cache::Entry>>& entry, entries) {
+      for (const auto& [_, entry] : entries) {
         if (entry.isSome()) {
           entry.get()->unreference();
 
@@ -866,7 +866,7 @@ Future<Nothing> FetcherProcess::run(
   };
 
   map<string, string> environment;
-  foreachpair (const string& key, const string& value, os::environment()) {
+  for (const auto& [key, value] : os::environment()) {
     if (whitelist.contains(strings::upper(key)) ||
         (!startsWith(key, "LIBPROCESS_") && !startsWith(key, "MESOS_"))) {
       environment.emplace(key, value);
@@ -1153,7 +1153,7 @@ FetcherProcess::Cache::selectVictims(const Bytes& requiredSpace)
 
   Bytes space = 0;
 
-  foreach (const shared_ptr<Cache::Entry>& entry, lruSortedEntries) {
+  for (const auto& entry : lruSortedEntries) {
     if (!entry->isReferenced()) {
       victims.push_back(entry);
 
@@ -1183,7 +1183,7 @@ Try<Nothing> FetcherProcess::Cache::reserve(
       return Error("Could not free up enough fetcher cache space");
     }
 
-    foreach (const shared_ptr<Cache::Entry>& entry, victims.get()) {
+    for (const auto& entry : victims.get()) {
       Try<Nothing> removal = remove(entry);
       if (removal.isError()) {
         return Error(removal.error());

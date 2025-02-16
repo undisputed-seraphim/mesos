@@ -71,7 +71,7 @@ Future<string> DriverClient::mount(
     "--volumename=" + name,
   };
 
-  foreachpair (const string& key, const string& value, options) {
+  for (const auto& [key, value] : options) {
     argv.push_back("--volumeopts=" + key + "=" + value);
   }
 

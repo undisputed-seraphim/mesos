@@ -117,7 +117,7 @@ Try<Isolator*> Cgroups2IsolatorProcess::create(
       controllersToCreate.insert(creator);
     }
   } else {
-    foreach (string isolator, strings::tokenize(flags.isolation, ",")) {
+    for (auto isolator : strings::tokenize(flags.isolation, ",")) {
       if (!strings::startsWith(isolator, "cgroups/")) {
         // Skip when the isolator is not related to cgroups.
         continue;
@@ -134,7 +134,7 @@ Try<Isolator*> Cgroups2IsolatorProcess::create(
     }
   }
 
-  foreach (const string& controllerName, controllersToCreate) {
+  for (const auto& controllerName : controllersToCreate) {
     if (creators.count(controllerName) == 0
         && creatorsWithDeviceManager.count(controllerName) == 0) {
       return Error(
@@ -239,7 +239,7 @@ Future<Option<ContainerLaunchInfo>> Cgroups2IsolatorProcess::prepare(
 
   vector<Future<Nothing>> prepares;
   hashset<string> skip_enable = {"core", "perf_event", "devices"};
-  foreachvalue (const Owned<Controller>& controller, controllers) {
+  for (const auto& [_, controller] : controllers) {
     // The "core", "perf_event" and "devices" controllers do not exist in
     // cgroup.controllers file, and therefore we cannot call
     // cgroups2::controllers::enable with it as it cannot be written into
@@ -251,7 +251,7 @@ Future<Option<ContainerLaunchInfo>> Cgroups2IsolatorProcess::prepare(
           strings::remove(nonLeafCgroup, flags.cgroups_root, strings::PREFIX),
           "/");
       string current_cgroup = flags.cgroups_root;
-      foreach (const string& token, cgroup_tokens) {
+      for (const auto& token : cgroup_tokens) {
         current_cgroup = path::join(current_cgroup, token);
         Try<Nothing> enable =
           cgroups2::controllers::enable(current_cgroup, {controller->name()});
@@ -346,7 +346,7 @@ Future<Option<ContainerLaunchInfo>> Cgroups2IsolatorProcess::_prepare(
     const vector<Future<Nothing>>& futures)
 {
   vector<string> errors;
-  foreach (const Future<Nothing>& future, futures) {
+  for (const auto& future : futures) {
     if (!future.isReady()) {
       errors.push_back(future.isFailed() ? future.failure() : "discarded");
     }
@@ -434,7 +434,7 @@ Future<Nothing> Cgroups2IsolatorProcess::recover(
 {
   // Recover containers from checkpointed data:
   vector<Future<Nothing>> recovers;
-  foreach (const ContainerState& state, states) {
+  for (const auto& state : states) {
     const bool shareCgroups =
       state.container_id().has_parent() &&
       ((state.has_container_info() && state.container_info().has_linux_info() &&
@@ -450,7 +450,7 @@ Future<Nothing> Cgroups2IsolatorProcess::recover(
     .then(defer(self(), [=](const vector<Future<Nothing>>& futures)
         -> Future<Nothing> {
       vector<string> errors;
-      foreach (const Future<Nothing>& future, futures) {
+      for (const auto& future : futures) {
         if (!future.isReady()) {
           errors.push_back(future.isFailed() ? future.failure() : "discarded");
         }
@@ -484,7 +484,7 @@ Future<Nothing> Cgroups2IsolatorProcess::_recover(
                    + cgroups.error());
   }
 
-  foreach (const string& cgroup, *cgroups) {
+  for (const auto& cgroup : *cgroups) {
     if (cgroup == cgroups2_paths::agent(flags.cgroups_root)) {
       continue;
     }
@@ -508,11 +508,11 @@ Future<Nothing> Cgroups2IsolatorProcess::_recover(
   }
 
   vector<Future<Nothing>> recovers;
-  foreach (const ContainerID& containerId, knownOrphans) {
+  for (const auto& containerId : knownOrphans) {
     recovers.push_back(___recover(containerId));
   }
 
-  foreach (const ContainerID& containerId, unknownOrphans) {
+  for (const auto& containerId : unknownOrphans) {
     recovers.push_back(___recover(containerId));
   }
 
@@ -530,7 +530,7 @@ Future<Nothing> Cgroups2IsolatorProcess::__recover(
     const vector<Future<Nothing>>& futures)
 {
   vector<string> errors;
-  foreach (const Future<Nothing>& future, futures) {
+  for (const auto& future : futures) {
     if (!future.isReady()) {
       errors.push_back(future.isFailed() ? future.failure() : "discarded");
     }
@@ -543,7 +543,7 @@ Future<Nothing> Cgroups2IsolatorProcess::__recover(
   // Known orphan cgroups will be destroyed by the containerizer using
   // the normal cleanup path, but for unknown orphans we need to clean
   // them up here:
-  foreach (const ContainerID& containerId, unknownOrphans) {
+  for (const auto& containerId : unknownOrphans) {
     LOG(INFO) << "Cleaning up unknown orphaned container " << containerId;
     cleanup(containerId);
   }
@@ -619,7 +619,7 @@ Future<Nothing> Cgroups2IsolatorProcess::___recover(
 
   vector<Future<Nothing>> recovers;
   hashset<string> recoveredControllers;
-  foreachvalue (const Owned<Controller>& controller, controllers) {
+  for (const auto& [_, controller] : controllers) {
     if (enabled->count(controller->name()) == 0) {
       // Controller is expected to be enabled but isn't.
       LOG(WARNING) << "Controller '" << controller->name() << "' is not enabled"
@@ -652,7 +652,7 @@ Future<Nothing> Cgroups2IsolatorProcess::____recover(
   CHECK(!infos.contains(containerId));
 
   vector<string> errors;
-  foreach (const Future<Nothing>& future, futures) {
+  for (const auto& future : futures) {
     if (!future.isReady()) {
       errors.push_back(future.isFailed() ? future.failure() : "discarded");
     }
@@ -691,7 +691,7 @@ Future<Nothing> Cgroups2IsolatorProcess::isolate(
 
   // Move the process into the container's cgroup.
   if (infos.contains(containerId)) {
-    foreachvalue (const Owned<Controller> controller, controllers) {
+    for (const auto& [_, controller] : controllers) {
       isolates.push_back(controller->isolate(
           containerId,
           infos[containerId]->cgroup,
@@ -715,7 +715,7 @@ Future<Nothing> Cgroups2IsolatorProcess::_isolate(
     pid_t pid)
 {
   vector<string> errors;
-  foreach (const Future<Nothing>& future, futures) {
+  for (const auto& future : futures) {
     if (!future.isReady()) {
       errors.push_back(future.isFailed() ? future.failure() : "discarded");
     }
@@ -745,7 +745,7 @@ Future<ContainerLimitation> Cgroups2IsolatorProcess::watch(
     return Failure("Unknown container");
   }
 
-  foreachvalue (const Owned<Controller>& controller, controllers) {
+  for (const auto& [_, controller] : controllers) {
     if (infos[containerId]->controllers.contains(controller->name())) {
       controller->watch(containerId, infos[containerId]->cgroup)
         .onAny(defer(
@@ -795,7 +795,7 @@ Future<Nothing> Cgroups2IsolatorProcess::update(
   LOG(INFO) << "Updating controllers for cgroup"
             << " '" << infos[containerId]->cgroup << "'";
 
-  foreachvalue (const Owned<Controller>& controller, controllers) {
+  for (const auto& [_, controller] : controllers) {
     if (infos[containerId]->controllers.contains(controller->name())) {
       updates.push_back(controller->update(
           containerId,
@@ -817,7 +817,7 @@ Future<Nothing> Cgroups2IsolatorProcess::_update(
     const vector<Future<Nothing>>& futures)
 {
   vector<string> errors;
-  foreach (const Future<Nothing>& future, futures) {
+  for (const auto& future : futures) {
     if (!future.isReady()) {
       errors.push_back(future.isFailed() ? future.failure() : "discarded");
     }
@@ -840,7 +840,7 @@ Future<ResourceStatistics> Cgroups2IsolatorProcess::usage(
   }
 
   vector<Future<ResourceStatistics>> usages;
-  foreachvalue (const Owned<Controller>& controller, controllers) {
+  for (const auto& [_, controller] : controllers) {
     if (infos[containerId]->controllers.contains(controller->name())) {
       usages.push_back(controller->usage(
           containerId,
@@ -852,7 +852,7 @@ Future<ResourceStatistics> Cgroups2IsolatorProcess::usage(
     .then([containerId](const vector<Future<ResourceStatistics>>& _usages) {
       ResourceStatistics result;
 
-      foreach (const Future<ResourceStatistics>& statistics, _usages) {
+      for (const auto& statistics : _usages) {
         if (statistics.isReady()) {
           result.MergeFrom(statistics.get());
         } else {
@@ -882,7 +882,7 @@ Future<ContainerStatus> Cgroups2IsolatorProcess::status(
   }
 
   vector<Future<ContainerStatus>> statuses;
-  foreachvalue (const Owned<Controller>& controller, controllers) {
+  for (const auto& [_, controller] : controllers) {
     if (infos[containerId]->controllers.contains(controller->name())) {
       statuses.push_back(controller->status(
           containerId,
@@ -894,7 +894,7 @@ Future<ContainerStatus> Cgroups2IsolatorProcess::status(
     .then([containerId](const vector<Future<ContainerStatus>>& _statuses) {
       ContainerStatus result;
 
-      foreach (const Future<ContainerStatus>& status, _statuses) {
+      for (const auto& status : _statuses) {
         if (status.isReady()) {
           result.MergeFrom(status.get());
         } else {
@@ -918,7 +918,7 @@ Future<Nothing> Cgroups2IsolatorProcess::cleanup(
   }
 
   vector<Future<Nothing>> cleanups;
-  foreachvalue (const Owned<Controller>& controller, controllers) {
+  for (const auto& [_, controller] : controllers) {
     if (infos[containerId]->controllers.contains(controller->name())) {
       cleanups.push_back(controller->cleanup(
           containerId,
@@ -942,7 +942,7 @@ Future<Nothing> Cgroups2IsolatorProcess::_cleanup(
   CHECK(infos.contains(containerId));
 
   vector<string> errors;
-  foreach (const Future<Nothing>& future, futures) {
+  for (const auto& future : futures) {
     if (!future.isReady()) {
       errors.push_back(future.isFailed() ? future.failure() : "discarded");
     }

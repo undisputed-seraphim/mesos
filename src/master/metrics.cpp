@@ -337,7 +337,7 @@ Metrics::Metrics(const Master& master)
   // resources the slave exposes.
   const string resources[] = {"cpus", "gpus", "mem", "disk"};
 
-  foreach (const string& resource, resources) {
+  for (const auto& resource : resources) {
     PullGauge total(
         "master/" + resource + "_total",
         defer(master, &Master::_resources_total, resource));
@@ -359,7 +359,7 @@ Metrics::Metrics(const Master& master)
     process::metrics::add(percent);
   }
 
-  foreach (const string& resource, resources) {
+  for (const auto& resource : resources) {
     PullGauge total(
         "master/" + resource + "_revocable_total",
         defer(master, &Master::_resources_revocable_total, resource));
@@ -514,39 +514,39 @@ Metrics::~Metrics()
   process::metrics::remove(slave_unreachable_completed);
   process::metrics::remove(slave_unreachable_canceled);
 
-  foreach (const PullGauge& gauge, resources_total) {
+  for (const auto& gauge : resources_total) {
     process::metrics::remove(gauge);
   }
   resources_total.clear();
 
-  foreach (const PullGauge& gauge, resources_used) {
+  for (const auto& gauge : resources_used) {
     process::metrics::remove(gauge);
   }
   resources_used.clear();
 
-  foreach (const PullGauge& gauge, resources_percent) {
+  for (const auto& gauge : resources_percent) {
     process::metrics::remove(gauge);
   }
   resources_percent.clear();
 
-  foreach (const PullGauge& gauge, resources_revocable_total) {
+  for (const auto& gauge : resources_revocable_total) {
     process::metrics::remove(gauge);
   }
   resources_revocable_total.clear();
 
-  foreach (const PullGauge& gauge, resources_revocable_used) {
+  for (const auto& gauge : resources_revocable_used) {
     process::metrics::remove(gauge);
   }
   resources_revocable_used.clear();
 
-  foreach (const PullGauge& gauge, resources_revocable_percent) {
+  for (const auto& gauge : resources_revocable_percent) {
     process::metrics::remove(gauge);
   }
   resources_revocable_percent.clear();
 
-  foreachvalue (const auto& source_reason, tasks_states) {
-    foreachvalue (const auto& reason_counter, source_reason) {
-      foreachvalue (const Counter& counter, reason_counter) {
+  for (const auto& [_, source_reason] : tasks_states) {
+    for (const auto& [_, reason_counter] : source_reason) {
+      for (const auto& [_, counter] : reason_counter) {
         process::metrics::remove(counter);
       }
     }
@@ -831,12 +831,12 @@ FrameworkMetrics::~FrameworkMetrics()
   removeMetric(subscribed);
 
   removeMetric(calls);
-  foreachvalue (const Counter& counter, call_types) {
+  for (const auto& [_, counter] : call_types) {
     removeMetric(counter);
   }
 
   process::metrics::remove(events);
-  foreachvalue (const Counter& counter, event_types) {
+  for (const auto& [_, counter] : event_types) {
     removeMetric(counter);
   }
 
@@ -845,16 +845,16 @@ FrameworkMetrics::~FrameworkMetrics()
   removeMetric(offers_declined);
   removeMetric(offers_rescinded);
 
-  foreachvalue (const Counter& counter, terminal_task_states) {
+  for (const auto& [_, counter] : terminal_task_states) {
     removeMetric(counter);
   }
 
-  foreachvalue (const PushGauge& gauge, active_task_states) {
+  for (const auto& [_, gauge] : active_task_states) {
     removeMetric(gauge);
   }
 
   process::metrics::remove(operations);
-  foreachvalue (const Counter& counter, operation_types) {
+  for (const auto& [_, counter] : operation_types) {
     removeMetric(counter);
   }
 }

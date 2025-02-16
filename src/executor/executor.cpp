@@ -180,7 +180,7 @@ public:
     // TODO(alexr): This should be supported by `FlagsBase`, see MESOS-9001.
     std::map<std::string, std::string> mesosEnvironment;
 
-    foreachpair (const string& key, const string& value, environment) {
+    for (const auto& [key, value] : environment) {
       if (strings::startsWith(key, "MESOS_")) {
         mesosEnvironment.emplace(key, value);
       }
@@ -203,7 +203,7 @@ public:
     }
 
     // Log any flag warnings (after logging is initialized).
-    foreach (const flags::Warning& warning, load->warnings) {
+    for (const auto& warning : load->warnings) {
       LOG(WARNING) << warning.message;
     }
 

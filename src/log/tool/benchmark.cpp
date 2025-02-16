@@ -126,7 +126,7 @@ Try<Nothing> Benchmark::execute(int argc, char** argv)
     logging::initialize(argv[0], false, flags);
 
     // Log any flag warnings (after logging is initialized).
-    foreach (const flags::Warning& warning, load->warnings) {
+    for (const auto& warning : load->warnings) {
       LOG(WARNING) << warning.message;
     }
   }

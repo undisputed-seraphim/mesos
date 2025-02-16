@@ -97,7 +97,7 @@ google::protobuf::RepeatedPtrField<T1> devolve(
 {
   google::protobuf::RepeatedPtrField<T1> t1s;
 
-  foreach (const T2& t2, t2s) {
+  for (const auto& t2 : t2s) {
     t1s.Add()->CopyFrom(devolve(t2));
   }
 

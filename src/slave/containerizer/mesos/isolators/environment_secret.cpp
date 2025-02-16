@@ -131,7 +131,7 @@ Future<Option<ContainerLaunchInfo>> EnvironmentSecretIsolatorProcess::prepare(
         -> Future<Option<ContainerLaunchInfo>> {
       ContainerLaunchInfo launchInfo;
       Environment* environment = launchInfo.mutable_environment();
-      foreach (const Environment::Variable& variable, variables) {
+      for (const auto& variable : variables) {
         environment->add_variables()->CopyFrom(variable);
       }
       launchInfo.mutable_task_environment()->CopyFrom(*environment);

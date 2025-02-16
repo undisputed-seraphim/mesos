@@ -73,7 +73,7 @@ public:
 
   ~TestContainerizerProcess() override
   {
-    foreachvalue (const Owned<ExecutorData>& data, executors) {
+    for (const auto& [_, data] : executors) {
       if (data->driver.get() != nullptr) {
         data->driver->stop();
         data->driver->join();

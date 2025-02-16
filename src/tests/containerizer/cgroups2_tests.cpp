@@ -470,7 +470,7 @@ TEST_F(Cgroups2Test, ROOT_CGROUPS2_GetCgroups)
     path::join(TEST_CGROUP, "test3"),
   };
 
-  foreach (const string& cgroup, cgroups) {
+  for (const auto& cgroup : cgroups) {
     ASSERT_SOME(cgroups2::create(cgroup, true));
   }
 
@@ -651,12 +651,12 @@ TEST_P(DeviceControllerTestFixture, ROOT_CGROUPS2_DeviceController)
     }
 
     // Check that we can only do the "allowed_accesses".
-    foreach(const OpenArgs& args, allowed_accesses) {
+    for (const auto& args : allowed_accesses) {
       if (os::open(args.first, args.second).isError()) {
         SAFE_EXIT(EXIT_FAILURE, "Expected allowed read to succeed");
       }
     }
-    foreach(const OpenArgs& args, blocked_accesses) {
+    for (const auto& args : blocked_accesses) {
       if (os::open(args.first, args.second).isSome()) {
         SAFE_EXIT(EXIT_FAILURE, "Expected blocked read to fail");
       }
@@ -665,13 +665,13 @@ TEST_P(DeviceControllerTestFixture, ROOT_CGROUPS2_DeviceController)
     ASSERT_SOME(ebpf::cgroups2::detach(path, attached->at(0)));
 
     // Check that we can do both the "allowed_accesses" and "blocked_accesses".
-    foreach(const OpenArgs& args, allowed_accesses) {
+    for (const auto& args : allowed_accesses) {
       if (os::open(args.first, args.second).isError()) {
         SAFE_EXIT(EXIT_FAILURE, "Expected successful read after detaching"
           " device controller program");
       }
     }
-    foreach(const OpenArgs& args, blocked_accesses) {
+    for (const auto& args : blocked_accesses) {
       if (os::open(args.first, args.second).isError()) {
         SAFE_EXIT(EXIT_FAILURE, "Expected successful read after detaching"
           " device controller program");
@@ -854,12 +854,12 @@ TEST_F(Cgroups2Test, ROOT_CGROUPS2_AtomicReplace)
     }
 
     // Check that we can only do the "allowed_accesses".
-    foreach(const OpenArgs& args, allowed_accesses) {
+    for (const auto& args : allowed_accesses) {
       if (os::open(args.first, args.second).isError()) {
         SAFE_EXIT(EXIT_FAILURE, "Expected allowed read to succeed");
       }
     }
-    foreach(const OpenArgs& args, blocked_accesses) {
+    for (const auto& args : blocked_accesses) {
       if (os::open(args.first, args.second).isSome()) {
         SAFE_EXIT(EXIT_FAILURE, "Expected blocked read to fail");
       }
@@ -868,13 +868,13 @@ TEST_F(Cgroups2Test, ROOT_CGROUPS2_AtomicReplace)
     ASSERT_SOME(ebpf::cgroups2::detach(path, attached->at(0)));
 
     // Check that we can do both the "allowed_accesses" and "blocked_accesses".
-    foreach(const OpenArgs& args, allowed_accesses) {
+    for (const auto& args : allowed_accesses) {
       if (os::open(args.first, args.second).isError()) {
         SAFE_EXIT(EXIT_FAILURE, "Expected successful read after detaching"
                                 " device controller program");
       }
     }
-    foreach(const OpenArgs& args, blocked_accesses) {
+    for (const auto& args : blocked_accesses) {
       if (os::open(args.first, args.second).isError()) {
         SAFE_EXIT(EXIT_FAILURE, "Expected successful read after detaching"
                                 " device controller program");

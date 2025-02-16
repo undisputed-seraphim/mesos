@@ -161,7 +161,7 @@ TaskStatusUpdateManagerProcess::TaskStatusUpdateManagerProcess(
 TaskStatusUpdateManagerProcess::~TaskStatusUpdateManagerProcess()
 {
   foreachkey (const FrameworkID& frameworkId, streams) {
-    foreachvalue (TaskStatusUpdateStream* stream, streams[frameworkId]) {
+    for (auto [_, stream] : streams[frameworkId]) {
       delete stream;
     }
   }
@@ -189,7 +189,7 @@ void TaskStatusUpdateManagerProcess::resume()
   paused = false;
 
   foreachkey (const FrameworkID& frameworkId, streams) {
-    foreachvalue (TaskStatusUpdateStream* stream, streams[frameworkId]) {
+    for (auto [_, stream] : streams[frameworkId]) {
       if (!stream->pending.empty()) {
         const StatusUpdate& update = stream->pending.front();
         LOG(WARNING) << "Resending task status update " << update;
@@ -210,8 +210,8 @@ Future<Nothing> TaskStatusUpdateManagerProcess::recover(
     return Nothing();
   }
 
-  foreachvalue (const FrameworkState& framework, state->frameworks) {
-    foreachvalue (const ExecutorState& executor, framework.executors) {
+  for (const auto& [_, framework] : state->frameworks) {
+    for (const auto& [_, executor] : framework.executors) {
       LOG(INFO) << "Recovering executor '" << executor.id
                 << "' of framework " << framework.id;
 
@@ -245,7 +245,7 @@ Future<Nothing> TaskStatusUpdateManagerProcess::recover(
         continue;
       }
 
-      foreachvalue (const TaskState& task, run->tasks) {
+      for (const auto& [_, task] : run->tasks) {
         // No updates were ever received for this task!
         // This means either:
         // 1) the executor never received this task or
@@ -475,7 +475,7 @@ void TaskStatusUpdateManagerProcess::timeout(const Duration& duration)
 
   // Check and see if we should resend any status updates.
   foreachkey (const FrameworkID& frameworkId, streams) {
-    foreachvalue (TaskStatusUpdateStream* stream, streams[frameworkId]) {
+    for (auto [_, stream] : streams[frameworkId]) {
       CHECK_NOTNULL(stream);
       if (!stream->pending.empty()) {
         CHECK_SOME(stream->timeout);
@@ -817,7 +817,7 @@ Try<Nothing> TaskStatusUpdateStream::replay(
 
   VLOG(1) << "Replaying task status update stream for task " << taskId;
 
-  foreach (const StatusUpdate& update, updates) {
+  for (const auto& update : updates) {
     // Handle the update.
     _handle(update, StatusUpdateRecord::UPDATE);
 

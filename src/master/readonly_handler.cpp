@@ -191,7 +191,7 @@ void FullFrameworkWriter::operator()(JSON::ObjectWriter* writer) const
 
   // Model all of the tasks associated with a framework.
   writer->field("tasks", [this](JSON::ArrayWriter* writer) {
-    foreachvalue (Task* task, framework_->tasks) {
+    for (auto [_, task] : framework_->tasks) {
       // Skip unauthorized tasks.
       if (!approvers_->approved<VIEW_TASK>(*task, framework_->info)) {
         continue;
@@ -202,7 +202,7 @@ void FullFrameworkWriter::operator()(JSON::ObjectWriter* writer) const
   });
 
   writer->field("unreachable_tasks", [this](JSON::ArrayWriter* writer) {
-    foreachvalue (const Owned<Task>& task, framework_->unreachableTasks) {
+    for (const auto& [_, task] : framework_->unreachableTasks) {
       // Skip unauthorized tasks.
       if (!approvers_->approved<VIEW_TASK>(*task, framework_->info)) {
         continue;
@@ -213,7 +213,7 @@ void FullFrameworkWriter::operator()(JSON::ObjectWriter* writer) const
   });
 
   writer->field("completed_tasks", [this](JSON::ArrayWriter* writer) {
-    foreach (const Owned<Task>& task, framework_->completedTasks) {
+    for (const auto& task : framework_->completedTasks) {
       // Skip unauthorized tasks.
       if (!approvers_->approved<VIEW_TASK>(*task, framework_->info)) {
         continue;
@@ -225,7 +225,7 @@ void FullFrameworkWriter::operator()(JSON::ObjectWriter* writer) const
 
   // Model all of the offers associated with a framework.
   writer->field("offers", [this](JSON::ArrayWriter* writer) {
-    foreach (Offer* offer, framework_->offers) {
+    for (auto* offer : framework_->offers) {
       writer->element(*offer);
     }
   });
@@ -236,7 +236,7 @@ void FullFrameworkWriter::operator()(JSON::ObjectWriter* writer) const
         const SlaveID& slaveId,
         const auto& executorsMap,
         framework_->executors) {
-      foreachvalue (const ExecutorInfo& executor, executorsMap) {
+      for (const auto& [_, executor] : executorsMap) {
         writer->element([this,
                          &executor,
                          &slaveId](JSON::ObjectWriter* writer) {
@@ -333,7 +333,7 @@ SlavesWriter::SlavesWriter(
 void SlavesWriter::operator()(JSON::ObjectWriter* writer) const
 {
   writer->field("slaves", [this](JSON::ArrayWriter* writer) {
-    foreachvalue (const Slave* slave, slaves_.registered) {
+    for (const auto& [_, slave] : slaves_.registered) {
       if (!selectSlaveId_.accept(slave->id)) {
         continue;
       }
@@ -345,7 +345,7 @@ void SlavesWriter::operator()(JSON::ObjectWriter* writer) const
   });
 
   writer->field("recovered_slaves", [this](JSON::ArrayWriter* writer) {
-    foreachvalue (const SlaveInfo& slaveInfo, slaves_.recovered) {
+    for (const auto& [_, slaveInfo] : slaves_.recovered) {
       if (!selectSlaveId_.accept(slaveInfo.id())) {
         continue;
       }
@@ -385,7 +385,7 @@ void SlavesWriter::writeSlave(
           if (approvers_->approved<VIEW_ROLE>(role)) {
             writer->field(role, [&resources, this](
                 JSON::ArrayWriter* writer) {
-              foreach (Resource resource, resources) {
+              for (Resource resource : resources) {
                 if (approvers_->approved<VIEW_ROLE>(resource)) {
                   convertResourceFormat(&resource, ENDPOINT);
                   writer->element(JSON::Protobuf(resource));
@@ -401,7 +401,7 @@ void SlavesWriter::writeSlave(
   writer->field(
       "unreserved_resources_full",
       [&unreservedResources, this](JSON::ArrayWriter* writer) {
-        foreach (Resource resource, unreservedResources) {
+        for (Resource resource : unreservedResources) {
           if (approvers_->approved<VIEW_ROLE>(resource)) {
             convertResourceFormat(&resource, ENDPOINT);
             writer->element(JSON::Protobuf(resource));
@@ -414,7 +414,7 @@ void SlavesWriter::writeSlave(
   writer->field(
       "used_resources_full",
       [&usedResources, this](JSON::ArrayWriter* writer) {
-        foreach (Resource resource, usedResources) {
+        for (Resource resource : usedResources) {
           if (approvers_->approved<VIEW_ROLE>(resource)) {
             convertResourceFormat(&resource, ENDPOINT);
             writer->element(JSON::Protobuf(resource));
@@ -427,7 +427,7 @@ void SlavesWriter::writeSlave(
   writer->field(
       "offered_resources_full",
       [&offeredResources, this](JSON::ArrayWriter* writer) {
-        foreach (Resource resource, offeredResources) {
+        for (Resource resource : offeredResources) {
           if (approvers_->approved<VIEW_ROLE>(resource)) {
             convertResourceFormat(&resource, ENDPOINT);
             writer->element(JSON::Protobuf(resource));
@@ -473,17 +473,17 @@ public:
     foreachpair (const FrameworkID& frameworkId,
                  const Framework* framework,
                  frameworks) {
-      foreachvalue (const Task* task, framework->tasks) {
+      for (const auto& [_, task] : framework->tasks) {
         frameworksToSlaves[frameworkId].insert(task->slave_id());
         slavesToFrameworks[task->slave_id()].insert(frameworkId);
       }
 
-      foreachvalue (const Owned<Task>& task, framework->unreachableTasks) {
+      for (const auto& [_, task] : framework->unreachableTasks) {
         frameworksToSlaves[frameworkId].insert(task->slave_id());
         slavesToFrameworks[task->slave_id()].insert(frameworkId);
       }
 
-      foreach (const Owned<Task>& task, framework->completedTasks) {
+      for (const auto& task : framework->completedTasks) {
         frameworksToSlaves[frameworkId].insert(task->slave_id());
         slavesToFrameworks[task->slave_id()].insert(frameworkId);
       }
@@ -589,17 +589,17 @@ public:
     foreachpair (const FrameworkID& frameworkId,
                  const Framework* framework,
                  frameworks) {
-      foreachvalue (const Task* task, framework->tasks) {
+      for (const auto& [_, task] : framework->tasks) {
         frameworkTaskSummaries[frameworkId].count(*task);
         slaveTaskSummaries[task->slave_id()].count(*task);
       }
 
-      foreachvalue (const Owned<Task>& task, framework->unreachableTasks) {
+      for (const auto& [_, task] : framework->unreachableTasks) {
         frameworkTaskSummaries[frameworkId].count(*task);
         slaveTaskSummaries[task->slave_id()].count(*task);
       }
 
-      foreach (const Owned<Task>& task, framework->completedTasks) {
+      for (const auto& task : framework->completedTasks) {
         frameworkTaskSummaries[frameworkId].count(*task);
         slaveTaskSummaries[task->slave_id()].count(*task);
       }
@@ -706,7 +706,7 @@ pair<Response, Option<Master::ReadOnlyHandler::PostProcessing>>
     writer->field(
         "roles",
         [&](JSON::ArrayWriter* writer) {
-          foreach (const string& name, knownRoles) {
+          for (const auto& name : knownRoles) {
             if (!approvers->approved<VIEW_ROLE>(name)) {
               continue;
             }
@@ -861,7 +861,7 @@ pair<Response, Option<Master::ReadOnlyHandler::PostProcessing>>
       }
 
       writer->field("flags", [master](JSON::ObjectWriter* writer) {
-          foreachvalue (const flags::Flag& flag, master->flags) {
+          for (const auto& [_, flag] : master->flags) {
             Option<string> value = flag.stringify(master->flags);
             if (value.isSome()) {
               writer->field(flag.effective_name().value, value.get());
@@ -874,7 +874,7 @@ pair<Response, Option<Master::ReadOnlyHandler::PostProcessing>>
     writer->field(
         "slaves",
         [master, &approvers](JSON::ArrayWriter* writer) {
-          foreachvalue (Slave* slave, master->slaves.registered) {
+          for (auto [_, slave] : master->slaves.registered) {
             writer->element(SlaveWriter(
                 *slave,
                 master->slaves.draining.get(slave->id),
@@ -981,7 +981,7 @@ pair<Response, Option<Master::ReadOnlyHandler::PostProcessing>>
          &slaveFrameworkMapping,
          &taskStateSummaries,
          &approvers](JSON::ArrayWriter* writer) {
-          foreachvalue (Slave* slave, master->slaves.registered) {
+          for (auto [_, slave] : master->slaves.registered) {
             writer->element(
                 [&slave,
                  &master,
@@ -1085,7 +1085,7 @@ pair<Response, Option<Master::ReadOnlyHandler::PostProcessing>>
                   writer->field(
                       "slave_ids",
                       [&slaves](JSON::ArrayWriter* writer) {
-                        foreach (const SlaveID& slaveId, slaves) {
+                        for (const auto& slaveId : slaves) {
                           writer->element(slaveId.value());
                         }
                       });
@@ -1170,7 +1170,7 @@ pair<Response, Option<Master::ReadOnlyHandler::PostProcessing>>
 
   // Construct framework list with both active and completed frameworks.
   vector<const Framework*> frameworks;
-  foreachvalue (const Framework* framework, master->frameworks.registered) {
+  for (const auto& [_, framework] : master->frameworks.registered) {
     // Skip unauthorized frameworks or frameworks without matching
     // framework ID.
     if (!selectFrameworkId.accept(framework->id()) ||
@@ -1196,8 +1196,8 @@ pair<Response, Option<Master::ReadOnlyHandler::PostProcessing>>
   // Construct task list with both running,
   // completed and unreachable tasks.
   vector<const Task*> tasks;
-  foreach (const Framework* framework, frameworks) {
-    foreachvalue (Task* task, framework->tasks) {
+  for (const auto* framework : frameworks) {
+    for (auto [_, task] : framework->tasks) {
       // Skip unauthorized tasks or tasks without matching task ID.
       if (!selectTaskId.accept(task->task_id()) ||
           !approvers->approved<VIEW_TASK>(*task, framework->info)) {
@@ -1219,7 +1219,7 @@ pair<Response, Option<Master::ReadOnlyHandler::PostProcessing>>
       tasks.push_back(task.get());
     }
 
-    foreach (const Owned<Task>& task, framework->completedTasks) {
+    for (const auto& task : framework->completedTasks) {
       // Skip unauthorized tasks or tasks without matching task ID.
       if (!selectTaskId.accept(task->task_id()) ||
           !approvers->approved<VIEW_TASK>(*task, framework->info)) {
@@ -1274,7 +1274,7 @@ function<void(JSON::ObjectWriter*)> Master::ReadOnlyHandler::jsonifyGetAgents(
   //     SlaveInfo* agent = getAgents.add_recovered_agents();
   //     agent->CopyFrom(slaveInfo);
   //     agent->clear_resources();
-  //     foreach (const Resource& resource, slaveInfo.resources()):
+  //     for (const Resource& resource : slaveInfo.resources()):
   //       if (approvers->approved<VIEW_ROLE>(resource)):
   //         *agent->add_resources() = resource;
 
@@ -1289,7 +1289,7 @@ function<void(JSON::ObjectWriter*)> Master::ReadOnlyHandler::jsonifyGetAgents(
     writer->field(
         descriptor->FindFieldByNumber(field)->name(),
         [&](JSON::ArrayWriter* writer) {
-      foreachvalue (const Slave* slave, master->slaves.registered) {
+      for (const auto& [_, slave] : master->slaves.registered) {
         // TODO(bmahler): Consider not constructing the temporary
         // agent object and instead serialize directly.
         mesos::master::Response::GetAgents::Agent agent =
@@ -1307,12 +1307,12 @@ function<void(JSON::ObjectWriter*)> Master::ReadOnlyHandler::jsonifyGetAgents(
     writer->field(
         descriptor->FindFieldByNumber(field)->name(),
         [&](JSON::ArrayWriter* writer) {
-      foreachvalue (const SlaveInfo& slaveInfo, master->slaves.recovered) {
+      for (const auto& [_, slaveInfo] : master->slaves.recovered) {
         // TODO(bmahler): Consider not constructing the temporary
         // SlaveInfo object and instead serialize directly.
         SlaveInfo agent = slaveInfo;
         agent.clear_resources();
-        foreach (const Resource& resource, slaveInfo.resources()) {
+        for (const Resource& resource : slaveInfo.resources()) {
           if (approvers->approved<VIEW_ROLE>(resource)) {
             *agent.add_resources() = resource;
           }
@@ -1341,7 +1341,7 @@ string Master::ReadOnlyHandler::serializeGetAgents(
   //     SlaveInfo* agent = getAgents.add_recovered_agents();
   //     agent->CopyFrom(slaveInfo);
   //     agent->clear_resources();
-  //     foreach (const Resource& resource, slaveInfo.resources()):
+  //     for (const Resource& resource : slaveInfo.resources()):
   //       if (approvers->approved<VIEW_ROLE>(resource)):
   //         *agent->add_resources() = resource;
 
@@ -1349,7 +1349,7 @@ string Master::ReadOnlyHandler::serializeGetAgents(
   google::protobuf::io::StringOutputStream stream(&output);
   google::protobuf::io::CodedOutputStream writer(&stream);
 
-  foreachvalue (const Slave* slave, master->slaves.registered) {
+  for (const auto& [_, slave] : master->slaves.registered) {
     // TODO(bmahler): Consider not constructing the temporary
     // agent object and instead serialize directly.
     WireFormatLite2::WriteMessageWithoutCachedSizes(
@@ -1362,12 +1362,12 @@ string Master::ReadOnlyHandler::serializeGetAgents(
         &writer);
   }
 
-  foreachvalue (const SlaveInfo& slaveInfo, master->slaves.recovered) {
+  for (const auto& [_, slaveInfo] : master->slaves.recovered) {
     // TODO(bmahler): Consider not constructing the temporary
     // SlaveInfo object and instead serialize directly.
     SlaveInfo agent = slaveInfo;
     agent.clear_resources();
-    foreach (const Resource& resource, slaveInfo.resources()) {
+    for (const Resource& resource : slaveInfo.resources()) {
       if (approvers->approved<VIEW_ROLE>(resource)) {
         *agent.add_resources() = resource;
       }
@@ -1666,7 +1666,7 @@ function<void(JSON::ObjectWriter*)>
   return [=](JSON::ObjectWriter* writer) {
     // Construct framework list with both active and completed frameworks.
     vector<const Framework*> frameworks;
-    foreachvalue (const Framework* framework, master->frameworks.registered) {
+    for (const auto& [_, framework] : master->frameworks.registered) {
       // Skip unauthorized frameworks.
       if (approvers->approved<VIEW_FRAMEWORK>(framework->info)) {
         frameworks.push_back(framework);
@@ -1689,11 +1689,11 @@ function<void(JSON::ObjectWriter*)>
     writer->field(
         descriptor->FindFieldByNumber(field)->name(),
         [&](JSON::ArrayWriter* writer) {
-      foreach (const Framework* framework, frameworks) {
+      for (const auto* framework : frameworks) {
         foreachpair (const SlaveID& slaveId,
                      const auto& executorsMap,
                      framework->executors) {
-          foreachvalue (const ExecutorInfo& executorInfo, executorsMap) {
+          for (const auto& [_, executorInfo] : executorsMap) {
             // Skip unauthorized executors.
             if (!approvers->approved<VIEW_EXECUTOR>(
                     executorInfo, framework->info)) {
@@ -1736,7 +1736,7 @@ string Master::ReadOnlyHandler::serializeGetExecutors(
 {
   // Construct framework list with both active and completed frameworks.
   vector<const Framework*> frameworks;
-  foreachvalue (const Framework* framework, master->frameworks.registered) {
+  for (const auto& [_, framework] : master->frameworks.registered) {
     // Skip unauthorized frameworks.
     if (approvers->approved<VIEW_FRAMEWORK>(framework->info)) {
       frameworks.push_back(framework);
@@ -1796,11 +1796,11 @@ string Master::ReadOnlyHandler::serializeGetExecutors(
   //     *executor->mutable_executor_info() = executorInfo;
   //     *executor->mutable_slave_id() = slaveId;
 
-  foreach (const Framework* framework, frameworks) {
+  for (const auto* framework : frameworks) {
     foreachpair (const SlaveID& slaveId,
                  const auto& executorsMap,
                  framework->executors) {
-      foreachvalue (const ExecutorInfo& executorInfo, executorsMap) {
+      for (const auto& [_, executorInfo] : executorsMap) {
         // Skip unauthorized executors.
         if (!approvers->approved<VIEW_EXECUTOR>(
                 executorInfo, framework->info)) {
@@ -1916,7 +1916,7 @@ function<void(JSON::ObjectWriter*)> Master::ReadOnlyHandler::jsonifyGetTasks(
   return [=](JSON::ObjectWriter* writer) {
     // Construct framework list with both active and completed frameworks.
     vector<const Framework*> frameworks;
-    foreachvalue (const Framework* framework, master->frameworks.registered) {
+    for (const auto& [_, framework] : master->frameworks.registered) {
       // Skip unauthorized frameworks.
       if (approvers->approved<VIEW_FRAMEWORK>(framework->info)) {
         frameworks.push_back(framework);
@@ -1940,8 +1940,8 @@ function<void(JSON::ObjectWriter*)> Master::ReadOnlyHandler::jsonifyGetTasks(
     writer->field(
         descriptor->FindFieldByNumber(field)->name(),
         [&](JSON::ArrayWriter* writer) {
-          foreach (const Framework* framework, frameworks) {
-            foreachvalue (const Task* task, framework->tasks) {
+          for (const auto* framework : frameworks) {
+            for (const auto& [_, task] : framework->tasks) {
               // Skip unauthorized tasks.
               if (!approvers->approved<VIEW_TASK>(*task, framework->info)) {
                 continue;
@@ -1957,7 +1957,7 @@ function<void(JSON::ObjectWriter*)> Master::ReadOnlyHandler::jsonifyGetTasks(
     writer->field(
         descriptor->FindFieldByNumber(field)->name(),
         [&](JSON::ArrayWriter* writer) {
-          foreach (const Framework* framework, frameworks) {
+          for (const auto* framework : frameworks) {
             foreachvalue (const Owned<Task>& task,
                           framework->unreachableTasks) {
               // Skip unauthorized tasks.
@@ -1975,8 +1975,8 @@ function<void(JSON::ObjectWriter*)> Master::ReadOnlyHandler::jsonifyGetTasks(
     writer->field(
         descriptor->FindFieldByNumber(field)->name(),
         [&](JSON::ArrayWriter* writer) {
-          foreach (const Framework* framework, frameworks) {
-            foreach (const Owned<Task>& task, framework->completedTasks) {
+          for (const auto* framework : frameworks) {
+            for (const auto& task : framework->completedTasks) {
               // Skip unauthorized tasks.
               if (!approvers->approved<VIEW_TASK>(*task, framework->info)) {
                 continue;
@@ -1995,7 +1995,7 @@ string Master::ReadOnlyHandler::serializeGetTasks(
 {
   // Construct framework list with both active and completed frameworks.
   vector<const Framework*> frameworks;
-  foreachvalue (const Framework* framework, master->frameworks.registered) {
+  for (const auto& [_, framework] : master->frameworks.registered) {
     // Skip unauthorized frameworks.
     if (approvers->approved<VIEW_FRAMEWORK>(framework->info)) {
       frameworks.push_back(framework);
@@ -2026,9 +2026,9 @@ string Master::ReadOnlyHandler::serializeGetTasks(
   google::protobuf::io::StringOutputStream stream(&output);
   google::protobuf::io::CodedOutputStream writer(&stream);
 
-  foreach (const Framework* framework, frameworks) {
+  for (const auto* framework : frameworks) {
     // Active tasks.
-    foreachvalue (const Task* task, framework->tasks) {
+    for (const auto& [_, task] : framework->tasks) {
       // Skip unauthorized tasks.
       if (!approvers->approved<VIEW_TASK>(*task, framework->info)) {
         continue;
@@ -2041,7 +2041,7 @@ string Master::ReadOnlyHandler::serializeGetTasks(
     }
 
     // Unreachable tasks.
-    foreachvalue (const Owned<Task>& task, framework->unreachableTasks) {
+    for (const auto& [_, task] : framework->unreachableTasks) {
       // Skip unauthorized tasks.
       if (!approvers->approved<VIEW_TASK>(*task, framework->info)) {
         continue;
@@ -2054,7 +2054,7 @@ string Master::ReadOnlyHandler::serializeGetTasks(
     }
 
     // Completed tasks.
-    foreach (const Owned<Task>& task, framework->completedTasks) {
+    for (const auto& task : framework->completedTasks) {
       // Skip unauthorized tasks.
       if (!approvers->approved<VIEW_TASK>(*task, framework->info)) {
         continue;
@@ -2169,7 +2169,7 @@ pair<Response, Option<Master::ReadOnlyHandler::PostProcessing>>
       return false;
     }
 
-    foreach (const Resource& resource, consumedResources.get()) {
+    for (const Resource& resource : consumedResources.get()) {
       if (!approvers->approved<VIEW_ROLE>(resource)) {
         return false;
       }
@@ -2184,8 +2184,8 @@ pair<Response, Option<Master::ReadOnlyHandler::PostProcessing>>
   mesos::master::Response::GetOperations* operations =
     response.mutable_get_operations();
 
-  foreachvalue (const Slave* slave, master->slaves.registered) {
-    foreachvalue (const Operation* operation, slave->operations) {
+  for (const auto& [_, slave] : master->slaves.registered) {
+    for (const auto& [_, operation] : slave->operations) {
       if (approved(*operation)) {
         operations->add_operations()->CopyFrom(*operation);
       }
@@ -2194,7 +2194,7 @@ pair<Response, Option<Master::ReadOnlyHandler::PostProcessing>>
     foreachvalue (
         const Slave::ResourceProvider& resourceProvider,
         slave->resourceProviders) {
-      foreachvalue (const Operation* operation, resourceProvider.operations) {
+      for (const auto& [_, operation] : resourceProvider.operations) {
         if (approved(*operation)) {
           operations->add_operations()->CopyFrom(*operation);
         }
@@ -2223,7 +2223,7 @@ pair<Response, Option<Master::ReadOnlyHandler::PostProcessing>>
   mesos::master::Response::GetRoles* getRoles =
     response.mutable_get_roles();
 
-  foreach (const string& name, knownRoles) {
+  for (const auto& name : knownRoles) {
     if (!approvers->approved<VIEW_ROLE>(name)) {
       continue;
     }
@@ -2244,7 +2244,7 @@ pair<Response, Option<Master::ReadOnlyHandler::PostProcessing>>
     // As a result, we don't bother trying to expose more
     // than {cpus, mem, disk, gpus} since we don't know if
     // anything outside this set is of type SCALAR.
-    foreach (const auto& quantity, allocatedAndOffered) {
+    for (const auto& quantity : allocatedAndOffered) {
       if (quantity.first == "cpus" || quantity.first == "mem" ||
           quantity.first == "disk" || quantity.first == "gpus") {
         Resource* resource = role->add_resources();

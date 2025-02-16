@@ -136,7 +136,7 @@ protected:
     Parameters parameters;
 
     if (options.isSome()) {
-      foreachpair (const string& key, const string& value, options.get()) {
+      for (const auto& [key, value] : options.get()) {
         Parameter* parameter = parameters.add_parameter();
         parameter->set_key(key);
         parameter->set_value(value);

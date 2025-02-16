@@ -535,7 +535,7 @@ void GroupProcess::expired(int64_t sessionId)
   memberships = None();
 
   // Set all owned memberships as cancelled.
-  foreachpair (int32_t sequence, Promise<bool>* cancelled, utils::copy(owned)) {
+  for (auto [sequence, cancelled] : utils::copy(owned)) {
     cancelled->set(false); // Since this was not requested.
     owned.erase(sequence); // Okay since iterating over a copy.
     delete cancelled;
@@ -740,7 +740,7 @@ Try<bool> GroupProcess::cache()
   // Convert results to sequence numbers and (optionally) labels.
   hashmap<int32_t, Option<string>> sequences;
 
-  foreach (const string& result, results) {
+  for (const auto& result : results) {
     vector<string> tokens = strings::tokenize(result, "_");
     Option<string> label = None();
     if (tokens.size() > 1) {
@@ -766,7 +766,7 @@ Try<bool> GroupProcess::cache()
   // Cache current memberships, cancelling those that are now missing.
   set<Group::Membership> current;
 
-  foreachpair (int32_t sequence, Promise<bool>* cancelled, utils::copy(owned)) {
+  for (auto [sequence, cancelled] : utils::copy(owned)) {
     if (!sequences.contains(sequence)) {
       cancelled->set(false);
       owned.erase(sequence); // Okay since iterating over a copy.
@@ -969,7 +969,7 @@ void GroupProcess::abort(const string& message)
   fail(&pending.watches, message);
 
   // Set all owned memberships as cancelled.
-  foreachvalue (Promise<bool>* cancelled, owned) {
+  for (auto [_, cancelled] : owned) {
     cancelled->set(false); // Since this was not requested.
     delete cancelled;
   }

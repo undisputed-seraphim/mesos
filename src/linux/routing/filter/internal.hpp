@@ -163,7 +163,7 @@ inline Try<Nothing> attach(
 {
   const std::string kind = rtnl_tc_get_kind(TC_CAST(cls.get()));
 
-  foreach (const std::string& _link, mirror.links) {
+  for (const auto& _link : mirror.links) {
     Result<Netlink<struct rtnl_link>> link = link::internal::get(_link);
     if (link.isError()) {
       return Error(link.error());
@@ -380,7 +380,7 @@ Try<Netlink<struct rtnl_cls>> encodeFilter(
   }
 
   // Attach actions to the libnl filter.
-  foreach (const process::Shared<action::Action>& action, filter.actions) {
+  for (const auto& action : filter.actions) {
     Try<Nothing> attaching = attach(cls, action);
     if (attaching.isError()) {
       return Error("Failed to attach an action " + attaching.error());
@@ -821,7 +821,7 @@ Result<std::vector<Classifier>> classifiers(
 
   std::vector<Classifier> results;
 
-  foreach (const Filter<Classifier>& filter, _filters.get()) {
+  for (const auto& filter : _filters.get()) {
     results.push_back(filter.classifier);
   }
 
