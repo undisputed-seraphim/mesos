@@ -123,7 +123,7 @@ inline Try<Bytes> contentLength(const std::string& url)
   }
 
   double result;
-  curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &result);
+  curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, &result);
 
   curl_easy_cleanup(curl);
 
